@@ -5,7 +5,6 @@ namespace comet
     
     class WindowImpl : public Window
     {
-    public:
     };
 
 } // namespace comet

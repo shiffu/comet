@@ -11,9 +11,6 @@ namespace comet
 
     class SFMLWindow : public WindowImpl
     {
-        sf::Window* m_sfWindow = nullptr;
-        bool m_isVSync = true;
-
     public:
         SFMLWindow(const WindowSpec& spec);
         virtual ~SFMLWindow();
@@ -30,5 +27,9 @@ namespace comet
 
         // Factory
         static Window* create(const WindowSpec& spec = WindowSpec());
+        
+    private:
+        sf::Window* m_sfWindow = nullptr;
+        bool m_isVSync = true;
     };
 }
