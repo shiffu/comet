@@ -7,6 +7,18 @@
 namespace comet
 {
 
+    static void APIENTRY glDebugCallback(GLenum source,
+                                        GLenum type,
+                                        GLuint id,
+                                        GLenum severity,
+                                        GLsizei length,
+                                        const GLchar* message,
+                                        const void* userParam)
+    {
+        CM_CORE_LOG_DEBUG("OpenGL Error: {}", message);
+        exit(EXIT_FAILURE);
+    }
+
     Application::Application(const WindowSpec& spec)
     {
         init(spec);
@@ -23,6 +35,8 @@ namespace comet
         Log::init();
         CM_CORE_LOG_DEBUG("Initializing the application");
         m_window = Window::create(spec);
+        glDebugMessageCallback(glDebugCallback, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
         m_isInitialized = true;
         CM_CORE_LOG_DEBUG("Finished initializing the application");
     }
