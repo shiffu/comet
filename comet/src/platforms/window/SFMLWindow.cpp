@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include "SFMLWindow.h"
 #include <SFML/Window.hpp>
-// #include <SFML/OpenGL.hpp>
 
 #include <comet/log.h>
 

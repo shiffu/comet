@@ -1,6 +1,6 @@
 #pragma once
+
 #include <string>
-#include <glad/glad.h>
 
 namespace comet
 {
@@ -10,24 +10,24 @@ namespace comet
         Shader();
         ~Shader();
 
-        void compileShader(const std::string& filename, GLenum shaderType);
-        void compileShaderSrc(const std::string& source, GLenum shaderType);
+        void compileShader(const std::string& filename, unsigned int shaderType);
+        void compileShaderSrc(const std::string& source, unsigned int shaderType);
 
         void linkProgram();
 
         // Uniform methods
         int getUniformLocation(const std::string& name);
-        void setUniform(const std::string& name, int value);
+        void setUniform(const std::string& name, unsigned int value);
         void setUniform(const std::string& name, float value);
 
         void bind() const;
         void unbind() const;
 
     private:
-        // Only Vertex , Geometry and Fragment shaders are managed for now
+        // Only Vertex, Geometry and Fragment shaders are managed for now
         static const unsigned int NB_SHADERS = 3;
 
-        void checkShaderTypeSupported(GLenum shaderType) const;
+        void checkShaderTypeSupported(unsigned int shaderType) const;
         void checkMaxShaderPerProgram() const;
 
         unsigned int m_program = 0;

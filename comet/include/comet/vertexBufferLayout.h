@@ -1,4 +1,5 @@
 #pragma once
+
 #include <glad/glad.h>
 #include <vector>
 #include <comet/log.h>
@@ -43,4 +44,3 @@ namespace comet
     void VertexBufferLayout::add<unsigned int>(GLint count, GLboolean normalized);
 
 } // namespace comet
-

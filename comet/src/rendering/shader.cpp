@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include <comet/shader.h>
 #include <comet/log.h>
 #include <fstream>
@@ -19,7 +20,7 @@ namespace comet
         }
     }
 
-    void Shader::checkShaderTypeSupported(GLenum shaderType) const
+    void Shader::checkShaderTypeSupported(unsigned int shaderType) const
     {
 
         // Only Vertex and Fragment shaders are managed for the time being
@@ -37,7 +38,7 @@ namespace comet
         }
     }
 
-    void Shader::compileShader(const std::string& filename, GLenum shaderType)
+    void Shader::compileShader(const std::string& filename, unsigned int shaderType)
     {
         checkShaderTypeSupported(shaderType);
         checkMaxShaderPerProgram();
@@ -61,7 +62,7 @@ namespace comet
         compileShaderSrc(shaderSource, shaderType);
     }
 
-    void Shader::compileShaderSrc(const std::string& source, GLenum shaderType)
+    void Shader::compileShaderSrc(const std::string& source, unsigned int shaderType)
     {
         checkShaderTypeSupported(shaderType);
         checkMaxShaderPerProgram();
@@ -164,7 +165,7 @@ namespace comet
         glUniform1f(location, value);
     }
 
-    void Shader::setUniform(const std::string& name, int value)
+    void Shader::setUniform(const std::string& name, unsigned int value)
     {
         int location = getUniformLocation(name);
         glUniform1i(location, value);

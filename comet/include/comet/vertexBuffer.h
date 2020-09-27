@@ -17,4 +17,5 @@ namespace comet
     private:
         unsigned int m_vbo{0};
     };
+    
 }

@@ -21,10 +21,10 @@ namespace comet
     void Application::init(const WindowSpec& spec)
     {
         Log::init();
-        CM_CORE_LOG_INFO("Initializing the application");
+        CM_CORE_LOG_DEBUG("Initializing the application");
         m_window = Window::create(spec);
         m_isInitialized = true;
-        CM_CORE_LOG_INFO("Finished initializing the application");
+        CM_CORE_LOG_DEBUG("Finished initializing the application");
     }
 
     void Application::onStart()
@@ -39,7 +39,7 @@ namespace comet
         CM_CORE_LOG_DEBUG("Calling onStart()");
         onStart();
 
-        CM_CORE_LOG_TRACE("Starting main loop");
+        CM_CORE_LOG_DEBUG("Starting main loop");
         while(!m_window->isClosed())
         {
             //TODO: Move this code in the renderer (probably)
@@ -51,7 +51,7 @@ namespace comet
             onUpdate();
             m_window->swapBuffers();
         }
-        CM_CORE_LOG_TRACE("Exit main loop");
+        CM_CORE_LOG_DEBUG("Exit main loop");
     }
 
 } // namespace comet

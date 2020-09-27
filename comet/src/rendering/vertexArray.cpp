@@ -1,8 +1,27 @@
+#include <glad/glad.h>
 #include <comet/vertexArray.h>
 #include <comet/log.h>
 
 namespace comet
 {
+
+    VertexArray::VertexArray()
+    {
+        glGenVertexArrays(1, &m_vao);
+    }
+
+    VertexArray::~VertexArray()
+    {
+        if (m_vao)
+        {
+            unbind();
+            glDeleteVertexArrays(1, &m_vao);
+        }
+    }
+
+    void VertexArray::bind() const { glBindVertexArray(m_vao); }
+    void VertexArray::unbind() const { glBindVertexArray(0); }
+
     void VertexArray::addLayout(const VertexBuffer& vbo, const VertexBufferLayout& vbl)
     {
             const auto& bufferAttributes = vbl.getAttributes();

@@ -40,8 +40,6 @@ void SanboxApp::onStart()
                       0.0f,  0.5f, 1.0f, 0.0f, 0.0f};
 
     m_vb = std::make_unique<comet::VertexBuffer>((const void*)data, sizeof(data));
-    // m_vb->loadData();
-
     m_vao = std::make_unique<comet::VertexArray>();
     comet::VertexBufferLayout vbl;
     vbl.add<float>(2, GL_FALSE);
@@ -54,5 +52,4 @@ void SanboxApp::onUpdate()
     m_shader->bind();
     m_vao->bind();
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    // m_shader->unbind();
 }

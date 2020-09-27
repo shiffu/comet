@@ -1,6 +1,5 @@
 #pragma once
 
-#include <comet/log.h>
 #include <comet/window.h>
 
 namespace comet

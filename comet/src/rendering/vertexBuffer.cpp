@@ -1,14 +1,13 @@
 #include <comet/vertexBuffer.h>
 #include <glad/glad.h>
 
-
-
 namespace comet
 {
     VertexBuffer::VertexBuffer(const void* data, unsigned int size)
     {
         glGenBuffers(1, &m_vbo);
         bind();
+        //TODO: Manage other type of memory allocation than GL_STATIC_DRAW
         glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
     };
 
