@@ -9,10 +9,12 @@ namespace comet
 class Application
 {
 public:
-    Application(const WindowSpec& spec = WindowSpec()) { CM_CORE_LOG_DEBUG("Application contructor"); init(spec); } ;
-    virtual ~Application() { CM_CORE_LOG_DEBUG("Application destructor"); };
+    Application(const WindowSpec& spec = WindowSpec());
+    virtual ~Application();
 
-    virtual int run();
+    virtual void run();
+    virtual void onStart();
+    virtual void onUpdate() = 0;
     
 private:
     bool m_isRunning = false;

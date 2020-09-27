@@ -16,6 +16,7 @@ namespace comet
         virtual ~SFMLWindow();
 
         virtual void pollEvent() const override;
+        virtual void swapBuffers() const override;
         virtual void onUpdate() override;
 
         // Window info
