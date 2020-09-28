@@ -55,6 +55,7 @@ target_include_directories(comet
     PUBLIC
         ${COMET_PUBLIC_HEADERS_DIR}
         ${COMET_SOURCES_DIR}/vendors/glad/include
+        ${COMET_SOURCES_DIR}/vendors/glm
     PRIVATE
         ${COMET_SOURCES_DIR}
 )
