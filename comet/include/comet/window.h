@@ -21,7 +21,6 @@ namespace comet
     public:
         virtual ~Window() {}
 
-        virtual void onUpdate() = 0;
         virtual void swapBuffers() const = 0;
         virtual unsigned int getWidth() const = 0;
         virtual unsigned int getHeight() const = 0;

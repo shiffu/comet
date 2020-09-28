@@ -17,7 +17,6 @@ namespace comet
 
         virtual void pollEvent() const override;
         virtual void swapBuffers() const override;
-        virtual void onUpdate() override;
 
         // Window info
         virtual unsigned int getWidth() const override;
@@ -31,6 +30,7 @@ namespace comet
         
     private:
         sf::Window* m_sfWindow = nullptr;
-        bool m_isVSync = true;
+        // vsync is disable by default in sfml (cf documentation)
+        bool m_isVSync = false;
     };
 }

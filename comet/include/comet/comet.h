@@ -2,6 +2,7 @@
 
 #include <comet/log.h>
 #include <comet/application.h>
+#include <comet/window.h>
 #include <comet/indexBuffer.h>
 #include <comet/vertexBuffer.h>
 #include <comet/vertexArray.h>

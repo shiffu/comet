@@ -37,7 +37,7 @@ void SanboxApp::onStart()
 
     float data[] = { -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
                       0.5f, -0.5f, 0.0f, 1.0f, 0.7f,
-                      0.0f,  0.5f, 1.0f, 0.0f, 0.0f};
+                      0.0f,  0.5f, 0.8f, 0.2f, 0.6f};
 
     m_vb = std::make_unique<comet::VertexBuffer>((const void*)data, sizeof(data));
     m_vao = std::make_unique<comet::VertexArray>();
@@ -48,6 +48,10 @@ void SanboxApp::onStart()
 }
 
 void SanboxApp::onUpdate()
+{
+}
+
+void SanboxApp::onRender(float deltaTime)
 {
     m_shader->bind();
     m_vao->bind();

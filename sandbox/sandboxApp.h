@@ -9,8 +9,9 @@ public:
     SanboxApp() { CM_LOG_DEBUG("SanboxApp contructor"); } ;
     virtual ~SanboxApp() { CM_LOG_DEBUG("SanboxApp destructor"); };
 
-    void onStart();
-    void onUpdate();
+    void onStart() override;
+    void onUpdate() override;
+    void onRender(float deltaTime) override;
 
 private:
     std::unique_ptr<comet::Shader> m_shader;

@@ -84,10 +84,6 @@ namespace comet
         }
     }
 
-    void SFMLWindow::onUpdate()
-    {
-    }
-
     void SFMLWindow::swapBuffers() const
     {
         m_sfWindow->display();
