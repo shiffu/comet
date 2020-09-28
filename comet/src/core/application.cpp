@@ -83,8 +83,6 @@ namespace comet
             previousTime = currentTime;
             lag += duration_cast<nanoseconds>(elapsedTime);
 
-            CM_CORE_LOG_DEBUG("main loop");
-
             // poll window events
             m_window->pollEvent();
 
@@ -122,7 +120,6 @@ namespace comet
                 if (waitTime > 1)
                 {
                     std::this_thread::sleep_for(milliseconds(waitTime));
-                    CM_CORE_LOG_DEBUG("Wait for: {} ms", milliseconds(waitTime).count());
                 }
             }
         }
