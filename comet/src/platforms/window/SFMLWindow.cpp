@@ -20,8 +20,8 @@ namespace comet
     {
         if(gladLoadGL())
         {
-            std::cout << "Glad loaded OpenGL with no context!" << std::endl;
-            exit(-1);
+            CM_CORE_LOG_FATAL("Glad loaded OpenGL with no context");
+            exit(EXIT_FAILURE);
         } 
         
         m_sfWindow = new sf::Window(sf::VideoMode(spec.width, spec.height), "");
@@ -29,15 +29,16 @@ namespace comet
         ss << spec.title << " (" << (const unsigned char*)glGetString(GL_VERSION) << ")";
         m_sfWindow->setTitle(ss.str());
 
-        m_sfWindow->setVerticalSyncEnabled(true);
+        // Somehow this slows down a lot the responsiveness of the window on Linux (when moving the window)
+        // m_sfWindow->setVerticalSyncEnabled(true);
 
         // activate the window
         m_sfWindow->setActive(true);
 
         if(!gladLoadGL())
         {
-            std::cout << "Glad failed to initialize!" << std::endl;
-            exit(-1);
+            CM_CORE_LOG_FATAL("Glad failed to initialize");
+            exit(EXIT_FAILURE);
         }
 
         CM_CORE_LOG_INFO("Graphic card: {}", glGetString(GL_RENDERER));
@@ -73,7 +74,7 @@ namespace comet
                 // adjust the viewport when the window is resized
                 case sf::Event::Resized:
                     CM_LOG_INFO("Window resized: {} {}", event.size.width, event.size.height);
-                    glViewport(0, 0, event.size.width, event.size.height);
+                    // glViewport(0, 0, event.size.width, event.size.height);
                     break;
 
                 // we don't process other types of events for now
