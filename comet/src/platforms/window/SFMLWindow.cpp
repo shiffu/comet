@@ -74,7 +74,7 @@ namespace comet
                 // adjust the viewport when the window is resized
                 case sf::Event::Resized:
                     CM_LOG_INFO("Window resized: {} {}", event.size.width, event.size.height);
-                    // glViewport(0, 0, event.size.width, event.size.height);
+                    glViewport(0, 0, event.size.width, event.size.height);
                     break;
 
                 // we don't process other types of events for now

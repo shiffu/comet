@@ -13,8 +13,9 @@ namespace comet
 
         virtual void run();
         virtual void onStart();
-        virtual void onUpdate();
-        virtual void onRender(float deltaTime);
+        virtual void onUpdate(double deltaTime);
+        virtual void onFixedUpdate(float fixedDeltaTime);
+        virtual void onRender();
         
         Window& getWindow() const { return *m_window; }
 
@@ -26,6 +27,8 @@ namespace comet
         bool m_isInitialized = false;
         Window* m_window = nullptr;
         unsigned int m_fpsCap{0};
+        // Fixed update time in ms (used to onFixedUpdate function call)
+        float m_fixedUpdateTime{20.0f};
 
         void init(const WindowSpec& spec);
     };

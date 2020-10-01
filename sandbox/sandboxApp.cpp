@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include "sandboxApp.h"
 #include <string>
+#include <math.h>
 
 void SanboxApp::onStart()
 {
@@ -10,11 +11,13 @@ void SanboxApp::onStart()
         layout (location = 0) in vec2 position;
         layout (location = 1) in vec3 color;
 
+        uniform float offset;
         out vec3 fragColor;
 
-        void main() {
+        void main()
+        {
             fragColor = color;
-            gl_Position = vec4(position, 0.0, 1.0);
+            gl_Position = vec4(position.x + offset, position.y, 0.0, 1.0);
         }
     )glsl";
 
@@ -24,7 +27,8 @@ void SanboxApp::onStart()
         in vec3 fragColor;
         out vec4 color;
 
-        void main() {
+        void main()
+        {
             color = vec4(fragColor, 1.0);
         }
     )glsl";
@@ -47,13 +51,33 @@ void SanboxApp::onStart()
     m_vao->addLayout(*m_vb, vbl);
 }
 
-void SanboxApp::onUpdate()
+static const double PI = 3.1415926535;
+
+void SanboxApp::onUpdate(double deltaTime)
 {
+    m_angle += 2 * PI * (deltaTime / 1000.0);
+    if (m_angle > 2 * PI)
+    {
+        m_angle = 0.0;
+    }
 }
 
-void SanboxApp::onRender(float deltaTime)
+void SanboxApp::onFixedUpdate(float fixedDeltaTime)
+{
+    // m_angle += 2 * PI * (fixedDeltaTime / 1000.0);
+    // if (m_angle > 2 * PI)
+    // {
+    //     m_angle = 0.0;
+    // }
+}
+
+void SanboxApp::onRender()
 {
     m_shader->bind();
+
+    float offset = cos(m_angle) * 0.4f;
+    m_shader->setUniform("offset", offset);
     m_vao->bind();
+
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
