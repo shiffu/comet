@@ -6,7 +6,7 @@ namespace comet
     class IndexBuffer
     {
     public:
-        IndexBuffer(const unsigned int* data, unsigned int count);
+        IndexBuffer(const unsigned int* data, unsigned int nbIndices);
         ~IndexBuffer();
 
         void bind() const;

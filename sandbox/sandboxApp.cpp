@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include "sandboxApp.h"
 #include <string>
 #include <math.h>
@@ -39,11 +38,20 @@ void SanboxApp::onStart()
     m_shader->linkProgram();
 
 
-    float data[] = { -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-                      0.5f, -0.5f, 0.0f, 1.0f, 0.7f,
-                      0.0f,  0.5f, 0.8f, 0.2f, 0.6f};
+    //              Positions           Colors
+    float data[] = { -0.5f, -0.5f,      0.0f, 0.2f, 0.7f,
+                      0.5f, -0.5f,      0.0f, 0.2f, 0.7f,
+                      0.5f,  0.5f,      0.8f, 0.4f, 0.0f,
+                     -0.5f,  0.5f,      0.8f, 0.4f, 0.0f};
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
 
     m_vb = std::make_unique<comet::VertexBuffer>((const void*)data, sizeof(data));
+    m_ib = std::make_unique<comet::IndexBuffer>((const unsigned int*)indices, sizeof(indices));
+
     m_vao = std::make_unique<comet::VertexArray>();
     comet::VertexBufferLayout vbl;
     vbl.add<float>(2, GL_FALSE);
@@ -78,6 +86,8 @@ void SanboxApp::onRender()
     float offset = cos(m_angle) * 0.4f;
     m_shader->setUniform("offset", offset);
     m_vao->bind();
+    m_ib->bind();
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)nullptr);
 }

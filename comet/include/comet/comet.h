@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <comet/log.h>
 #include <comet/application.h>
 #include <comet/window.h>

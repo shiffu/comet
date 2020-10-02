@@ -4,12 +4,12 @@
 
 namespace comet
 {
-    IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count) : m_count(count)
+    IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int nbIndices) : m_count(nbIndices)
     {
         static_assert(sizeof(unsigned int) == sizeof(GLuint), "GLuint has not the same size has an unsigned int");
         glGenBuffers(1, &m_ibo);
         bind();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, nbIndices, data, GL_STATIC_DRAW);
     };
 
     IndexBuffer::~IndexBuffer()
