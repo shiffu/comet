@@ -3,12 +3,12 @@
 #include <comet/comet.h>
 #include <memory>
 
-class SanboxApp : public comet::Application
+class SandboxApp : public comet::Application
 {
 public:
 
-    SanboxApp() { CM_LOG_DEBUG("SanboxApp contructor"); } ;
-    virtual ~SanboxApp() { CM_LOG_DEBUG("SanboxApp destructor"); };
+    SandboxApp() { CM_LOG_DEBUG("SandboxApp contructor"); } ;
+    virtual ~SandboxApp() { CM_LOG_DEBUG("SandboxApp destructor"); };
 
     void onStart() override;
     void onUpdate(double deltaTime) override;

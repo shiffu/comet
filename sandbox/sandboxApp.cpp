@@ -4,11 +4,11 @@
 
 comet::Application* comet::Application::getInstance()
 {
-    static SanboxApp* instance = new SanboxApp();
+    static SandboxApp* instance = new SandboxApp();
     return instance;
 }
 
-void SanboxApp::onStart()
+void SandboxApp::onStart()
 {
     std::string vertexShaderSrc = R"glsl(
         #version 430 core
@@ -67,7 +67,7 @@ void SanboxApp::onStart()
 
 static const double PI = 3.1415926535;
 
-void SanboxApp::onUpdate(double deltaTime)
+void SandboxApp::onUpdate(double deltaTime)
 {
     m_angle += 2 * PI * (deltaTime / 1000.0);
     if (m_angle > 2 * PI)
@@ -76,7 +76,7 @@ void SanboxApp::onUpdate(double deltaTime)
     }
 }
 
-void SanboxApp::onFixedUpdate(float fixedDeltaTime)
+void SandboxApp::onFixedUpdate(float fixedDeltaTime)
 {
     // m_angle += 2 * PI * (fixedDeltaTime / 1000.0);
     // if (m_angle > 2 * PI)
@@ -85,7 +85,7 @@ void SanboxApp::onFixedUpdate(float fixedDeltaTime)
     // }
 }
 
-void SanboxApp::onRender()
+void SandboxApp::onRender()
 {
     m_shader->bind();
 
