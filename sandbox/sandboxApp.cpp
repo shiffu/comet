@@ -2,6 +2,12 @@
 #include <string>
 #include <math.h>
 
+comet::Application* comet::Application::getInstance()
+{
+    static SanboxApp* instance = new SanboxApp();
+    return instance;
+}
+
 void SanboxApp::onStart()
 {
     std::string vertexShaderSrc = R"glsl(

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/windowImpl.h>
+#include <comet/window.h>
 
 namespace sf {
     class Window;
@@ -9,7 +9,7 @@ namespace sf {
 namespace comet
 {
 
-    class SFMLWindow : public WindowImpl
+    class SFMLWindow : public Window
     {
     public:
         SFMLWindow(const WindowSpec& spec);
@@ -24,6 +24,8 @@ namespace comet
         virtual void setVSync(bool enabled) override;
         virtual bool isVSync() const override;
         virtual bool isClosed() const override;
+
+        virtual void* getPlatformWindow() const override;
 
         // Factory
         static Window* create(const WindowSpec& spec = WindowSpec());

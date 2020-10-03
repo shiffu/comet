@@ -29,6 +29,8 @@ namespace comet
         virtual bool isClosed() const = 0;
         virtual void pollEvent() const = 0;
 
+        virtual void* getPlatformWindow() const = 0;
+
         // Factory
         static Window* create(const WindowSpec& spec = WindowSpec());
     };

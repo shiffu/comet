@@ -6,6 +6,7 @@
 class SanboxApp : public comet::Application
 {
 public:
+
     SanboxApp() { CM_LOG_DEBUG("SanboxApp contructor"); } ;
     virtual ~SanboxApp() { CM_LOG_DEBUG("SanboxApp destructor"); };
 

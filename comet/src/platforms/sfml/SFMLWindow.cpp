@@ -51,7 +51,12 @@ namespace comet
         delete m_sfWindow;
         m_sfWindow = nullptr;
     }
- 
+
+    void* SFMLWindow::getPlatformWindow() const
+    {
+        return m_sfWindow;
+    }
+
     void SFMLWindow::pollEvent() const
     {
         sf::Event event;

@@ -5,7 +5,7 @@
 #include <comet/log.h>
 #include <comet/application.h>
 #include <comet/window.h>
-#include <platforms/window/SFMLWindow.h>
+#include <platforms/sfml/SFMLWindow.h>
 
 namespace comet
 {

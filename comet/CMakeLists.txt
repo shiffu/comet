@@ -9,21 +9,23 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/window.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/input.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBuffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/indexBuffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBufferLayout.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexArray.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
-    ${COMET_SOURCES_DIR}/platforms/window/SFMLWindow.h
+    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
 
     # Sources
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
     ${COMET_SOURCES_DIR}/core/log.cpp
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
-    ${COMET_SOURCES_DIR}/core/windowImpl.h
     ${COMET_SOURCES_DIR}/events/event.h
-    ${COMET_SOURCES_DIR}/platforms/window/SFMLWindow.cpp
+    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
+    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
+    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexBuffer.cpp
     ${COMET_SOURCES_DIR}/rendering/indexBuffer.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
