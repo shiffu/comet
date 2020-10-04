@@ -1,6 +1,7 @@
 #include "sandboxApp.h"
 #include <string>
 #include <math.h>
+#include <comet/input.h>
 
 comet::Application* comet::Application::getInstance()
 {
@@ -13,16 +14,16 @@ void SandboxApp::onStart()
     std::string vertexShaderSrc = R"glsl(
         #version 430 core
         
-        layout (location = 0) in vec2 position;
+        layout (location = 0) in vec3 position;
         layout (location = 1) in vec3 color;
 
-        uniform float offset;
+        uniform vec3 offset;
         out vec3 fragColor;
 
         void main()
         {
             fragColor = color;
-            gl_Position = vec4(position.x + offset, position.y, 0.0, 1.0);
+            gl_Position = vec4(position + offset, 1.0);
         }
     )glsl";
 
@@ -45,10 +46,10 @@ void SandboxApp::onStart()
 
 
     //              Positions           Colors
-    float data[] = { -0.5f, -0.5f,      0.0f, 0.2f, 0.7f,
-                      0.5f, -0.5f,      0.0f, 0.2f, 0.7f,
-                      0.5f,  0.5f,      0.8f, 0.4f, 0.0f,
-                     -0.5f,  0.5f,      0.8f, 0.4f, 0.0f};
+    float data[] = { -0.5f, -0.5f, 0.0f,      0.0f, 0.2f, 0.7f,
+                      0.5f, -0.5f, 0.0f,      0.0f, 0.2f, 0.7f,
+                      0.5f,  0.5f, 0.0f,      0.8f, 0.4f, 0.0f,
+                     -0.5f,  0.5f, 0.0f,      0.8f, 0.4f, 0.0f};
 
     unsigned int indices[] = {
         0, 1, 2,
@@ -60,7 +61,7 @@ void SandboxApp::onStart()
 
     m_vao = std::make_unique<comet::VertexArray>();
     comet::VertexBufferLayout vbl;
-    vbl.add<float>(2, GL_FALSE);
+    vbl.add<float>(3, GL_FALSE);
     vbl.add<float>(3, GL_FALSE);
     m_vao->addLayout(*m_vb, vbl);
 }
@@ -74,11 +75,29 @@ static const double PI = 3.1415926535;
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    m_angle += 2 * PI * (deltaTime / 1000.0);
-    if (m_angle > 2 * PI)
+    // m_angle += 2 * PI * (deltaTime / 1000.0);
+    // if (m_angle > 2 * PI)
+    // {
+    //     m_angle = 0.0;
+    // }
+    if (comet::Input::isKeyPressed(comet::Input::Key::A))
     {
-        m_angle = 0.0;
+        m_offset.x -= 0.003f * deltaTime;
     }
+    else if (comet::Input::isKeyPressed(comet::Input::Key::D))
+    {
+        m_offset.x += 0.003f * deltaTime;
+    }
+
+    if (comet::Input::isKeyPressed(comet::Input::Key::S))
+    {
+        m_offset.y -= 0.003f * deltaTime;
+    }
+    else if (comet::Input::isKeyPressed(comet::Input::Key::W))
+    {
+        m_offset.y += 0.003f * deltaTime;
+    }
+
 }
 
 void SandboxApp::onFixedUpdate(float fixedDeltaTime)
@@ -94,8 +113,9 @@ void SandboxApp::onRender()
 {
     m_shader->bind();
 
-    float offset = cos(m_angle) * 0.4f;
-    m_shader->setUniform("offset", offset);
+    // float xOffset = cos(m_angle) * 0.4f;
+    // glm::vec3 offset(xOffset, 0, 0);
+    m_shader->setUniform("offset", m_offset);
     m_vao->bind();
     m_ib->bind();
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 namespace comet
 {
@@ -19,6 +21,8 @@ namespace comet
         int getUniformLocation(const std::string& name);
         void setUniform(const std::string& name, unsigned int value);
         void setUniform(const std::string& name, float value);
+        void setUniform(const std::string& name, glm::vec2 value);
+        void setUniform(const std::string& name, glm::vec3 value);
 
         void bind() const;
         void unbind() const;

@@ -1,8 +1,9 @@
 #include <glad/glad.h>
-#include <comet/shader.h>
-#include <comet/log.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <string>
+#include <comet/shader.h>
+#include <comet/log.h>
 
 namespace comet
 {
@@ -170,6 +171,19 @@ namespace comet
         int location = getUniformLocation(name);
         glUniform1i(location, value);
     }
+
+    void Shader::setUniform(const std::string& name, glm::vec2 value)
+    {
+        int location = getUniformLocation(name);
+        glUniform2fv(location, 1, glm::value_ptr(value));
+    }
+
+    void Shader::setUniform(const std::string& name, glm::vec3 value)
+    {
+        int location = getUniformLocation(name);
+        glUniform3fv(location, 1, glm::value_ptr(value));
+    }
+
 
     void Shader::bind() const { glUseProgram(m_program); }
     void Shader::unbind() const { glUseProgram(0); }

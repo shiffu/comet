@@ -2,6 +2,7 @@
 
 #include <comet/comet.h>
 #include <memory>
+#include <glm/vec3.hpp>
 
 class SandboxApp : public comet::Application
 {
@@ -23,4 +24,5 @@ private:
     std::unique_ptr<comet::IndexBuffer> m_ib;
     std::unique_ptr<comet::VertexArray> m_vao;
     double m_angle{0.0};
+    glm::vec3 m_offset{0.0f};
 };
