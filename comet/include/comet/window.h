@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <functional>
+#include <comet/event.h>
 
 namespace comet
 {
@@ -19,7 +21,10 @@ namespace comet
     class Window
     {
     public:
+        using EventCallbackFn = std::function<void(Event&)>;
         virtual ~Window() {}
+
+        void setEventCallback(const EventCallbackFn& callback) { m_eventCallbackFn = callback; }
 
         virtual void swapBuffers() const = 0;
         virtual unsigned int getWidth() const = 0;
@@ -33,6 +38,9 @@ namespace comet
 
         // Factory
         static Window* create(const WindowSpec& spec = WindowSpec());
+
+    protected:
+        EventCallbackFn m_eventCallbackFn;
     };
 
 } // namespace comet

@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <iostream>
+#include <functional>
 #include <chrono>
 #include <thread>
 #include <comet/log.h>
@@ -9,6 +10,7 @@
 
 namespace comet
 {
+    #define BIND_METHOD(m) std::bind(&m, this, std::placeholders::_1)
 
     static void APIENTRY glDebugCallback(GLenum source,
                                         GLenum type,
@@ -41,10 +43,15 @@ namespace comet
     void Application::init(const WindowSpec& spec)
     {
         Log::init();
+        
         CM_CORE_LOG_DEBUG("Initializing the application");
         m_window = Window::create(spec);
         glDebugMessageCallback(glDebugCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+        // set Event callback
+        m_window->setEventCallback(BIND_METHOD(Application::onEvent));
+
         m_isInitialized = true;
         CM_CORE_LOG_DEBUG("Finished initializing the application");
     }
@@ -53,6 +60,40 @@ namespace comet
     void Application::onUpdate(double deltaTime) {}
     void Application::onFixedUpdate(float fixedDeltaTime) {}
     void Application::onRender() {}
+
+    void Application::onEvent(Event& e)
+    {
+        // CM_CORE_LOG_DEBUG("Application::onEvent - Event received: {}", e.toString());
+        EventDispatcher dispatcher(e);
+
+        dispatcher.dispatch<WindowResizedEvent>(BIND_METHOD(Application::onWindowResized));
+        dispatcher.dispatch<WindowLostFocusEvent>(BIND_METHOD(Application::onWindowLostFocus));
+        dispatcher.dispatch<WindowGainedFocusEvent>(BIND_METHOD(Application::onWindowGainedFocus));
+        dispatcher.dispatch<KeyPressedEvent>(BIND_METHOD(Application::onKeyPressed));
+        dispatcher.dispatch<KeyReleasedEvent>(BIND_METHOD(Application::onKeyReleased));
+        dispatcher.dispatch<KeyTextEnteredEvent>(BIND_METHOD(Application::onTextEntered));
+        dispatcher.dispatch<MouseMovedEvent>(BIND_METHOD(Application::onMouseMoved));
+        dispatcher.dispatch<MouseEnteredWindowEvent>(BIND_METHOD(Application::onMouseEnteredWindow));
+        dispatcher.dispatch<MouseLeftWindowEvent>(BIND_METHOD(Application::onMouseLeftWindow));
+        dispatcher.dispatch<VerticalMouseWheelScrolledEvent>(BIND_METHOD(Application::onVerticalMouseWheelScrolled));
+        dispatcher.dispatch<HorizontalMouseWheelScrolledEvent>(BIND_METHOD(Application::onHorizontalMouseWheelScrolled));
+        dispatcher.dispatch<MouseButtonPressedEvent>(BIND_METHOD(Application::onMouseButtonPressed));
+        dispatcher.dispatch<MouseButtonReleasedEvent>(BIND_METHOD(Application::onMouseButtonRelease));
+    }
+
+    bool Application::onWindowResized(WindowResizedEvent& e) {}
+    bool Application::onWindowLostFocus(WindowLostFocusEvent& e) {}
+    bool Application::onWindowGainedFocus(WindowGainedFocusEvent& e) {}
+    bool Application::onKeyPressed(KeyPressedEvent& e) {}
+    bool Application::onKeyReleased(KeyReleasedEvent& e) {}
+    bool Application::onTextEntered(KeyTextEnteredEvent& e) {}
+    bool Application::onMouseMoved(MouseMovedEvent& e) {}
+    bool Application::onMouseEnteredWindow(MouseEnteredWindowEvent& e) {}
+    bool Application::onMouseLeftWindow(MouseLeftWindowEvent& e) {}
+    bool Application::onVerticalMouseWheelScrolled(VerticalMouseWheelScrolledEvent& e) {}
+    bool Application::onHorizontalMouseWheelScrolled(HorizontalMouseWheelScrolledEvent& e) {}
+    bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) {}
+    bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) {}
 
     void Application::run()
     {

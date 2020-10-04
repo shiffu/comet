@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <ostream>
 
 namespace comet
 {
@@ -133,6 +134,7 @@ namespace comet
         static bool isMouseButtonPressed(MouseButton button) { return m_instance->isMouseButtonPressedImpl(button); }
         static std::pair<int, int> getMousePosition() { return m_instance->getMousePositionImpl(); };
     
+
     protected:
         virtual bool isKeyPressedImpl(Key key) = 0;
         virtual bool isMouseButtonPressedImpl(MouseButton button) = 0;
@@ -141,5 +143,15 @@ namespace comet
     private:
         static Input* m_instance;
     };
+    
+    inline std::ostream& operator<<(std::ostream& os, const Input::Key& key)
+    {
+        return os << int(key);
+    }
+    
+    inline std::ostream& operator<<(std::ostream& os, const Input::MouseButton& mouseButton)
+    {
+        return os << int(mouseButton);
+    }
 
 } // namespace comet

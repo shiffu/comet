@@ -1,6 +1,7 @@
 #pragma once
 
 #include <comet/window.h>
+#include <comet/event.h>
 
 namespace comet
 {
@@ -16,6 +17,7 @@ namespace comet
         Application(const Application&) = delete;
         Application& operator=(const Application) = delete;
 
+        void onEvent(Event& e);
         virtual void run();
         
         Window& getWindow() const { return *m_window; }
@@ -26,6 +28,21 @@ namespace comet
     protected:
         Application(const WindowSpec& spec = WindowSpec());
         virtual ~Application();
+
+        // Event Callbacks
+        virtual bool onWindowResized(WindowResizedEvent& e);
+        virtual bool onWindowLostFocus(WindowLostFocusEvent& e);
+        virtual bool onWindowGainedFocus(WindowGainedFocusEvent& e);
+        virtual bool onKeyPressed(KeyPressedEvent& e);
+        virtual bool onKeyReleased(KeyReleasedEvent& e);
+        virtual bool onTextEntered(KeyTextEnteredEvent& e);
+        virtual bool onMouseMoved(MouseMovedEvent& e);
+        virtual bool onMouseEnteredWindow(MouseEnteredWindowEvent& e);
+        virtual bool onMouseLeftWindow(MouseLeftWindowEvent& e);
+        virtual bool onVerticalMouseWheelScrolled(VerticalMouseWheelScrolledEvent& e);
+        virtual bool onHorizontalMouseWheelScrolled(HorizontalMouseWheelScrolledEvent& e);
+        virtual bool onMouseButtonPressed(MouseButtonPressedEvent& e);
+        virtual bool onMouseButtonRelease(MouseButtonReleasedEvent& e);
 
     private:
         void init(const WindowSpec& spec = WindowSpec());

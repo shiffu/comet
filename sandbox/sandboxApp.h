@@ -15,6 +15,8 @@ public:
     void onFixedUpdate(float fixedDeltaTime) override;
     void onRender() override;
 
+    virtual bool onKeyPressed(comet::KeyPressedEvent& e);
+
 private:
     std::unique_ptr<comet::Shader> m_shader;
     std::unique_ptr<comet::VertexBuffer> m_vb;

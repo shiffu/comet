@@ -1,9 +1,11 @@
+#include <glad/glad.h>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <glad/glad.h>
 #include "SFMLWindow.h"
 #include <SFML/Window.hpp>
+#include "SFMLInput.h"
+#include <comet/event.h>
 
 #include <comet/log.h>
 
@@ -30,6 +32,7 @@ namespace comet
         m_sfWindow->setTitle(ss.str());
 
         // Somehow this slows down a lot the responsiveness of the window on Linux (when moving the window)
+        // TODO: Figure out why VSync is slowing down window movement responsiveness on Linux
         // m_sfWindow->setVerticalSyncEnabled(true);
 
         // activate the window
@@ -68,22 +71,107 @@ namespace comet
             {
                 // window closed
                 case sf::Event::Closed:
+                {
                     m_sfWindow->close();
                     break;
-
-                // key pressed
-                case sf::Event::KeyPressed:
-                    CM_LOG_INFO("Key pressed: {}", event.key.code);
-                    break;
+                }
 
                 // adjust the viewport when the window is resized
                 case sf::Event::Resized:
-                    CM_LOG_INFO("Window resized: {} {}", event.size.width, event.size.height);
+                {
                     glViewport(0, 0, event.size.width, event.size.height);
+                    WindowResizedEvent cometEvent(event.size.width, event.size.height);
+                    m_eventCallbackFn(cometEvent);
                     break;
+                }
+
+                case sf::Event::LostFocus:
+                {
+                    WindowLostFocusEvent cometEvent;
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::GainedFocus:
+                {
+                    WindowGainedFocusEvent cometEvent;
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::KeyPressed:
+                {
+                    KeyPressedEvent cometEvent(SFMLInput::sfmlKeyToCometKey(event.key.code), 0);
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::KeyReleased:
+                {
+                    KeyReleasedEvent cometEvent(SFMLInput::sfmlKeyToCometKey(event.key.code));
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::TextEntered:
+                {
+                    KeyTextEnteredEvent cometEvent(event.text.unicode);
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::MouseMoved:
+                {
+                    MouseMovedEvent cometEvent(event.mouseMove.x, event.mouseMove.y);
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::MouseEntered:
+                {
+                    MouseEnteredWindowEvent cometEvent;
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::MouseLeft:
+                {
+                    MouseLeftWindowEvent cometEvent;
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::MouseWheelScrolled:
+                {
+                    if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+                    {
+                        VerticalMouseWheelScrolledEvent cometEvent(event.mouseWheelScroll.delta);
+                        m_eventCallbackFn(cometEvent);
+                    }
+                    else if (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
+                    {
+                        HorizontalMouseWheelScrolledEvent cometEvent(event.mouseWheelScroll.delta);
+                        m_eventCallbackFn(cometEvent);
+                    }
+                    break;
+                }
+
+                case sf::Event::MouseButtonPressed:
+                {
+                    MouseButtonPressedEvent cometEvent((Input::MouseButton)event.mouseButton.button, event.mouseButton.x, event.mouseButton.y);
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
+
+                case sf::Event::MouseButtonReleased:
+                {
+                    MouseButtonReleasedEvent cometEvent((Input::MouseButton)event.mouseButton.button, event.mouseButton.x, event.mouseButton.y);
+                    m_eventCallbackFn(cometEvent);
+                    break;
+                }
 
                 // we don't process other types of events for now
-                // TODO: Implement proper Keyboard and Mouse events management
+                // TODO: implement Joystick events
                 default:
                     break;
             }

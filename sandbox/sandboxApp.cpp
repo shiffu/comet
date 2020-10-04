@@ -65,6 +65,11 @@ void SandboxApp::onStart()
     m_vao->addLayout(*m_vb, vbl);
 }
 
+bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
+{
+    CM_LOG_TRACE(e.toString());
+}
+
 static const double PI = 3.1415926535;
 
 void SandboxApp::onUpdate(double deltaTime)

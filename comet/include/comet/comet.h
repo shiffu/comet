@@ -5,6 +5,7 @@
 #include <comet/application.h>
 #include <comet/window.h>
 #include <comet/input.h>
+#include <comet/event.h>
 #include <comet/indexBuffer.h>
 #include <comet/vertexBuffer.h>
 #include <comet/vertexArray.h>

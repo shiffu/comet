@@ -9,6 +9,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/window.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/event.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/input.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBuffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/indexBuffer.h
@@ -22,7 +23,6 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/core/log.cpp
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
-    ${COMET_SOURCES_DIR}/events/event.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
