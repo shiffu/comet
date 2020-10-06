@@ -11,3 +11,4 @@
 #include <comet/vertexArray.h>
 #include <comet/vertexBufferLayout.h>
 #include <comet/shader.h>
+#include <comet/camera.h>

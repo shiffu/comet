@@ -3,6 +3,7 @@
 #include <string>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
 namespace comet
 {
@@ -23,6 +24,7 @@ namespace comet
         void setUniform(const std::string& name, float value);
         void setUniform(const std::string& name, glm::vec2 value);
         void setUniform(const std::string& name, glm::vec3 value);
+        void setUniform(const std::string& name, glm::mat4 value);
 
         void bind() const;
         void unbind() const;

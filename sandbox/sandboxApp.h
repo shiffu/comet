@@ -17,6 +17,7 @@ public:
     void onRender() override;
 
     virtual bool onKeyPressed(comet::KeyPressedEvent& e);
+    virtual bool onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e);
 
 private:
     std::unique_ptr<comet::Shader> m_shader;
@@ -25,4 +26,5 @@ private:
     std::unique_ptr<comet::VertexArray> m_vao;
     double m_angle{0.0};
     glm::vec3 m_offset{0.0f};
+    comet::Camera m_camera{glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 100.0f};
 };

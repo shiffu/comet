@@ -18,12 +18,13 @@ void SandboxApp::onStart()
         layout (location = 1) in vec3 color;
 
         uniform vec3 offset;
+        uniform mat4 mvp;
         out vec3 fragColor;
 
         void main()
         {
             fragColor = color;
-            gl_Position = vec4(position + offset, 1.0);
+            gl_Position = mvp * vec4(position + offset, 1.0);
         }
     )glsl";
 
@@ -64,57 +65,55 @@ void SandboxApp::onStart()
     vbl.add<float>(3, GL_FALSE);
     vbl.add<float>(3, GL_FALSE);
     m_vao->addLayout(*m_vb, vbl);
+
+    m_camera.lookAt(glm::vec3{0.0f, 0.0f, -7.0f}, glm::vec3{0.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
 }
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 {
-    CM_LOG_TRACE(e.toString());
+    // CM_LOG_TRACE(e.toString());
 }
 
-static const double PI = 3.1415926535;
+bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
+{
+    CM_LOG_TRACE(e.toString());
+    auto pos = m_camera.getPosition();
+    pos.z += e.getDelta() * 0.8f;
+    m_camera.setPosition(pos);
+}
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    // m_angle += 2 * PI * (deltaTime / 1000.0);
-    // if (m_angle > 2 * PI)
-    // {
-    //     m_angle = 0.0;
-    // }
     if (comet::Input::isKeyPressed(comet::Input::Key::A))
     {
-        m_offset.x -= 0.003f * deltaTime;
+        m_offset.x += 0.005f * deltaTime;
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::D))
     {
-        m_offset.x += 0.003f * deltaTime;
+        m_offset.x -= 0.005f * deltaTime;
     }
 
     if (comet::Input::isKeyPressed(comet::Input::Key::S))
     {
-        m_offset.y -= 0.003f * deltaTime;
+        m_offset.y -= 0.005f * deltaTime;
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::W))
     {
-        m_offset.y += 0.003f * deltaTime;
+        m_offset.y += 0.005f * deltaTime;
     }
-
 }
 
 void SandboxApp::onFixedUpdate(float fixedDeltaTime)
 {
-    // m_angle += 2 * PI * (fixedDeltaTime / 1000.0);
-    // if (m_angle > 2 * PI)
-    // {
-    //     m_angle = 0.0;
-    // }
 }
 
 void SandboxApp::onRender()
 {
     m_shader->bind();
 
-    // float xOffset = cos(m_angle) * 0.4f;
-    // glm::vec3 offset(xOffset, 0, 0);
+    glm::mat4 model{1.0f};
+    glm::mat4 mvp = m_camera.getProjection() * m_camera.getView() * model;
+    m_shader->setUniform("mvp", mvp);
     m_shader->setUniform("offset", m_offset);
     m_vao->bind();
     m_ib->bind();

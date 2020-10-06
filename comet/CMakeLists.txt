@@ -17,6 +17,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexArray.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
 
     # Sources
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
@@ -31,6 +32,7 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexArray.cpp
     ${COMET_SOURCES_DIR}/rendering/shader.cpp
+    ${COMET_SOURCES_DIR}/rendering/camera.cpp
 )
 
 # For Debugging

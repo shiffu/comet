@@ -175,13 +175,19 @@ namespace comet
     void Shader::setUniform(const std::string& name, glm::vec2 value)
     {
         int location = getUniformLocation(name);
-        glUniform2fv(location, 1, glm::value_ptr(value));
+        glUniform2fv(location, 1, &value[0]);
     }
 
     void Shader::setUniform(const std::string& name, glm::vec3 value)
     {
         int location = getUniformLocation(name);
-        glUniform3fv(location, 1, glm::value_ptr(value));
+        glUniform3fv(location, 1, &value[0]);
+    }
+
+    void Shader::setUniform(const std::string& name, glm::mat4 value)
+    {
+        int location = getUniformLocation(name);
+        glUniformMatrix4fv(location, 1, false, &value[0][0]);
     }
 
 
