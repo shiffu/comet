@@ -2,6 +2,7 @@
 #include <string>
 #include <math.h>
 #include <comet/input.h>
+#include "vertex.h"
 
 comet::Application* comet::Application::getInstance()
 {
@@ -11,7 +12,7 @@ comet::Application* comet::Application::getInstance()
 
 void SandboxApp::onStart()
 {
-    std::string vertexShaderSrc = R"glsl(
+    std::string vertexShaderSrc = R"(
         #version 430 core
         
         layout (location = 0) in vec3 position;
@@ -26,9 +27,9 @@ void SandboxApp::onStart()
             fragColor = color;
             gl_Position = mvp * vec4(position + offset, 1.0);
         }
-    )glsl";
+    )";
 
-    std::string fragmentShaderSrc = R"glsl(
+    std::string fragmentShaderSrc = R"(
         #version 430 core
         
         in vec3 fragColor;
@@ -38,7 +39,7 @@ void SandboxApp::onStart()
         {
             color = vec4(fragColor, 1.0);
         }
-    )glsl";
+    )";
 
     m_shader = std::make_unique<comet::Shader>();
     m_shader->compileShaderSrc(vertexShaderSrc, GL_VERTEX_SHADER);
@@ -46,11 +47,12 @@ void SandboxApp::onStart()
     m_shader->linkProgram();
 
 
-    //              Positions           Colors
-    float data[] = { -0.5f, -0.5f, 0.0f,      0.0f, 0.2f, 0.7f,
-                      0.5f, -0.5f, 0.0f,      0.0f, 0.2f, 0.7f,
-                      0.5f,  0.5f, 0.0f,      0.8f, 0.4f, 0.0f,
-                     -0.5f,  0.5f, 0.0f,      0.8f, 0.4f, 0.0f};
+    Vertex data[] = {
+        {{-0.5f, -0.5f, 0.0f},  {0.0f, 0.2f, 0.7f}},
+        {{0.5f, -0.5f, 0.0f},   {0.0f, 0.2f, 0.7f}},
+        {{0.5f,  0.5f, 0.0f},   {0.8f, 0.4f, 0.0f}},
+        {{-0.5f,  0.5f, 0.0f},  {0.8f, 0.4f, 0.0f}}
+    };
 
     unsigned int indices[] = {
         0, 1, 2,
@@ -71,12 +73,10 @@ void SandboxApp::onStart()
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 {
-    // CM_LOG_TRACE(e.toString());
 }
 
 bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
 {
-    CM_LOG_TRACE(e.toString());
     auto pos = m_camera.getPosition();
     pos.z += e.getDelta() * 0.8f;
     m_camera.setPosition(pos);
@@ -118,6 +118,5 @@ void SandboxApp::onRender()
     m_vao->bind();
     m_ib->bind();
 
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)nullptr);
 }
