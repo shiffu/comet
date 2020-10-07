@@ -78,7 +78,8 @@ bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
 {
     auto pos = m_camera.getPosition();
-    pos.z += e.getDelta() * 0.8f;
+    pos.z += e.getDelta() * 0.5f;
+    if (pos.z >= -0.5f) pos.z = -0.5f;
     m_camera.setPosition(pos);
 }
 
