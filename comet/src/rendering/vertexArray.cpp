@@ -22,12 +22,15 @@ namespace comet
     void VertexArray::bind() const { glBindVertexArray(m_vao); }
     void VertexArray::unbind() const { glBindVertexArray(0); }
 
-    void VertexArray::addLayout(const VertexBuffer& vbo, const VertexBufferLayout& vbl)
+    void VertexArray::addLayout(const VertexBufferLayout& vbl, const VertexBuffer& vbo, const IndexBuffer& ibo)
     {
             const auto& bufferAttributes = vbl.getAttributes();
             unsigned int offset = 0;
             bind();
             vbo.bind();
+            ibo.bind();
+
+            // Loop over the vertex attributes
             for (unsigned int i = 0; i < bufferAttributes.size(); ++i) {
                 const auto& attr = bufferAttributes[i];
                 CM_CORE_LOG_DEBUG("enable vertex attrib {}", i);

@@ -66,7 +66,7 @@ void SandboxApp::onStart()
     comet::VertexBufferLayout vbl;
     vbl.add<float>(3, GL_FALSE);
     vbl.add<float>(3, GL_FALSE);
-    m_vao->addLayout(*m_vb, vbl);
+    m_vao->addLayout(vbl, *m_vb, *m_ib);
 
     m_camera.lookAt(glm::vec3{0.0f, 0.0f, -7.0f}, glm::vec3{0.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
 }
@@ -116,7 +116,6 @@ void SandboxApp::onRender()
     m_shader->setUniform("mvp", mvp);
     m_shader->setUniform("offset", m_offset);
     m_vao->bind();
-    m_ib->bind();
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)nullptr);
 }
