@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <comet/log.h>
 #include <comet/application.h>
 #include <comet/window.h>
@@ -12,3 +11,4 @@
 #include <comet/vertexBufferLayout.h>
 #include <comet/shader.h>
 #include <comet/camera.h>
+#include <comet/renderer.h>

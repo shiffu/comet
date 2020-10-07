@@ -27,4 +27,5 @@ private:
     double m_angle{0.0};
     glm::vec3 m_offset{0.0f};
     comet::Camera m_camera{glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 100.0f};
+    comet::Renderer m_renderer;
 };

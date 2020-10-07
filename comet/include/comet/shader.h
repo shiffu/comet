@@ -10,11 +10,18 @@ namespace comet
     class Shader
     {
     public:
+        enum class Type
+        {
+            NONE = 0,
+            VERTEX,
+            FRAGMENT
+        };
+
         Shader();
         ~Shader();
 
-        void compileShader(const std::string& filename, unsigned int shaderType);
-        void compileShaderSrc(const std::string& source, unsigned int shaderType);
+        void compileShader(const std::string& filename, Type shaderType);
+        void compileShaderSrc(const std::string& source, Type shaderType);
 
         void linkProgram();
 
@@ -30,11 +37,8 @@ namespace comet
         void unbind() const;
 
     private:
-        // Only Vertex, Geometry and Fragment shaders are managed for now
-        static const unsigned int NB_SHADERS = 3;
-
-        void checkShaderTypeSupported(unsigned int shaderType) const;
-        void checkMaxShaderPerProgram() const;
+        // Only Vertex and Fragment shaders are managed for now
+        static const unsigned int NB_SHADERS = 2;
 
         unsigned int m_program = 0;
         unsigned int m_numShaders = 0;

@@ -42,10 +42,9 @@ void SandboxApp::onStart()
     )";
 
     m_shader = std::make_unique<comet::Shader>();
-    m_shader->compileShaderSrc(vertexShaderSrc, GL_VERTEX_SHADER);
-    m_shader->compileShaderSrc(fragmentShaderSrc, GL_FRAGMENT_SHADER);
+    m_shader->compileShaderSrc(vertexShaderSrc, comet::Shader::Type::VERTEX);
+    m_shader->compileShaderSrc(fragmentShaderSrc, comet::Shader::Type::FRAGMENT);
     m_shader->linkProgram();
-
 
     Vertex data[] = {
         {{-0.5f, -0.5f, 0.0f},  {0.0f, 0.2f, 0.7f}},
@@ -61,11 +60,11 @@ void SandboxApp::onStart()
 
     m_vb = std::make_unique<comet::VertexBuffer>((const void*)data, sizeof(data));
     m_ib = std::make_unique<comet::IndexBuffer>((const unsigned int*)indices, sizeof(indices));
-
     m_vao = std::make_unique<comet::VertexArray>();
+
     comet::VertexBufferLayout vbl;
-    vbl.add<float>(3, GL_FALSE);
-    vbl.add<float>(3, GL_FALSE);
+    vbl.add<float>(3, false);
+    vbl.add<float>(3, false);
     m_vao->addLayout(vbl, *m_vb, *m_ib);
 
     m_camera.lookAt(glm::vec3{0.0f, 0.0f, -7.0f}, glm::vec3{0.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
@@ -118,5 +117,5 @@ void SandboxApp::onRender()
     m_shader->setUniform("offset", m_offset);
     m_vao->bind();
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)nullptr);
+    m_renderer.drawIndexed(6);
 }

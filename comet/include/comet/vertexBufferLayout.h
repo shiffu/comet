@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <vector>
 #include <comet/log.h>
 
@@ -8,12 +7,12 @@ namespace comet
 {
     struct VertexAttribute
     {
-        GLenum type;
-        GLint count;
+        unsigned int type;
+        unsigned int count;
         unsigned int size;
-        GLboolean normalized;
+        bool normalized;
 
-        VertexAttribute(GLenum pType, GLint pCount, unsigned int pSize, GLboolean pNormalized)
+        VertexAttribute(unsigned int pType, unsigned int pCount, unsigned int pSize, bool pNormalized)
             : type(pType), count(pCount), size(pSize), normalized(pNormalized)
             {
                 CM_CORE_LOG_DEBUG("VertexAttribute: type = {}, count = {}, size = {}", type, count, size);
@@ -30,7 +29,7 @@ namespace comet
         const std::vector<VertexAttribute>& getAttributes() const { return m_attributes; }
 
         template <typename T>
-        void add(GLint count, GLboolean normalized = GL_FALSE);
+        void add(unsigned int count, bool normalized = false);
 
     private:
         std::vector<VertexAttribute> m_attributes;
@@ -38,9 +37,9 @@ namespace comet
     };
 
     template <>
-    void VertexBufferLayout::add<float>(GLint count, GLboolean normalized);
+    void VertexBufferLayout::add<float>(unsigned int count, bool normalized);
 
     template <>
-    void VertexBufferLayout::add<unsigned int>(GLint count, GLboolean normalized);
+    void VertexBufferLayout::add<unsigned int>(unsigned int count, bool normalized);
 
 } // namespace comet

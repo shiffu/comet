@@ -21,29 +21,8 @@ namespace comet
         }
     }
 
-    void Shader::checkShaderTypeSupported(unsigned int shaderType) const
+    void Shader::compileShader(const std::string& filename, Type shaderType)
     {
-
-        // Only Vertex and Fragment shaders are managed for the time being
-        if (shaderType != GL_VERTEX_SHADER && shaderType != GL_GEOMETRY_SHADER && shaderType != GL_FRAGMENT_SHADER)
-        {
-            CM_CORE_LOG_FATAL("Only Vertex, Geometry and Fragment shaders are managed");
-        }
-    }
-
-    void Shader::checkMaxShaderPerProgram() const
-    {
-        if (m_numShaders >= NB_SHADERS)
-        {
-            CM_CORE_LOG_FATAL("Exceeded max allowed shaders per program (3)");
-        }
-    }
-
-    void Shader::compileShader(const std::string& filename, unsigned int shaderType)
-    {
-        checkShaderTypeSupported(shaderType);
-        checkMaxShaderPerProgram();
-
         // Read the shader file
         std::ifstream shaderFile(filename, std::ifstream::in);
         if (shaderFile.fail())
@@ -63,12 +42,26 @@ namespace comet
         compileShaderSrc(shaderSource, shaderType);
     }
 
-    void Shader::compileShaderSrc(const std::string& source, unsigned int shaderType)
+    void Shader::compileShaderSrc(const std::string& source, Type shaderType)
     {
-        checkShaderTypeSupported(shaderType);
-        checkMaxShaderPerProgram();
+        unsigned int glShaderType;
+        switch (shaderType)
+        {
+        case Type::VERTEX:
+            glShaderType = GL_VERTEX_SHADER;
+            break;
 
-        unsigned int shader = glCreateShader(shaderType);
+        case Type::FRAGMENT:
+            glShaderType = GL_FRAGMENT_SHADER;
+            break;
+        
+        default:
+            CM_CORE_LOG_FATAL("Unmanaged shader type {}", shaderType);
+            exit(EXIT_FAILURE);
+            break;
+        }
+
+        unsigned int shader = glCreateShader(glShaderType);
         if (shader == 0)
         {
             CM_CORE_LOG_FATAL("Unable to create shader {}", shaderType);
