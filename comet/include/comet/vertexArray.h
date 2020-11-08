@@ -12,9 +12,14 @@ namespace comet
         VertexArray();
         ~VertexArray();
 
+        VertexArray(const VertexArray&) = delete;
+        VertexArray(VertexArray&& other);
+        void operator=(const VertexArray&) = delete;
+        VertexArray& operator=(VertexArray&& other) noexcept;
+
         void bind() const;
         void unbind() const;
-        void addLayout(const VertexBufferLayout& vbl, const VertexBuffer& vbo, const IndexBuffer& ibo);
+        void addLayout(const VertexBufferLayout& vbl, const VertexBuffer& vbo, const IndexBuffer* ibo = nullptr);
 
     private:
         unsigned int m_vao{0};

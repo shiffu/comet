@@ -1,20 +1,19 @@
 #pragma once
+#include <cstdint>
+#include <comet/buffer.h>
 
 namespace comet
 {
-
-    class IndexBuffer
+    class IndexBuffer : public Buffer
     {
     public:
-        IndexBuffer(const unsigned int* data, unsigned int nbIndices);
-        ~IndexBuffer();
+        IndexBuffer(uint32_t usage);
+        ~IndexBuffer() {};
 
-        void bind() const;
-        void unbind() const;
+        IndexBuffer& operator=(IndexBuffer&& other) noexcept;
 
-        inline unsigned int getCount() const {return m_count; }
-    private:
-        unsigned int m_ibo{0};
-        unsigned int m_count;
+        void allocate();
+        void allocate(uint32_t indexCount);
+        void loadDataInMappedMemory(const uint32_t* data, uint32_t indexCount, uint32_t offset = 0);
     };
 }

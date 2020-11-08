@@ -7,15 +7,17 @@ namespace comet
 {
     struct VertexAttribute
     {
-        unsigned int type;
-        unsigned int count;
-        unsigned int size;
+        uint32_t type;
+        uint32_t count;
+        uint32_t size;
+        uint32_t loc;
+        uint32_t divisor;
         bool normalized;
 
-        VertexAttribute(unsigned int pType, unsigned int pCount, unsigned int pSize, bool pNormalized)
-            : type(pType), count(pCount), size(pSize), normalized(pNormalized)
+        VertexAttribute(uint32_t pLoc, uint32_t pType, uint32_t pCount, uint32_t pSize, bool pNormalized, uint32_t divisor)
+            : loc(pLoc), type(pType), count(pCount), size(pSize), normalized(pNormalized), divisor(divisor)
             {
-                CM_CORE_LOG_DEBUG("VertexAttribute: type = {}, count = {}, size = {}", type, count, size);
+                CM_CORE_LOG_DEBUG("VertexAttribute: loc = {}, type = {}, count = {}, size = {}, divisor = {}", loc, type, count, size, divisor);
             }
     };
 
@@ -25,21 +27,21 @@ namespace comet
         VertexBufferLayout() : m_stride(0){};
         ~VertexBufferLayout(){};
 
-        unsigned int getStride() const { return m_stride; }
+        uint32_t getStride() const { return m_stride; }
         const std::vector<VertexAttribute>& getAttributes() const { return m_attributes; }
 
         template <typename T>
-        void add(unsigned int count, bool normalized = false);
+        void add(uint32_t count, bool normalized, uint32_t loc, uint32_t divisor = 0);
 
     private:
         std::vector<VertexAttribute> m_attributes;
-        unsigned int m_stride;
+        uint32_t m_stride;
     };
 
     template <>
-    void VertexBufferLayout::add<float>(unsigned int count, bool normalized);
+    void VertexBufferLayout::add<float>(uint32_t count, bool normalized, uint32_t loc, uint32_t divisor);
 
     template <>
-    void VertexBufferLayout::add<unsigned int>(unsigned int count, bool normalized);
+    void VertexBufferLayout::add<unsigned int>(uint32_t count, bool normalized, uint32_t loc, uint32_t divisor);
 
 } // namespace comet

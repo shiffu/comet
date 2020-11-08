@@ -11,14 +11,20 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/event.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/input.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/buffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBuffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/indexBuffer.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/commandBuffer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBufferLayout.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexArray.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/mesh.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
 
     # Sources
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
@@ -28,14 +34,18 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
+    ${COMET_SOURCES_DIR}/rendering/buffer.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexBuffer.cpp
     ${COMET_SOURCES_DIR}/rendering/indexBuffer.cpp
+    ${COMET_SOURCES_DIR}/rendering/commandBuffer.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexArray.cpp
     ${COMET_SOURCES_DIR}/rendering/shader.cpp
     ${COMET_SOURCES_DIR}/rendering/camera.cpp
     ${COMET_SOURCES_DIR}/rendering/renderer.cpp
-)
+    ${COMET_SOURCES_DIR}/rendering/material.cpp
+    ${COMET_SOURCES_DIR}/rendering/mesh.cpp
+ )
 
 # For Debugging
 set(CMAKE_VERBOSE_MAKEFILE ON)

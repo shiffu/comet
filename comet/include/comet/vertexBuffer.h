@@ -1,21 +1,16 @@
 #pragma once
+#include <cstdint>
+#include <comet/buffer.h>
+#include <comet/vertex.h>
 
 namespace comet
 {
-
-    class VertexBuffer
+    class VertexBuffer : public Buffer
     {
     public:
-        VertexBuffer(const void* data, unsigned int size);
-        ~VertexBuffer();
+        VertexBuffer(uint32_t usage);
+        ~VertexBuffer() {};
 
-        void bind() const;
-        void unbind() const;
-
-        void loadData(const void* data, unsigned int size);
-
-    private:
-        unsigned int m_vbo{0};
+        VertexBuffer& operator=(VertexBuffer&& other) noexcept;
     };
-    
 }

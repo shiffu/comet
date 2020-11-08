@@ -20,8 +20,57 @@ namespace comet
                                         const GLchar* message,
                                         const void* userParam)
     {
-        CM_CORE_LOG_DEBUG("OpenGL Error: {}", message);
-        exit(EXIT_FAILURE);
+        std::string msgType;
+        bool error_category = false;
+        bool warn_category = false;
+        switch(type)
+        {
+            case GL_DEBUG_TYPE_ERROR:
+                msgType = "ERROR";
+                error_category = true;
+            break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                msgType = "DEPRECATED_BEHAVIOR";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                msgType = "UNDEFINED_BEHAVIOR";
+                error_category = true;
+            break;
+            case GL_DEBUG_TYPE_PORTABILITY:
+                msgType = "PORTABILITY";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_PERFORMANCE:
+                msgType = "PERFORMANCE";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_MARKER:
+                msgType = "MARKER";
+            break;
+            case GL_DEBUG_TYPE_PUSH_GROUP:
+                msgType = "PSUH_GROUP";
+            break;
+            case GL_DEBUG_TYPE_POP_GROUP:
+                msgType = "POP_GROUP";
+            break;
+            case GL_DEBUG_TYPE_OTHER:
+                msgType = "OTHER";
+            break;
+        }
+
+        if (error_category)
+        {
+            CM_CORE_LOG_ERROR("[OpenGL:{}]: {}", msgType, message);
+        }
+        else if (warn_category)
+        {
+            CM_CORE_LOG_WARN("[OpenGL:{}]: {}", msgType, message);
+        }
+        else
+        {
+            CM_CORE_LOG_TRACE("[OpenGL:{}]: {}", msgType, message);
+        }
     }
 
     Application::Application(const WindowSpec& spec)
@@ -48,6 +97,7 @@ namespace comet
         m_window = Window::create(spec);
         glDebugMessageCallback(glDebugCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        glEnable(GL_DEBUG_OUTPUT);  
 
         // set Event callback
         m_window->setEventCallback(BIND_METHOD(Application::onEvent));

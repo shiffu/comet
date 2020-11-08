@@ -1,33 +1,34 @@
-#include <comet/indexBuffer.h>
 #include <glad/glad.h>
+#include <utility>
 #include <type_traits>
+#include <comet/indexBuffer.h>
 
 namespace comet
 {
-    IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int nbIndices) : m_count(nbIndices)
+    IndexBuffer::IndexBuffer(uint32_t usage)
+        : Buffer(GL_ELEMENT_ARRAY_BUFFER, usage)
     {
-        static_assert(sizeof(unsigned int) == sizeof(GLuint), "GLuint has not the same size has an unsigned int");
-        glGenBuffers(1, &m_ibo);
-        bind();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, nbIndices, data, GL_STATIC_DRAW);
-    };
-
-    IndexBuffer::~IndexBuffer()
-    {
-        if (m_ibo)
-        {
-            unbind();
-            glDeleteBuffers(1, &m_ibo);
-        }
-    };
-
-    void IndexBuffer::bind() const
-    {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
     }
 
-    void IndexBuffer::unbind() const
+    void IndexBuffer::allocate()
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        Buffer::allocate();
+    }
+
+    IndexBuffer& IndexBuffer::operator=(IndexBuffer&& other) noexcept
+    {
+        Buffer::operator=(std::move(other));
+        return *this;
+    }
+
+    void IndexBuffer::allocate(uint32_t indexCount)
+    {
+        m_size = indexCount * sizeof(uint32_t);
+        Buffer::allocate(m_size);
+    }
+
+    void IndexBuffer::loadDataInMappedMemory(const uint32_t* data, uint32_t indexCount, uint32_t offset /*= 0*/)
+    {
+        Buffer::loadDataInMappedMemory((const void*)data, indexCount * sizeof(uint32_t), indexCount, offset);
     }
 }

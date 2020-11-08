@@ -9,7 +9,7 @@ namespace comet
 
     struct WindowSpec
     {
-        WindowSpec(const std::string& pTitle = "(@)Comet Engine", unsigned int pWidth = 1280, unsigned int pHeight = 720)
+        WindowSpec(const std::string& pTitle = "(@)Comet Engine", unsigned int pWidth = 1600, unsigned int pHeight = 1280)
             : title(pTitle), width(pWidth), height(pHeight) {}
 
         std::string title;

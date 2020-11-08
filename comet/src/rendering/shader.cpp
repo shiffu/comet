@@ -21,7 +21,7 @@ namespace comet
         }
     }
 
-    void Shader::compileShader(const std::string& filename, Type shaderType)
+    void Shader::compileShaderFile(const std::string& filename, Type shaderType)
     {
         // Read the shader file
         std::ifstream shaderFile(filename, std::ifstream::in);
@@ -144,11 +144,17 @@ namespace comet
 
     int Shader::getUniformLocation(const std::string& name)
     {
+        if (auto location = m_uniformLocationsCache.find(name); location != m_uniformLocationsCache.end())
+        {
+            return location->second;
+        }
+
         int location = glGetUniformLocation(m_program, name.c_str());
         if (location == GL_INVALID_INDEX)
         {
             CM_CORE_LOG_FATAL("Uniform {} not found in sharder program", name);
         }
+        m_uniformLocationsCache[name] = location;
 
         return location;
     }
@@ -165,19 +171,25 @@ namespace comet
         glUniform1i(location, value);
     }
 
-    void Shader::setUniform(const std::string& name, glm::vec2 value)
+    void Shader::setUniform(const std::string& name, const glm::vec2& value)
     {
         int location = getUniformLocation(name);
         glUniform2fv(location, 1, &value[0]);
     }
 
-    void Shader::setUniform(const std::string& name, glm::vec3 value)
+    void Shader::setUniform(const std::string& name, const glm::vec3& value)
     {
         int location = getUniformLocation(name);
         glUniform3fv(location, 1, &value[0]);
     }
 
-    void Shader::setUniform(const std::string& name, glm::mat4 value)
+    void Shader::setUniform(const std::string& name, const glm::vec4& value)
+    {
+        int location = getUniformLocation(name);
+        glUniform4fv(location, 1, &value[0]);
+    }
+
+    void Shader::setUniform(const std::string& name, const glm::mat4& value)
     {
         int location = getUniformLocation(name);
         glUniformMatrix4fv(location, 1, false, &value[0][0]);

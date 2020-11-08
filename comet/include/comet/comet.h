@@ -12,3 +12,6 @@
 #include <comet/shader.h>
 #include <comet/camera.h>
 #include <comet/renderer.h>
+#include <comet/material.h>
+#include <comet/mesh.h>
+#include <comet/vertex.h>
