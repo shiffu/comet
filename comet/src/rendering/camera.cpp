@@ -1,28 +1,31 @@
 #include <comet/camera.h>
 #include <comet/application.h>
 #include <comet/log.h>
+#include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 namespace comet
 {
 
     // Perpective matrix
     Camera::Camera(float fov, float near, float far)
-        : m_fov(fov), m_near(near), m_far(far)
     {
-        auto app = Application::getInstance();
-        m_width = app->getWindow().getWidth();
-        m_height = app->getWindow().getHeight();
-        m_projection = glm::perspective(m_fov, m_width / m_height, m_near, m_far);
+        updateDirections();
+        setPerspective(fov, near, far);
     }
 
     // Orthographic matrix
     Camera::Camera(float near, float far)
-        : m_near(near), m_far(far), m_fov(0.0f)
+    {
+        updateDirections();
+        setOrthographic(near, far);
+    }
+
+    void Camera::updateWidthAndHeightFromWindow()
     {
         auto app = Application::getInstance();
         m_width = app->getWindow().getWidth();
         m_height = app->getWindow().getHeight();
-        m_projection = glm::ortho(0.0f, m_width, 0.0f, m_height, m_near, m_far);
     }
 
     void Camera::setPerspective(float fov, float width, float height, float near, float far)
@@ -37,9 +40,7 @@ namespace comet
 
     void Camera::setPerspective(float fov, float near, float far)
     {
-        auto app = Application::getInstance();
-        m_width = app->getWindow().getWidth();
-        m_height = app->getWindow().getHeight();
+        updateWidthAndHeightFromWindow();
         m_fov = fov;
         m_near = near;
         m_far = far;
@@ -58,9 +59,7 @@ namespace comet
 
     void Camera::setOrthographic(float near, float far)
     {
-        auto app = Application::getInstance();
-        m_width = app->getWindow().getWidth();
-        m_height = app->getWindow().getHeight();
+        updateWidthAndHeightFromWindow();
         m_fov = 0.0f;
         m_near = near;
         m_far = far;
@@ -72,79 +71,107 @@ namespace comet
         m_position = cameraPos;
         m_target = targetPos;
         m_up = up;
-        calculateDirections();
-        calculatedAngles();
-        calculateView();
+        calculateDirectionsFromTarget();
+        buildViewMatrix();
     }
 
-    void Camera::lookAt(const glm::vec3& targetPos, const glm::vec3& up)
+    void Camera::lookAt(const glm::vec3& targetPos, const glm::vec3& up /*= glm::vec3{0.0f, 1.0f, 0.0f}*/)
     {
         m_target = targetPos;
         m_up = up;
-        calculateDirections();
-        calculatedAngles();
-        calculateView();
+        calculateDirectionsFromTarget();
+        
+        m_yaw = glm::angle(m_right, -glm::normalize(m_position - m_target));
+        m_pitch = glm::angle(m_front, -glm::normalize(m_position - m_target));
+
+        buildViewMatrix();
     }
 
-    void Camera::lookAt(const glm::vec3& targetPos)
+    void Camera::move(const glm::vec3& translation)
     {
-        m_target = targetPos;
-        calculateDirections();
-        calculatedAngles();
-        calculateView();
-    }
-
-    void Camera::translate(const glm::vec3& translation)
-    {
-        m_position -= translation;
-        calculateView();
+        setPosition(m_position + translation);
     }
 
     void Camera::setPosition(const glm::vec3& pos)
     {
         m_position = pos;
-        calculateDirections();
-        calculateView();
+        buildViewMatrix();
     }
 
-    void Camera::setYaw(float yaw)
+    void Camera::moveFront(float delta)
+    {
+        auto dir = glm::normalize(m_front);
+        dir *= delta;
+        move(dir);
+    }
+
+    void Camera::moveRight(float delta)
+    {
+        auto dir = glm::normalize(m_right);
+        dir *= delta;
+        move(dir);
+    }
+
+    void Camera::moveUp(float delta)
+    {
+        auto dir = glm::normalize(m_up);
+        dir *= delta;
+        move(dir);
+    }
+
+    void Camera::addYaw(float yaw)
     {
         m_yaw = yaw;
-        m_front.x = cos(m_yaw) * cos(m_pitch);
-        m_front.y = sin(m_pitch);
-        m_front.z = sin(m_yaw) * cos(m_pitch);
+        m_front = glm::rotate(glm::normalize(m_front), m_yaw, m_up);
+        updateDirections();
+        buildViewMatrix();
+    }
+    
+    void Camera::addPitch(float pitch)
+    {
+        m_pitch = pitch;
+        m_front = glm::rotate(glm::normalize(m_front), m_pitch, m_right);
+        updateDirections();
+        buildViewMatrix();
+    }
 
+    void Camera::setUp(const glm::vec3& up)
+    {
+        m_up = up;
+        updateDirections();
+        buildViewMatrix();
+    }
+
+    void Camera::setFront(const glm::vec3& front)
+    {
+        m_front = front;
+        updateDirections();
+        buildViewMatrix();
+    }
+
+    void Camera::setRight(const glm::vec3& right)
+    {
+        m_right = right;
+        updateDirections();
+        buildViewMatrix();
+    }
+
+
+    void Camera::updateDirections()
+    {
         m_front = glm::normalize(m_front);
         m_right = glm::normalize(glm::cross(m_up, m_front));
         m_up = glm::cross(m_front, m_right);
-        calculateView();
-    }
-    
-    void Camera::setPitch(float pitch)
-    {
-        m_pitch = pitch;
-        m_front.x = cos(m_yaw) * cos(m_pitch);
-        m_front.y = sin(m_pitch);
-        m_front.z = sin(m_yaw) * cos(m_pitch);
-        m_right = glm::normalize(glm::cross(m_up, m_front));
-        m_up = glm::cross(m_front, m_right);
-        calculateView();
     }
 
-    void Camera::calculateDirections()
+    void Camera::calculateDirectionsFromTarget()
     {
         m_front = glm::normalize(m_position - m_target);
         m_right = glm::normalize(glm::cross(m_up, m_front));
         m_up = glm::cross(m_front, m_right);
     }
 
-    void Camera::calculatedAngles()
-    {
-        m_pitch = asin(m_front.y);
-        m_yaw = -acos(m_front.x / cos(m_pitch));
-    }
-
-    void Camera::calculateView()
+    void Camera::buildViewMatrix()
     {
         glm::mat4 pos(1.0f);
         glm::mat4 rotation(1.0f);

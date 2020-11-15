@@ -8,7 +8,7 @@
 namespace comet
 {
 
-    Shader::Shader()
+    Shader::Shader(const std::string& name) : m_name(name)
     {
         m_program = glCreateProgram();
     }

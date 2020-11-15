@@ -40,22 +40,23 @@ void SandboxApp::onStart()
 
     m_quad = new comet::Mesh(data, sizeof(data) / sizeof(data[0]),
                             (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
-    // m_quad->setMeshMaterial(&m_blueColorMaterial);
+    m_quad->setMeshMaterial(&m_blueColorMaterial);
 
     // m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
     // auto transform = glm::rotate(glm::mat4(1.0f), 3.1415f / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.7f));
+    const float translationStep = 0.75f;
 
     for (uint32_t i = 0; i < 10; ++i)
     {
         for (uint32_t j = 0; j < 10; ++j)
         {
-            auto transform = glm::translate(glm::mat4(1.0f), glm::vec3((j + 1) * -0.9f, (i + 1) * 0.9f, 0.0f));
+            auto transform = glm::translate(glm::mat4(1.0f), glm::vec3(j * translationStep, i * translationStep, 0.0f));
             auto& instance = m_quad->createMeshInstance();
             instance.setModelTransform(transform * scale);
 
-            if (i == j)
+            if (i == 0 && j == 0)
             {
                 instance.setMaterial(&m_redColorMaterial);
             }
@@ -72,79 +73,76 @@ void SandboxApp::onStart()
     m_renderer.loadData();
 
     // m_camera.lookAt(glm::vec3{0.0f, 0.0f, -50.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
-    m_camera.setPosition(glm::vec3{10.0f, 10.0f, -30.0f});
+    m_camera.setPosition(glm::vec3{0.0f, 0.0f, 30.0f});
 }
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 {
+    auto pos = m_camera.getPosition();
+    CM_LOG_DEBUG("Camera pos: {}, {}, {}", pos.x, pos.y, pos.z);
 }
 
 bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
 {
-    m_camera.translate(glm::vec3(0.0f, 0.0f, -e.getDelta() * 0.9f));
+    m_camera.moveFront(-e.getDelta() * 0.9f);
 }
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    const float yawSpeed = 0.001f;
-    const float pitchSpeed = 0.001f;
-    const float moveSpeed = 0.03f;
-    // const float rotSpeed = 0.0015f;
+    static const float yawSpeed = 0.004f;
+    static const float pitchSpeed = 0.004f;
+    static const float moveSpeed = 0.015f;
+    static const float rotSpeed = 0.0015f;
 
-    // m_angle += rotSpeed * deltaTime;
-    // m_camera.setPosition(glm::vec3(cos(m_angle) * 40.0f, 0.0f, -sin(m_angle) * 40.0f));
-    // m_camera.lookAt(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+    if (comet::Input::isKeyPressed(comet::Input::Key::R))
+    {
+        // m_angle += rotSpeed * deltaTime;
+        // auto currentCameraPos = m_camera.getPosition();
+        // auto length = glm::length(currentCameraPos);
+        // m_camera.setPosition(glm::vec3(cos(m_angle) * length, currentCameraPos.y, sin(m_angle) * length));
+        m_camera.lookAt(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+    }
 
     if (comet::Input::isKeyPressed(comet::Input::Key::A))
     {
-        m_camera.translate(glm::vec3(-moveSpeed * deltaTime, 0.0f, 0.0f));
+        m_camera.moveRight(-moveSpeed * deltaTime);
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::D))
     {
-        m_camera.translate(glm::vec3(moveSpeed * deltaTime, 0.0f, 0.0f));
+        m_camera.moveRight(moveSpeed * deltaTime);
     }
 
     if (comet::Input::isKeyPressed(comet::Input::Key::S))
     {
-        m_camera.translate(glm::vec3(0.0f, moveSpeed * deltaTime, 0.0f));
+        m_camera.moveUp(-moveSpeed * deltaTime);
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::W))
     {
-        m_camera.translate(glm::vec3(0.0f, -moveSpeed * deltaTime, 0.0f));
+        m_camera.moveUp(moveSpeed * deltaTime);
     }
 
     if (comet::Input::isKeyPressed(comet::Input::Key::Left))
     {
-        auto yaw = m_camera.getYaw();
-        yaw -= yawSpeed * deltaTime;
-        m_camera.setYaw(yaw);
+        m_camera.addYaw(yawSpeed * deltaTime);
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::Right))
     {
-        auto yaw = m_camera.getYaw();
-        yaw += yawSpeed * deltaTime;
-        m_camera.setYaw(yaw);
+        m_camera.addYaw(-yawSpeed * deltaTime);
     }
 
     if (comet::Input::isKeyPressed(comet::Input::Key::Up))
     {
-        auto pitch = m_camera.getPitch();
-        pitch -= pitchSpeed * deltaTime;
-        m_camera.setPitch(pitch);
+        m_camera.addPitch(pitchSpeed * deltaTime);
     }
     else if (comet::Input::isKeyPressed(comet::Input::Key::Down))
     {
-        auto pitch = m_camera.getPitch();
-        pitch += pitchSpeed * deltaTime;
-        m_camera.setPitch(pitch);
+        m_camera.addPitch(-pitchSpeed * deltaTime);
     }
 
     // for (auto& meshInstance : m_quad->getMeshInstances())
     // {
     //     glm::mat4& transform = meshInstance.getModelTransform();
     //     transform = glm::rotate(transform, (float)deltaTime * 0.0031415f, glm::vec3(0.0f, 0.0f, 1.0f));
-        // auto tr = glm::rotate(glm::mat4(1.0f), 0.0031415f, glm::vec3(0.0f, 0.0f, 1.0f));
-        // meshInstance.setModelTransform( tr * transform );
     // }
     // m_renderer.prepareBuffers();
 }

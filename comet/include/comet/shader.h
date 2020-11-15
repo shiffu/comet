@@ -20,8 +20,7 @@ namespace comet
             GEOMETRY
         };
 
-        Shader();
-        Shader(const std::string& name) : m_name(name) {};
+        Shader(const std::string& name);
         ~Shader();
 
         const std::string& getName() const { return m_name; }
@@ -55,7 +54,7 @@ namespace comet
         void unbind() const;
 
     private:
-        std::string m_name{"Standard"};
+        std::string m_name{};
         
         // Only Vertex, Fragment and Geometry shaders are managed for now
         static const unsigned int NB_SHADERS = 3;

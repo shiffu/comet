@@ -60,6 +60,7 @@ namespace comet
                     meshMaterial = &m_defaultColorMaterial;
                 }
                 meshInstanceMaterial = meshMaterial;
+                meshInstance.setMaterial(meshInstanceMaterial);
             }
             auto materialName = meshInstanceMaterial->getName();
             auto shaderName = meshInstanceMaterial->getShaderName();

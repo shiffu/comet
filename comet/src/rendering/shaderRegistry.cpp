@@ -10,7 +10,7 @@ namespace comet
     {
         if (m_shaders.find(shaderName) == m_shaders.end())
         {
-            m_shaders[shaderName] = new Shader();
+            m_shaders[shaderName] = new Shader(shaderName);
             compileLinkAndValidateShaders(m_shaders[shaderName]);
         }
 
