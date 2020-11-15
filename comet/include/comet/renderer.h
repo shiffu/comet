@@ -17,6 +17,7 @@ namespace comet
         void addMesh(Mesh* mesh);
         void allocateBuffersAndSetupLayouts();
         void loadData();
+        void reloadInstanceData();
         void render(const Camera& camera);
 
     private:

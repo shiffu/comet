@@ -1,5 +1,7 @@
 #include <comet/mesh.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace comet
 {
     
@@ -57,6 +59,26 @@ namespace comet
     void MeshInstance::setModelTransform(const glm::mat4& modelTransform)
     {
         m_instanceData.modelTransform = modelTransform;
+    }
+
+    void MeshInstance::move(const glm::vec3& translation)
+    {
+        m_instanceData.modelTransform = glm::translate(m_instanceData.modelTransform, translation);
+    }
+
+    void MeshInstance::rotate(float angle, const glm::vec3& axis)
+    {
+        m_instanceData.modelTransform = glm::rotate(m_instanceData.modelTransform, angle, axis);
+    }
+
+    void MeshInstance::scale(const glm::vec3& values)
+    {
+        m_instanceData.modelTransform = glm::scale(m_instanceData.modelTransform, values);
+    }
+
+    void MeshInstance::scale(float value)
+    {
+        m_instanceData.modelTransform = glm::scale(m_instanceData.modelTransform, glm::vec3(value, value, value));
     }
     
 } // namespace comet

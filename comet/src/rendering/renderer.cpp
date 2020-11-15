@@ -203,6 +203,26 @@ namespace comet
         }
     }
 
+    void Renderer::reloadInstanceData()
+    {
+        for (auto [shaderName, pShaderDrawContext] : m_materialDrawContexts)
+        {
+            for (auto [materialName, pMaterialDrawContext] : pShaderDrawContext->materialDrawContexts)
+            {
+                pMaterialDrawContext->instanceBuffer.mapMemory(GL_WRITE_ONLY);
+                for (auto mesh : pMaterialDrawContext->meshes)
+                {
+                    for (auto instance : mesh->getMeshInstances())
+                    {
+                        auto data = instance.getInstanceData();
+                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&data, sizeof(data), 1);
+                    }
+                }
+                pMaterialDrawContext->instanceBuffer.unmapMemory();
+            }
+        }
+    }
+
     void Renderer::render(const Camera& camera)
     {
         auto vpMatrix = camera.getViewProjection();

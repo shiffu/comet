@@ -32,7 +32,10 @@ namespace comet
         virtual void setVSync(bool enabled) = 0;
         virtual bool isVSync() const = 0;
         virtual bool isClosed() const = 0;
-        virtual void pollEvent() const = 0;
+        virtual void close() = 0;
+        virtual bool isCloseRequested() const = 0;
+        virtual void closeRequested() = 0;
+        virtual void pollEvent() = 0;
 
         virtual void* getPlatformWindow() const = 0;
 

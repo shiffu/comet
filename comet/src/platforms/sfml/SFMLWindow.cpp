@@ -60,7 +60,7 @@ namespace comet
         return m_sfWindow;
     }
 
-    void SFMLWindow::pollEvent() const
+    void SFMLWindow::pollEvent()
     {
         sf::Event event;
 
@@ -72,7 +72,7 @@ namespace comet
                 // window closed
                 case sf::Event::Closed:
                 {
-                    m_sfWindow->close();
+                    closeRequested();
                     break;
                 }
 
@@ -203,6 +203,21 @@ namespace comet
     bool SFMLWindow::isVSync() const
     {
         return m_isVSync;
+    }
+
+    bool SFMLWindow::isCloseRequested() const
+    {
+        return m_isCloseRequested;
+    }
+
+    void SFMLWindow::closeRequested()
+    {
+        m_isCloseRequested = true;
+    }
+
+    void SFMLWindow::close()
+    {
+        m_sfWindow->close();
     }
 
     bool SFMLWindow::isClosed() const

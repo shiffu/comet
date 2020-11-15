@@ -15,15 +15,18 @@ namespace comet
         SFMLWindow(const WindowSpec& spec);
         virtual ~SFMLWindow();
 
-        virtual void pollEvent() const override;
+        virtual void pollEvent() override;
         virtual void swapBuffers() const override;
 
         // Window info
-        virtual unsigned int getWidth() const override;
-        virtual unsigned int getHeight() const override;
-        virtual void setVSync(bool enabled) override;
-        virtual bool isVSync() const override;
-        virtual bool isClosed() const override;
+        unsigned int getWidth() const override;
+        unsigned int getHeight() const override;
+        void setVSync(bool enabled) override;
+        bool isVSync() const override;
+        bool isClosed() const override;
+        void close() override;
+        bool isCloseRequested() const override;
+        void closeRequested() override;
 
         virtual void* getPlatformWindow() const override;
 
@@ -32,6 +35,7 @@ namespace comet
         
     private:
         sf::Window* m_sfWindow = nullptr;
+        bool m_isCloseRequested = false;
         // vsync is disable by default in sfml (cf documentation)
         bool m_isVSync = false;
     };

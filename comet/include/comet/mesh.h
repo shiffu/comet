@@ -26,6 +26,11 @@ namespace comet
         void setMaterial(Material* material);
         Material* getMaterial() { return m_material; }
         
+        void move(const glm::vec3& translation);
+        void rotate(float angle, const glm::vec3& axis);
+        void scale(const glm::vec3& values);
+        void scale(float value);
+
         void setModelTransform(const glm::mat4& modelTransform);
         glm::mat4& getModelTransform() { return m_instanceData.modelTransform; }
 

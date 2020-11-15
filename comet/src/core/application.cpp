@@ -97,6 +97,7 @@ namespace comet
         m_window = Window::create(spec);
         glDebugMessageCallback(glDebugCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, nullptr, GL_FALSE);
         glEnable(GL_DEBUG_OUTPUT);  
 
         // set Event callback
@@ -172,7 +173,7 @@ namespace comet
             CM_CORE_LOG_DEBUG("FPS Cap Time set to: {}ms", fpsCapTime.count());
         }
 
-        while(!m_window->isClosed())
+        while(!m_window->isCloseRequested())
         {
             currentTime = steady_clock::now();
             elapsedTime = currentTime - previousTime;
@@ -228,6 +229,7 @@ namespace comet
                 std::this_thread::sleep_for(milliseconds(1));
             }
         }
+        m_window->close();
         CM_CORE_LOG_DEBUG("Exit main loop");
     }
 

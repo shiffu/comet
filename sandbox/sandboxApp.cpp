@@ -43,18 +43,17 @@ void SandboxApp::onStart()
     m_quad->setMeshMaterial(&m_blueColorMaterial);
 
     // m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
-    // auto transform = glm::rotate(glm::mat4(1.0f), 3.1415f / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.7f));
-    const float translationStep = 0.75f;
+    const float translationStep = 0.85f;
 
-    for (uint32_t i = 0; i < 10; ++i)
+    for (uint32_t i = 0; i < 20; ++i)
     {
-        for (uint32_t j = 0; j < 10; ++j)
+        for (uint32_t j = 0; j < 20; ++j)
         {
-            auto transform = glm::translate(glm::mat4(1.0f), glm::vec3(j * translationStep, i * translationStep, 0.0f));
             auto& instance = m_quad->createMeshInstance();
-            instance.setModelTransform(transform * scale);
+            instance.move(glm::vec3(j * translationStep, i * translationStep, 0.0f));
+            instance.scale(0.7f);
 
             if (i == 0 && j == 0)
             {
@@ -63,6 +62,7 @@ void SandboxApp::onStart()
             else if (i % 2 == 0)
             {
                 instance.setMaterial(&m_orangeColorMaterial);
+                instance.rotate(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             }
         }
     }
@@ -71,8 +71,6 @@ void SandboxApp::onStart()
     // m_renderer.addMesh(m_terrain);
     m_renderer.allocateBuffersAndSetupLayouts();
     m_renderer.loadData();
-
-    // m_camera.lookAt(glm::vec3{0.0f, 0.0f, -50.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
     m_camera.setPosition(glm::vec3{0.0f, 0.0f, 30.0f});
 }
 
@@ -92,14 +90,10 @@ void SandboxApp::onUpdate(double deltaTime)
     static const float yawSpeed = 0.004f;
     static const float pitchSpeed = 0.004f;
     static const float moveSpeed = 0.015f;
-    static const float rotSpeed = 0.0015f;
+    static const float rotSpeed = glm::radians(360.0) / 1000.0f;
 
     if (comet::Input::isKeyPressed(comet::Input::Key::R))
     {
-        // m_angle += rotSpeed * deltaTime;
-        // auto currentCameraPos = m_camera.getPosition();
-        // auto length = glm::length(currentCameraPos);
-        // m_camera.setPosition(glm::vec3(cos(m_angle) * length, currentCameraPos.y, sin(m_angle) * length));
         m_camera.lookAt(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
     }
 
@@ -139,12 +133,10 @@ void SandboxApp::onUpdate(double deltaTime)
         m_camera.addPitch(-pitchSpeed * deltaTime);
     }
 
-    // for (auto& meshInstance : m_quad->getMeshInstances())
-    // {
-    //     glm::mat4& transform = meshInstance.getModelTransform();
-    //     transform = glm::rotate(transform, (float)deltaTime * 0.0031415f, glm::vec3(0.0f, 0.0f, 1.0f));
-    // }
-    // m_renderer.prepareBuffers();
+    auto& instances = m_quad->getMeshInstances();
+    instances[0].rotate(rotSpeed * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    m_renderer.reloadInstanceData();
 }
 
 void SandboxApp::onFixedUpdate(float fixedDeltaTime)
