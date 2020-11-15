@@ -8,21 +8,20 @@ namespace comet
     class Material
     {
     public:
-        Material(const char* name, Shader& shader) : m_name(name), m_shader(shader) {}
+        Material(const char* name) : m_name(name) {}
 
-        Shader* getShader() const { return &m_shader; }
         const std::string& getName() const { return m_name; }
-        
-        void set(const std::string& uniformName, float value);
-        void set(const std::string& uniformName, uint32_t value);
-        void set(const std::string& uniformName, const glm::vec2& value);
-        void set(const std::string& uniformName, const glm::vec3& value);
-        void set(const std::string& uniformName, const glm::vec4& value);
-        void set(const std::string& uniformName, const glm::mat4& value);
+        const std::string& getShaderName() { return getShader()->getName(); }
 
-    private:
-        Shader& m_shader;
+        uint32_t getInstanceId() const { return m_instanceID; }
+
+        virtual Shader* getShader() = 0;
+        virtual void loadUniforms() = 0;
+
+    protected:
         const std::string m_name;
+        uint32_t m_instanceID{0};
+        Shader* m_shader{nullptr};
     };
 
 } // namespace comet

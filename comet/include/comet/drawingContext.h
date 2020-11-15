@@ -11,9 +11,9 @@ namespace comet
 {
     struct DrawingContext
     {
-        DrawingContext(Shader* _shader) : shader(_shader) {}
+        DrawingContext(const Material* _material) : material(_material) {}
 
-        Shader* shader;
+        const Material* material;
         VertexArray vao;
         IndexBuffer ibo{GL_STATIC_DRAW};
         VertexBuffer vbo{GL_STATIC_DRAW};

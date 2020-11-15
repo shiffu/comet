@@ -21,6 +21,24 @@ namespace comet
         }
     }
 
+    Shader::Type Shader::getShaderTypeFromSuffix(const std::string& suffix)
+    {
+        if (suffix == "vs")
+        {
+            return Type::VERTEX;
+        }
+        else if (suffix == "fs")
+        {
+            return Type::FRAGMENT;
+        }
+        else if (suffix == "gs")
+        {
+            return Type::GEOMETRY;
+        }
+
+        return Type::NONE;
+    }
+
     void Shader::compileShaderFile(const std::string& filename, Type shaderType)
     {
         // Read the shader file
@@ -49,10 +67,16 @@ namespace comet
         {
         case Type::VERTEX:
             glShaderType = GL_VERTEX_SHADER;
+            m_hasVertexShader = true;
             break;
 
         case Type::FRAGMENT:
             glShaderType = GL_FRAGMENT_SHADER;
+            m_hasFragmentShader = true;
+            break;
+
+        case Type::GEOMETRY:
+            glShaderType = GL_GEOMETRY_SHADER;
             break;
         
         default:
@@ -65,6 +89,7 @@ namespace comet
         if (shader == 0)
         {
             CM_CORE_LOG_FATAL("Unable to create shader {}", shaderType);
+            exit(EXIT_FAILURE);
         }
 
         const char* stringData = source.c_str();
@@ -89,6 +114,7 @@ namespace comet
             glDeleteShader(shader);
 
             CM_CORE_LOG_FATAL("Failed to compile shader: {}", std::string(infoLog.data()));
+            exit(EXIT_FAILURE);
         }
 
         m_shaders[m_numShaders++] = shader;
@@ -96,6 +122,13 @@ namespace comet
 
     void Shader::linkProgram()
     {
+        // Check if there is at least a Vertext shader and a Fragment shader
+        if (!m_hasVertexShader || !m_hasFragmentShader)
+        {
+            CM_CORE_LOG_FATAL("Both a Vertex and a Fragment shader must be provided to build a shader program");
+            exit(EXIT_FAILURE);
+        }
+
         // Attach our shaders to our program
         for (unsigned int i = 0; i < m_numShaders; i++)
         {
@@ -126,6 +159,7 @@ namespace comet
             }
 
             CM_CORE_LOG_FATAL("Failed to link the program: {}", std::string(infoLog.data()));
+            exit(EXIT_FAILURE);
         }
 
         // Always detach and delete shaders after a successful link.
@@ -138,8 +172,26 @@ namespace comet
         {
             glDeleteShader(m_shaders[i]);
         }
+
         // In case we want to reuse this program with different shaders code.
+        // TODO: Think more about this
         m_numShaders = 0;
+    }
+
+    void Shader::validateProgram()
+    {
+        if (m_program)
+        {
+            glValidateProgram(m_program);
+
+            int isValid = 0;
+            glGetProgramiv(m_program, GL_VALIDATE_STATUS, &isValid);
+            if (isValid == GL_FALSE)
+            {
+                CM_CORE_LOG_FATAL("Failed to validate the program: {}", m_name);
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
     int Shader::getUniformLocation(const std::string& name)
@@ -153,6 +205,7 @@ namespace comet
         if (location == GL_INVALID_INDEX)
         {
             CM_CORE_LOG_FATAL("Uniform {} not found in sharder program", name);
+            exit(EXIT_FAILURE);
         }
         m_uniformLocationsCache[name] = location;
 
@@ -193,6 +246,18 @@ namespace comet
     {
         int location = getUniformLocation(name);
         glUniformMatrix4fv(location, 1, false, &value[0][0]);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t count, const glm::vec4* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform4fv(location, count, (GLfloat*)values);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t count, const uint32_t* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform1uiv(location, count, (GLuint*)values);
     }
 
 

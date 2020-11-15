@@ -6,13 +6,18 @@ namespace comet
     Mesh::Mesh(Vertex* vertices, uint32_t vertexCount)
     {
         setVertices(vertices, vertexCount);
-        createMeshInstance();
     }
     
     Mesh::Mesh(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount)
     {
         setData(vertices, vertexCount, indices, indexCount);
-        createMeshInstance();
+    }
+
+    MeshInstance& Mesh::createMeshInstance()
+    {
+        m_meshInstances.emplace_back(this);
+        
+        return m_meshInstances.back();
     }
 
     void Mesh::setData(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount)
@@ -46,11 +51,12 @@ namespace comet
     void MeshInstance::setMaterial(Material* material)
     {
         m_material = material;
+        setMaterialInstanceId(m_material->getInstanceId());
     }
 
     void MeshInstance::setModelTransform(const glm::mat4& modelTransform)
     {
-        m_modelTransform = modelTransform;
+        m_instanceData.modelTransform = modelTransform;
     }
     
 } // namespace comet

@@ -109,7 +109,10 @@ namespace comet
     void Buffer::unmapMemory()
     {
         bind();
-        glUnmapBuffer(m_target);
+        if (!glUnmapBuffer(m_target))
+        {
+            CM_CORE_LOG_ERROR("Error while unmapping Buffer");
+        }
         m_pMappedMemory = nullptr;
     }
 }

@@ -18,4 +18,5 @@ namespace comet
         m_stride += count * sizeof(GLuint);
     }
 
+
 } // namespace comet

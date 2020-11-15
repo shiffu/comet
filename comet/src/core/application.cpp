@@ -204,9 +204,9 @@ namespace comet
                 CM_CORE_LOG_DEBUG("FPS: {}", fps);
             }
 
-            //TODO: Move this code in the renderer (probably)
+            // TODO: Move this code in the renderer (probably)
             glClearDepth(1.0f);
-            glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
+            glClearColor(0.0f, 0.05f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             onRender();

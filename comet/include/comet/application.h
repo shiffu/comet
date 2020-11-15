@@ -15,7 +15,7 @@ namespace comet
         static Application* getInstance();
 
         Application(const Application&) = delete;
-        Application& operator=(const Application) = delete;
+        Application& operator=(const Application&) = delete;
 
         void onEvent(Event& e);
         virtual void run();

@@ -13,5 +13,6 @@
 #include <comet/camera.h>
 #include <comet/renderer.h>
 #include <comet/material.h>
+#include <comet/flatColorMaterial.h>
 #include <comet/mesh.h>
 #include <comet/vertex.h>

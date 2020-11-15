@@ -13,40 +13,18 @@ comet::Application* comet::Application::getInstance()
     return instance;
 }
 
+SandboxApp::~SandboxApp()
+{
+    CM_LOG_DEBUG("SandboxApp destructor");
+    if (m_quad)
+    {
+        delete m_quad;
+    }
+}
+
 void SandboxApp::onStart()
 {
     m_camera.setPerspective(glm::radians(45.0f), 0.1f, 400.0f);
-
-    std::string vertexShaderSrc = R"(
-        #version 430 core
-        
-        layout (location = 0) in vec3 position;
-        layout (location = 1) in mat4 instance_model_matrix;
-
-        uniform mat4 vp_matrix;
-
-        void main()
-        {
-            gl_Position = vp_matrix * instance_model_matrix * vec4(position, 1.0);
-        }
-    )";
-
-    std::string fragmentShaderSrc = R"(
-        #version 430 core
-        
-        out vec4 color;
-        uniform vec4 u_flatColor;
-
-        void main()
-        {
-            color = u_flatColor;
-        }
-    )";
-
-    m_shader = std::make_unique<comet::Shader>();
-    m_shader->compileShaderSrc(vertexShaderSrc, comet::Shader::Type::VERTEX);
-    m_shader->compileShaderSrc(fragmentShaderSrc, comet::Shader::Type::FRAGMENT);
-    m_shader->linkProgram();
 
     Vertex data[] = {
         {{-0.5f, -0.5f, 0.0f}},
@@ -60,35 +38,41 @@ void SandboxApp::onStart()
         2, 3, 0
     };
 
-    m_shader->bind();
-    static comet::Material flatColorMaterial("basic", *m_shader);
-    flatColorMaterial.set("u_flatColor", glm::vec4{0.0f, 0.2f, 1.0f, 1.0f});
+    m_quad = new comet::Mesh(data, sizeof(data) / sizeof(data[0]),
+                            (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+    // m_quad->setMeshMaterial(&m_blueColorMaterial);
 
-    m_quad = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
-    m_quad->getMeshInstance().setMaterial(&flatColorMaterial);
+    // m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+    // auto transform = glm::rotate(glm::mat4(1.0f), 3.1415f / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
-    m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
-    auto transform = glm::rotate(glm::mat4(1.0f), 3.1415f / 4.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    m_terrain->getMeshInstance().setMaterial(&flatColorMaterial);
+    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.7f));
 
-    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-    // m_quad->getMeshInstance().setModelTransform(scale);
-
-    for (uint32_t i = 0; i < 20; ++i)
+    for (uint32_t i = 0; i < 10; ++i)
     {
-        for (uint32_t j = 0; j < 20; ++j)
+        for (uint32_t j = 0; j < 10; ++j)
         {
             auto transform = glm::translate(glm::mat4(1.0f), glm::vec3((j + 1) * -0.9f, (i + 1) * 0.9f, 0.0f));
-            m_quad->createMeshInstance().setModelTransform(transform * scale);
+            auto& instance = m_quad->createMeshInstance();
+            instance.setModelTransform(transform * scale);
+
+            if (i == j)
+            {
+                instance.setMaterial(&m_redColorMaterial);
+            }
+            else if (i % 2 == 0)
+            {
+                instance.setMaterial(&m_orangeColorMaterial);
+            }
         }
     }
 
     m_renderer.addMesh(m_quad);
-    m_renderer.addMesh(m_terrain);
-    m_renderer.createAllocateBuffers();
+    // m_renderer.addMesh(m_terrain);
+    m_renderer.allocateBuffersAndSetupLayouts();
     m_renderer.loadData();
 
-    m_camera.lookAt(glm::vec3{0.0f, 0.0f, -30.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+    // m_camera.lookAt(glm::vec3{0.0f, 0.0f, -50.0f}, glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+    m_camera.setPosition(glm::vec3{10.0f, 10.0f, -30.0f});
 }
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)

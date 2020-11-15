@@ -61,11 +61,28 @@ namespace comet
             // Loop over the vertex attributes
             for (unsigned int i = 0; i < bufferAttributes.size(); ++i) {
                 const auto& attr = bufferAttributes[i];
-                CM_CORE_LOG_DEBUG("enable vertex attrib {}", attr.loc);
+                
                 glEnableVertexAttribArray(attr.loc);
-                CM_CORE_LOG_DEBUG("vertex attrib pointer: loc = {}, count = {}, type = {}, normalized = {}, stride = {}", attr.loc, attr.count, attr.type, attr.normalized, vbl.getStride());
-                glVertexAttribPointer(attr.loc, attr.count, attr.type, attr.normalized, vbl.getStride(),
-                                    reinterpret_cast<void*>(offset));
+                CM_CORE_LOG_DEBUG("enabled vertex attrib pointer: loc = {}, count = {}, type = {}, normalized = {}, stride = {}", attr.loc, attr.count, attr.type, attr.normalized, vbl.getStride());
+                
+                switch(attr.type)
+                {
+                    case GL_BYTE:
+                    case GL_UNSIGNED_BYTE:
+                    case GL_SHORT:
+                    case GL_UNSIGNED_SHORT:
+                    case GL_INT:
+                    case GL_UNSIGNED_INT:
+                        glVertexAttribIPointer(attr.loc, attr.count, attr.type, vbl.getStride(),
+                                                reinterpret_cast<void*>(offset));
+                        break;
+
+                    default:
+                        glVertexAttribPointer(attr.loc, attr.count, attr.type, attr.normalized, vbl.getStride(),
+                                                reinterpret_cast<void*>(offset));
+                        break;
+                }
+
                 if (attr.divisor)
                 {
                     glVertexAttribDivisor(attr.loc, attr.divisor);

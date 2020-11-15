@@ -18,10 +18,12 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBufferLayout.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexArray.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/shaderRegistry.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/flatColorMaterial.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/mesh.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
@@ -31,6 +33,7 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/core/log.cpp
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
+    ${COMET_SOURCES_DIR}/core/singleton.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
@@ -41,14 +44,19 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexArray.cpp
     ${COMET_SOURCES_DIR}/rendering/shader.cpp
+    ${COMET_SOURCES_DIR}/rendering/shaderRegistry.cpp
     ${COMET_SOURCES_DIR}/rendering/camera.cpp
     ${COMET_SOURCES_DIR}/rendering/renderer.cpp
     ${COMET_SOURCES_DIR}/rendering/material.cpp
+    ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/mesh.cpp
  )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # For Debugging
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # Dependencies
 #   spdlog
@@ -80,6 +88,7 @@ target_link_libraries(comet
     PUBLIC
         spdlog
     PRIVATE
+        stdc++fs
         sfml-window
         OpenGL::GL
         ${CMAKE_DL_LIBS}
