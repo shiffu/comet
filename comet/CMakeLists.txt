@@ -34,6 +34,8 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
     ${COMET_SOURCES_DIR}/core/singleton.h
+    ${COMET_SOURCES_DIR}/core/resourceManager.h
+    ${COMET_SOURCES_DIR}/core/resourceManager.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp

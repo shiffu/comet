@@ -1,6 +1,7 @@
 #include <comet/shaderRegistry.h>
 #include <experimental/filesystem>
 #include <comet/log.h>
+#include <core/resourceManager.h>
 
 namespace comet
 {
@@ -19,8 +20,7 @@ namespace comet
 
     void ShaderRegistry::compileLinkAndValidateShaders(Shader* shader)
     {
-        // TODO: Resource manager instead of hardcoded path
-        static const fs::path shaderRootPath = "../../comet/resources/shaders";
+        static const fs::path shaderRootPath = ResourceManager::getInstance().getResourcePath(ResourceType::SHADER);
         static const std::string shaderExtension = ".glsl";
 
         // Find 'shaderName' shader files
