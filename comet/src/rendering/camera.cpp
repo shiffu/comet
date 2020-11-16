@@ -134,6 +134,14 @@ namespace comet
         updateDirections();
         buildViewMatrix();
     }
+    
+    void Camera::addRoll(float roll)
+    {
+        m_roll = roll;
+        m_up = glm::rotate(glm::normalize(m_up), -m_roll, m_front);
+        updateDirections();
+        buildViewMatrix();
+    }
 
     void Camera::setUp(const glm::vec3& up)
     {
@@ -155,7 +163,6 @@ namespace comet
         updateDirections();
         buildViewMatrix();
     }
-
 
     void Camera::updateDirections()
     {

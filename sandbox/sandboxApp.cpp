@@ -87,8 +87,9 @@ bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledE
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    static const float yawSpeed = 0.004f;
-    static const float pitchSpeed = 0.004f;
+    static const float yawSpeed = glm::radians(360.0) / 2000.0f;
+    static const float pitchSpeed = glm::radians(360.0) / 2000.0f;
+    static const float rollSpeed = glm::radians(360.0) / 2000.0f;
     static const float moveSpeed = 0.015f;
     static const float rotSpeed = glm::radians(360.0) / 1000.0f;
 
@@ -133,8 +134,20 @@ void SandboxApp::onUpdate(double deltaTime)
         m_camera.addPitch(-pitchSpeed * deltaTime);
     }
 
+    if (comet::Input::isKeyPressed(comet::Input::Key::Z))
+    {
+        m_camera.addRoll(rollSpeed * deltaTime);
+    }
+    else if (comet::Input::isKeyPressed(comet::Input::Key::X))
+    {
+        m_camera.addRoll(-rollSpeed * deltaTime);
+    }
+
     auto& instances = m_quad->getMeshInstances();
-    instances[0].rotate(rotSpeed * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+    for(int i = 0; i < instances.size(); i += 2)
+    {
+        instances[i].rotate(rotSpeed * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+    }
 
     m_renderer.reloadInstanceData();
 }

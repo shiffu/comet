@@ -40,6 +40,8 @@ namespace comet
         void addYaw(float yaw);
         float getPitch() const { return m_pitch; }
         void addPitch(float pitch);
+        float getRoll() const { return m_roll; }
+        void addRoll(float pitch);
 
         const glm::vec3& getUp() const { return m_up; }
         void setUp(const glm::vec3& up);
@@ -84,6 +86,7 @@ namespace comet
 
         float m_pitch{0.0f};
         float m_yaw{glm::pi<float>() * 0.5f};
+        float m_roll{0.0f};
         glm::vec3 m_position{0.0f, 0.0f, 1.0f};
         glm::vec3 m_target{0.0f};
 
