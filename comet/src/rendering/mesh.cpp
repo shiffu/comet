@@ -1,10 +1,21 @@
 #include <comet/mesh.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <core/resourceManager.h>
+#include <core/objLoader.h>
 
 namespace comet
 {
     
+    Mesh::Mesh(const char* filename)
+    {
+        auto meshResourcePath = ResourceManager::getInstance().getResourcePath(ResourceType::MESH, filename);
+        ObjLoader loader;
+        loader.loadFile(meshResourcePath, m_vertices, m_indices);
+        m_vertexCount = m_vertices.size();
+        m_indexCount = m_indices.size();
+    }
+
     Mesh::Mesh(Vertex* vertices, uint32_t vertexCount)
     {
         setVertices(vertices, vertexCount);
@@ -48,6 +59,23 @@ namespace comet
             m_indices.push_back(indices[i]);
         }
         m_indexCount = indexCount;
+    }
+
+    void Mesh::updateVboDataLayout(VertexBufferLayout& layout) const
+    {
+        //TODO: We are introducing a dependency to Shader's attributes here. To think about it.
+        layout.add<float>(3, false, 0);
+        layout.add<float>(3, false, 1);
+        layout.add<float>(2, false, 2);
+    }
+
+    void Mesh::updateInstanceDataLayout(VertexBufferLayout& layout) const
+    {
+        layout.add<float>(4, false, 10, 1);
+        layout.add<float>(4, false, 11, 1);
+        layout.add<float>(4, false, 12, 1);
+        layout.add<float>(4, false, 13, 1);
+        layout.add<unsigned int>(1, false, 14, 1);
     }
 
     void MeshInstance::setMaterial(Material* material)

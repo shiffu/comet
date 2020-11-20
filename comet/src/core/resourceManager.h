@@ -23,6 +23,7 @@ namespace comet
         void setRootPath(const char* rootPath) { m_rootPath = rootPath; }
 
         fs::path getResourcePath(ResourceType type) const;
+        fs::path getResourcePath(ResourceType type, const char* filename) const;
 
     private:
         const char* SHADER_SUBFOLDER = "shaders";

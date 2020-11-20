@@ -4,6 +4,7 @@
 #include <comet/vertex.h>
 #include <glm/mat4x4.hpp>
 #include <comet/material.h>
+#include <comet/vertexBufferLayout.h>
 
 namespace comet
 {
@@ -50,6 +51,7 @@ namespace comet
         friend class MeshInstance;
 
     public:
+        Mesh(const char* filename);
         Mesh(Vertex* vertices, uint32_t vertexCount);
         Mesh(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
 
@@ -60,10 +62,14 @@ namespace comet
         uint32_t getVertexCount() const { return m_vertexCount; }
         uint32_t getVerticesSize() const { return m_vertexCount * sizeof(Vertex); }
 
+        bool hasIndices() const { return m_indexCount != 0; }
         void setIndices(const uint32_t* indices, uint32_t indexCount);
         const std::vector<uint32_t>& getIndices() const { return m_indices; }
         uint32_t getIndexCount() const { return m_indexCount; }
         uint32_t getIndicesSize() const { return m_indexCount * sizeof(uint32_t); }
+
+        void updateVboDataLayout(VertexBufferLayout& layout) const;
+        void updateInstanceDataLayout(VertexBufferLayout& layout) const;
 
         void setMeshMaterial(Material* material) { m_meshMaterial = material; }
         Material* getMeshMaterial() { return m_meshMaterial; }

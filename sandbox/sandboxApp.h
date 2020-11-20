@@ -27,5 +27,6 @@ private:
     comet::FlatColorMaterial m_orangeColorMaterial{glm::vec4(1.0f, 0.6, 0.0f, 1.0f)};
     comet::FlatColorMaterial m_redColorMaterial{glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)};
     comet::Mesh* m_quad;
+    comet::Mesh* m_cube;
     comet::Mesh* m_terrain;
 };

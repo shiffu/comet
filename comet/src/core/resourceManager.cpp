@@ -36,4 +36,9 @@ namespace comet
         return path;
     }
 
+    fs::path ResourceManager::getResourcePath(ResourceType type, const char* filename) const
+    {
+        return getResourcePath(type).append(filename);
+    }
+
 } // namespace comet

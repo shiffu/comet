@@ -25,6 +25,7 @@ SandboxApp::~SandboxApp()
 void SandboxApp::onStart()
 {
     m_camera.setPerspective(glm::radians(45.0f), 0.1f, 400.0f);
+    m_camera.setPosition(glm::vec3{0.0f, 0.0f, 30.0f});
 
     Vertex data[] = {
         {{-0.5f, -0.5f, 0.0f}},
@@ -38,11 +39,20 @@ void SandboxApp::onStart()
         2, 3, 0
     };
 
+
+    // Create test Meshes
+    m_cube = new comet::Mesh("cube.obj");
     m_quad = new comet::Mesh(data, sizeof(data) / sizeof(data[0]),
                             (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+    // m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+    
+    // Set Materials
+    m_cube->setMeshMaterial(&m_blueColorMaterial);
     m_quad->setMeshMaterial(&m_blueColorMaterial);
 
-    // m_terrain = new comet::Mesh(data, sizeof(data) / sizeof(data[0]), (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+    // Set Instances data
+    auto& cubeInstance = m_cube->createMeshInstance();
+    cubeInstance.move(glm::vec3(-2.0f, -2.0f, -2.0f));
 
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.7f));
     const float translationStep = 0.85f;
@@ -62,16 +72,16 @@ void SandboxApp::onStart()
             else if (i % 2 == 0)
             {
                 instance.setMaterial(&m_orangeColorMaterial);
-                instance.rotate(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             }
         }
     }
 
+    m_renderer.addMesh(m_cube);
     m_renderer.addMesh(m_quad);
     // m_renderer.addMesh(m_terrain);
+
     m_renderer.allocateBuffersAndSetupLayouts();
     m_renderer.loadData();
-    m_camera.setPosition(glm::vec3{0.0f, 0.0f, 30.0f});
 }
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
@@ -91,7 +101,7 @@ void SandboxApp::onUpdate(double deltaTime)
     static const float pitchSpeed = glm::radians(360.0) / 2000.0f;
     static const float rollSpeed = glm::radians(360.0) / 2000.0f;
     static const float moveSpeed = 0.015f;
-    static const float rotSpeed = glm::radians(360.0) / 1000.0f;
+    static const float rotSpeed = glm::radians(360.0) / 700.0f;
 
     if (comet::Input::isKeyPressed(comet::Input::Key::R))
     {
@@ -144,10 +154,14 @@ void SandboxApp::onUpdate(double deltaTime)
     }
 
     auto& instances = m_quad->getMeshInstances();
-    for(int i = 0; i < instances.size(); i += 2)
+    uint32_t nbInstancesToRotate =  instances.size() / 20.0f;
+    auto angle = rotSpeed * deltaTime;
+    for(int i = 0; i < nbInstancesToRotate; ++i)
     {
-        instances[i].rotate(rotSpeed * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+        instances[i*20].rotate(angle, glm::vec3(0.0f, 0.0f, 1.0f));
     }
+
+    m_cube->getMeshInstances()[0].rotate(angle/5.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
     m_renderer.reloadInstanceData();
 }
