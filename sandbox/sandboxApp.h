@@ -23,10 +23,13 @@ private:
     glm::vec3 m_offset{0.0f};
     comet::Camera m_camera;
     comet::Renderer m_renderer;
-    comet::FlatColorMaterial m_blueColorMaterial{glm::vec4(0.0f, 0.6, 1.0f, 1.0f)};
-    comet::FlatColorMaterial m_orangeColorMaterial{glm::vec4(1.0f, 0.6, 0.0f, 1.0f)};
+    comet::FlatColorMaterial m_blueColorMaterial{glm::vec4(0.0f, 0.5, 1.0f, 1.0f)};
+    comet::FlatColorMaterial m_lightBlueColorMaterial{glm::vec4(0.0f, 0.8, 1.0f, 1.0f)};
     comet::FlatColorMaterial m_redColorMaterial{glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)};
+    comet::PhongMaterial m_phongMaterial;
     comet::Mesh* m_quad;
     comet::Mesh* m_cube;
+    comet::Mesh* m_test;
     comet::Mesh* m_terrain;
+    bool m_pauseAnimation{false};
 };

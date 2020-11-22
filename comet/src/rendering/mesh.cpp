@@ -63,19 +63,19 @@ namespace comet
 
     void Mesh::updateVboDataLayout(VertexBufferLayout& layout) const
     {
-        //TODO: We are introducing a dependency to Shader's attributes here. To think about it.
-        layout.add<float>(3, false, 0);
-        layout.add<float>(3, false, 1);
-        layout.add<float>(2, false, 2);
+        // TODO: We are introducing a dependency to Shader's attributes here. To think about it.
+        layout.add<float>(3, false, 0); // postiion
+        layout.add<float>(3, false, 1); // normal
+        layout.add<float>(2, false, 2); // texture coordinate
     }
 
     void Mesh::updateInstanceDataLayout(VertexBufferLayout& layout) const
     {
-        layout.add<float>(4, false, 10, 1);
-        layout.add<float>(4, false, 11, 1);
-        layout.add<float>(4, false, 12, 1);
-        layout.add<float>(4, false, 13, 1);
-        layout.add<unsigned int>(1, false, 14, 1);
+        layout.add<float>(4, false, 10, 1); //
+        layout.add<float>(4, false, 11, 1); //
+        layout.add<float>(4, false, 12, 1); // Instance Model to Word Matrix transform
+        layout.add<float>(4, false, 13, 1); //
+        layout.add<unsigned int>(1, false, 14, 1);  // Material ID (or index)
     }
 
     void MeshInstance::setMaterial(Material* material)

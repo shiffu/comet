@@ -24,10 +24,10 @@ namespace comet
         {
             const std::regex vec2Regex("([-0-9]+\\.[0-9]+)\\s+([-0-9]+\\.[0-9]+)");
             const std::regex vec3Regex("([-0-9]+\\.[0-9]+)\\s+([-0-9]+\\.[0-9]+)\\s+([-0-9]+\\.[0-9]+)");
-            const std::regex facesRegex("([0-9]+)/([0-9]+)/([0-9]+)");
+            const std::regex facesRegex("([0-9]+)/([0-9]*)/([0-9]*)");
             std::smatch match;
             std::string line;
-            int lineNumber = 0;
+            uint32_t lineNumber{0};
             std::vector<glm::vec3> positions;
             std::vector<glm::vec3> normals;
             std::vector<glm::vec2> texCoords;
@@ -71,7 +71,9 @@ namespace comet
                 // Faces (indices)
                 else if (line.substr(0, 2) == "f ")
                 {
-                    vertices.reserve(positions.size());
+                    auto size = positions.size();
+                    vertices.reserve(size);
+                    indices.reserve(size);
                     break;
                 }
             }
@@ -81,7 +83,6 @@ namespace comet
             std::unordered_map<std::string, uint32_t> usedVertices;
             do
             {
-                lineNumber++;
                 auto linePart = line;
                 if (line.substr(0, 2) == "f ")
                 {
@@ -95,9 +96,19 @@ namespace comet
                         }
 
                         auto positionIdx = std::stoi(match[1]) - 1;
-                        auto texCoordIdx = std::stoi(match[2]) - 1;
-                        auto normalIdx = std::stoi(match[3]) - 1;
-                        auto key = match[1].str() + match[2].str() + match[3].str();
+                        int32_t texCoordIdx{-1};
+                        if (match[2].length() != 0)
+                        {
+                            texCoordIdx = std::stoi(match[2]) - 1;
+                        }
+
+                        int32_t normalIdx{-1};
+                        if (match[3].length() != 0)
+                        {
+                            normalIdx = std::stoi(match[3]) - 1;
+                        }
+
+                        auto key = match[1].str() + "/" + match[2].str() + "/" + match[3].str();
 
                         // The vertex index has already been used before, so get the index from it
                         if (usedVertices.find(key) != usedVertices.end())
@@ -107,7 +118,21 @@ namespace comet
                         // Vertex index has not been used before, so we need to create a new Vertex
                         else
                         {
-                            vertices.emplace_back(positions[positionIdx], normals[normalIdx], texCoords[texCoordIdx]);
+                            auto position = positions[positionIdx];
+
+                            glm::vec2 texCoord{0.0f};
+                            if (texCoordIdx != -1)
+                            {
+                                texCoord = texCoords[texCoordIdx];
+                            }
+
+                            glm::vec3 normal{0.0f};
+                            if (normalIdx != -1)
+                            {
+                                normal = normals[normalIdx];
+                            }
+
+                            vertices.emplace_back(position, normal, texCoord);
                             uint32_t newIndex = vertices.size() - 1;
                             indices.push_back(newIndex);
                             usedVertices.insert({key, newIndex});
@@ -117,6 +142,8 @@ namespace comet
                     }
                 }
 
+                lineNumber++;
+                
             } while (getline(ifs, line));
         }
     }

@@ -7,8 +7,8 @@ layout (location = 14) in uint instance_materialID;
 out vec4 pass_color;
 
 uniform mat4 vp_matrix;
-uniform vec4 u_flatColor[10];
 
+uniform vec4 u_flatColor[32];
 
 void main()
 {

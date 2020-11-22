@@ -12,6 +12,7 @@ namespace comet
     {
         updateDirections();
         setPerspective(fov, near, far);
+        buildViewMatrix();
     }
 
     // Orthographic matrix
@@ -19,6 +20,7 @@ namespace comet
     {
         updateDirections();
         setOrthographic(near, far);
+        buildViewMatrix();
     }
 
     void Camera::updateWidthAndHeightFromWindow()

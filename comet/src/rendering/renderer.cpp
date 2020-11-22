@@ -248,11 +248,16 @@ namespace comet
     void Renderer::render(const Camera& camera)
     {
         auto vpMatrix = camera.getViewProjection();
+        auto viewMatrix = camera.getView();
+        auto projectionMatrix = camera.getProjection();
+
         for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
         {
             auto currentShader = pShaderDrawContext->shader;
             currentShader->bind();
             currentShader->setUniform(currentShader->getViewProjectionMatrixName(), vpMatrix);
+            currentShader->setUniform(currentShader->getViewMatrixName(), viewMatrix);
+            currentShader->setUniform(currentShader->getProjectionMatrixName(), projectionMatrix);
 
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
@@ -264,7 +269,8 @@ namespace comet
 
                 if (key.hasIndices)
                 {
-                    glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, 2, 0);
+                    glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr,
+                                    pMaterialDrawContext->commandBuffer.getCurrentCount(), 0);
                 }
                 else
                 {

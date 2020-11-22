@@ -24,6 +24,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/flatColorMaterial.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/phongMaterial.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/mesh.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
@@ -51,7 +52,9 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/shaderRegistry.cpp
     ${COMET_SOURCES_DIR}/rendering/camera.cpp
     ${COMET_SOURCES_DIR}/rendering/renderer.cpp
+    ${COMET_SOURCES_DIR}/rendering/material.cpp
     ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
+    ${COMET_SOURCES_DIR}/rendering/phongMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/mesh.cpp
  )
 

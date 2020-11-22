@@ -26,7 +26,11 @@ namespace comet
             exit(EXIT_FAILURE);
         } 
         
-        m_sfWindow = new sf::Window(sf::VideoMode(spec.width, spec.height), "");
+        sf::ContextSettings windowSettings;
+        windowSettings.depthBits = 24;
+
+        m_sfWindow = new sf::Window(sf::VideoMode(spec.width, spec.height), "",
+                        sf::Style::Resize | sf::Style::Close, windowSettings);
         std::stringstream ss;
         ss << spec.title << " (" << (const unsigned char*)glGetString(GL_VERSION) << ")";
         m_sfWindow->setTitle(ss.str());

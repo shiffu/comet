@@ -204,8 +204,7 @@ namespace comet
         int location = glGetUniformLocation(m_program, name.c_str());
         if (location == GL_INVALID_INDEX)
         {
-            CM_CORE_LOG_FATAL("Uniform {} not found in sharder program", name);
-            exit(EXIT_FAILURE);
+            CM_CORE_LOG_ERROR("Uniform {} not found in sharder program", name);
         }
         m_uniformLocationsCache[name] = location;
 
@@ -248,18 +247,29 @@ namespace comet
         glUniformMatrix4fv(location, 1, false, &value[0][0]);
     }
 
-    void Shader::setUniform(const std::string& name, uint32_t count, const glm::vec4* values)
-    {
-        int location = getUniformLocation(name);
-        glUniform4fv(location, count, (GLfloat*)values);
-    }
-
     void Shader::setUniform(const std::string& name, uint32_t count, const uint32_t* values)
     {
         int location = getUniformLocation(name);
         glUniform1uiv(location, count, (GLuint*)values);
     }
 
+    void Shader::setUniform(const std::string& name, uint32_t count, const float* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform1fv(location, count, (GLfloat*)values);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t count, const glm::vec3* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform3fv(location, count, (GLfloat*)values);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t count, const glm::vec4* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform4fv(location, count, (GLfloat*)values);
+    }
 
     void Shader::bind() const { glUseProgram(m_program); }
     void Shader::unbind() const { glUseProgram(0); }

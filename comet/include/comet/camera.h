@@ -16,6 +16,9 @@ namespace comet
         const glm::mat4& getProjection() const { return m_projection; }
         const glm::mat4 getViewProjection() const { return m_projection * m_view; }
         void setProjection(const glm::mat4& projection) { m_projection = m_projection; }
+        const glm::mat4& getView() const { return m_view; }
+        void setView(const glm::mat4& view) { m_view = view; }
+
         void setPerspective(float fov, float width, float height, float near, float far);
         void setPerspective(float fov, float near, float far);
         void setOrthographic(float left, float right, float bottom, float top, float near, float far);
@@ -24,9 +27,6 @@ namespace comet
         const glm::vec3& getTarget() { return m_target; };
         void lookAt(const glm::vec3& cameraPos, const glm::vec3& target, const glm::vec3& up);
         void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3{0.0f, 1.0f, 0.0f});
-
-        glm::mat4& getView() { return m_view; }
-        void setView(const glm::mat4& view) { m_view = view; }
 
         const glm::vec3& getPosition() const { return m_position; }
         void setPosition(const glm::vec3& pos);

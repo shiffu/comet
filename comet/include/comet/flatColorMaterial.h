@@ -12,18 +12,17 @@ namespace comet
     public:
         FlatColorMaterial();
         FlatColorMaterial(const glm::vec4& color);
-        ~FlatColorMaterial() {}
+        ~FlatColorMaterial() = default;
 
         void setColor(const glm::vec4& color) { m_color = color; }
         const glm::vec4& getColor() const { return m_color; }
 
-        std::vector<FlatColorMaterial>& getInstances() { return getMaterialInstances(); }
+        std::vector<FlatColorMaterial*>& getInstances() { return getMaterialInstances(); }
 
-        Shader* getShader() override;
         void loadUniforms() override;
     
     private:
-        std::vector<FlatColorMaterial>& getMaterialInstances();
+        std::vector<FlatColorMaterial*>& getMaterialInstances();
 
     private:
         static const char* MATERIAL_NAME;

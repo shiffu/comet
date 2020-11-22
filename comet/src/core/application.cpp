@@ -95,12 +95,18 @@ namespace comet
         
         CM_CORE_LOG_DEBUG("Initializing the application");
         m_window = Window::create(spec);
+
+        // Setup OpenGL Debug Messages
         glDebugMessageCallback(glDebugCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
         glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, nullptr, GL_FALSE);
         glEnable(GL_DEBUG_OUTPUT);
 
+        // Enable OpenGL Flags
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        // glFrontFace(GL_CW);
 
         // set Event callback
         m_window->setEventCallback(BIND_METHOD(Application::onEvent));
@@ -207,9 +213,8 @@ namespace comet
                 CM_CORE_LOG_DEBUG("FPS: {}", fps);
             }
 
-            // TODO: Move this code in the renderer (probably)
-            glClearDepth(1.0f);
-            glClearColor(0.0f, 0.05f, 0.15f, 1.0f);
+            // TODO: Move this code in the Window
+            glClearColor(0.01f, 0.02f, 0.03f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             onRender();

@@ -24,10 +24,19 @@ namespace comet
         static const std::string shaderExtension = ".glsl";
 
         // Find 'shaderName' shader files
+        uint8_t shaderFoundCount{0};
         for (auto& p : fs::recursive_directory_iterator(shaderRootPath))
         {
-            auto extension = p.path().extension().string();
             auto filenameWithoutExt = p.path().stem().string();
+            auto const firstDotPos = filenameWithoutExt.find_first_of('.');
+            const auto shaderName = filenameWithoutExt.substr(0, firstDotPos);
+
+            if (shaderName != shader->getName())
+            {
+                continue;
+            }
+
+            auto extension = p.path().extension().string();
             if (extension != shaderExtension)
             {
                 CM_CORE_LOG_WARN("file extension '{}' is not a proper GLSL Shader extension. Skipping file {}",
@@ -56,13 +65,23 @@ namespace comet
                             p.path().string(), shaderSuffix);
 
             shader->compileShaderFile(p.path().c_str(), shaderType);
+            shaderFoundCount++;
         }
 
-        // Link program
-        shader->linkProgram();
+        if (shaderFoundCount >= 2)
+        {
+            // Link program
+            CM_CORE_LOG_DEBUG("Linking shader program: {}", shader->getName());
+            shader->linkProgram();
 
-        // Validate program
-        shader->validateProgram();
+            // Validate program
+            CM_CORE_LOG_DEBUG("Validating shader program: {}", shader->getName());
+            shader->validateProgram();
+        }
+        else
+        {
+            CM_CORE_LOG_ERROR("At least 2 shader files ({} found) must be defined to build a shader program", shaderFoundCount);
+        }
     }
 
 } // namespace comet
