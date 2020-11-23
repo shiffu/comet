@@ -3,6 +3,7 @@
 #include <comet/log.h>
 #include <comet/application.h>
 #include <comet/window.h>
+#include <comet/timer.h>
 #include <comet/input.h>
 #include <comet/event.h>
 #include <comet/indexBuffer.h>

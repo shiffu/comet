@@ -17,7 +17,6 @@ namespace comet
         VertexAttribute(uint32_t pLoc, uint32_t pType, uint32_t pCount, uint32_t pSize, bool pNormalized, uint32_t divisor)
             : loc(pLoc), type(pType), count(pCount), size(pSize), normalized(pNormalized), divisor(divisor)
             {
-                CM_CORE_LOG_DEBUG("VertexAttribute: loc = {}, type = {}, count = {}, size = {}, divisor = {}", loc, type, count, size, divisor);
             }
     };
 

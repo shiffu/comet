@@ -17,6 +17,7 @@ namespace comet
 
         virtual void pollEvent() override;
         virtual void swapBuffers() const override;
+        virtual void clearBuffers() const override;
 
         // Window info
         unsigned int getWidth() const override;

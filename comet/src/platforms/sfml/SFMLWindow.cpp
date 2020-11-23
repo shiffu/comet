@@ -1,13 +1,13 @@
 #include <glad/glad.h>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "SFMLWindow.h"
 #include <SFML/Window.hpp>
 #include "SFMLInput.h"
 #include <comet/event.h>
-
 #include <comet/log.h>
+#include <glm/vec4.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace comet
 {
@@ -18,7 +18,7 @@ namespace comet
         return new SFMLWindow(spec);
     }
 
-    SFMLWindow::SFMLWindow(const WindowSpec& spec)
+    SFMLWindow::SFMLWindow(const WindowSpec& spec) : Window(spec)
     {
         if(gladLoadGL())
         {
@@ -27,16 +27,19 @@ namespace comet
         } 
         
         sf::ContextSettings windowSettings;
-        windowSettings.depthBits = 24;
+        windowSettings.depthBits = spec.depthBufferBits;
 
         m_sfWindow = new sf::Window(sf::VideoMode(spec.width, spec.height), "",
                         sf::Style::Resize | sf::Style::Close, windowSettings);
+
+        // We need to set the title after window creation since we call glGetString, thus
+        // we need the OpenGL Context to be created
         std::stringstream ss;
         ss << spec.title << " (" << (const unsigned char*)glGetString(GL_VERSION) << ")";
         m_sfWindow->setTitle(ss.str());
 
-        // Somehow this slows down a lot the responsiveness of the window on Linux (when moving the window)
         // TODO: Figure out why VSync is slowing down window movement responsiveness on Linux
+        // Somehow this slows down a lot the responsiveness of the window on Linux (when moving the window)
         // m_sfWindow->setVerticalSyncEnabled(true);
 
         // activate the window
@@ -185,6 +188,23 @@ namespace comet
     void SFMLWindow::swapBuffers() const
     {
         m_sfWindow->display();
+    }
+
+    void SFMLWindow::clearBuffers() const
+    {
+        glClearColor(
+            m_windowSpec.backgroundColor.r,
+            m_windowSpec.backgroundColor.g,
+            m_windowSpec.backgroundColor.b, 1.0f);
+
+        if (m_windowSpec.depthBufferBits > 0)
+        {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+        else
+        {
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
     }
 
     // Window info

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <comet/event.h>
+#include <glm/vec3.hpp>
 #include <string>
 #include <functional>
-#include <comet/event.h>
 
 namespace comet
 {
@@ -13,8 +14,10 @@ namespace comet
             : title(pTitle), width(pWidth), height(pHeight) {}
 
         std::string title;
-        unsigned int width;
-        unsigned int height;
+        uint16_t width;
+        uint16_t height;
+        glm::vec3 backgroundColor{0.0f, 0.01f, 0.02f};
+        uint8_t depthBufferBits{24};
     };
 
     // Window Interface (implemetation is delegated to platform specific classes)
@@ -22,11 +25,16 @@ namespace comet
     {
     public:
         using EventCallbackFn = std::function<void(Event&)>;
+
+        Window(const WindowSpec& spec = WindowSpec()) : m_windowSpec(spec) {}
         virtual ~Window() {}
+
+        const WindowSpec& getWindowSpec() const { return m_windowSpec; }
 
         void setEventCallback(const EventCallbackFn& callback) { m_eventCallbackFn = callback; }
 
         virtual void swapBuffers() const = 0;
+        virtual void clearBuffers() const = 0;
         virtual unsigned int getWidth() const = 0;
         virtual unsigned int getHeight() const = 0;
         virtual void setVSync(bool enabled) = 0;
@@ -44,6 +52,7 @@ namespace comet
 
     protected:
         EventCallbackFn m_eventCallbackFn;
+        WindowSpec m_windowSpec;
     };
 
 } // namespace comet

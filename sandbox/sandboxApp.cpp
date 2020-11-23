@@ -39,7 +39,6 @@ void SandboxApp::onStart()
         2, 3, 0
     };
 
-
     // Create test Meshes
     m_cube = new comet::Mesh("dragon.obj");
     // m_test = new comet::Mesh("torus.obj");
@@ -50,7 +49,7 @@ void SandboxApp::onStart()
     // Set Materials
     m_phongMaterial.setDiffuse(glm::vec3(0.8f, 0.4f, 0.0f));
     m_phongMaterial.setSpecular(glm::vec3(1.0f, 0.5f, 0.0f));
-    m_phongMaterial.setShininess(25.0f);
+    m_phongMaterial.setShininess(10.0f);
 
     m_cube->setMeshMaterial(&m_phongMaterial);
     // m_test->setMeshMaterial(&m_phongMaterial);
@@ -70,6 +69,7 @@ void SandboxApp::onStart()
     const float translationStep = 1.0f;
     const float xOffset = -10.0f;
     const float yOffset = -2.0f;
+    
     for (uint32_t i = 0; i < 20; ++i)
     {
         for (uint32_t j = 0; j < 20; ++j)

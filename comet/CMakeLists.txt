@@ -7,6 +7,7 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/log.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/timer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/window.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/event.h
@@ -39,6 +40,8 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/core/resourceManager.cpp
     ${COMET_SOURCES_DIR}/core/objLoader.h
     ${COMET_SOURCES_DIR}/core/objLoader.cpp
+    ${COMET_SOURCES_DIR}/core/stringUtils.h
+    ${COMET_SOURCES_DIR}/core/stringUtils.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
