@@ -5,11 +5,12 @@
 
 namespace comet
 {
+    class Window;
+    
     class Input
     {
     public:
 
-        // Matches exactly sfml (2.5.1) Mouse::Button enum
         enum class MouseButton
         {
             Left,       // The left mouse button
@@ -21,7 +22,6 @@ namespace comet
             ButtonCount // Keep last -- the total number of mouse buttons
         };
 
-        // Matches exactly sfml (2.5.1) Keyboard::Key enum
         enum class Key
         {
             Unknown = -1, // Unhandled key
@@ -73,6 +73,7 @@ namespace comet
             Menu,         // The Menu key
             LBracket,     // The [ key
             RBracket,     // The ] key
+            BackTick,     // The ` Key
             Semicolon,    // The ; key
             Comma,        // The , key
             Period,       // The . key
@@ -92,6 +93,10 @@ namespace comet
             Home,         // The Home key
             Insert,       // The Insert key
             Delete,       // The Delete key
+            Caps,         // The Caps Lock Key
+            ScrollLock,   // The Scroll Lock Key
+            NumLock,      // The Num Lock Key
+            PrintScreen,  // The Print Screen Key
             Add,          // The + key
             Subtract,     // The - key (minus, usually from numpad)
             Multiply,     // The * key
@@ -100,16 +105,24 @@ namespace comet
             Right,        // Right arrow
             Up,           // Up arrow
             Down,         // Down arrow
-            Numpad0,      // The numpad 0 key
-            Numpad1,      // The numpad 1 key
-            Numpad2,      // The numpad 2 key
-            Numpad3,      // The numpad 3 key
-            Numpad4,      // The numpad 4 key
-            Numpad5,      // The numpad 5 key
-            Numpad6,      // The numpad 6 key
-            Numpad7,      // The numpad 7 key
-            Numpad8,      // The numpad 8 key
-            Numpad9,      // The numpad 9 key
+            KP0,          // The numpad 0 key
+            KP1,          // The numpad 1 key
+            KP2,          // The numpad 2 key
+            KP3,          // The numpad 3 key
+            KP4,          // The numpad 4 key
+            KP5,          // The numpad 5 key
+            KP6,          // The numpad 6 key
+            KP7,          // The numpad 7 key
+            KP8,          // The numpad 8 key
+            KP9,          // The numpad 9 key
+            KPPeriod,     // The numpad  . key
+            KPDivide,     // The numpad  / key
+            KPMultiply,   // The numpad  * key
+            KPSubstract,  // The numpad  - key
+            KPAdd,        // The numpad  + key
+            KPEnter,      // The numpad  Enter key
+            KPEqual,      // The numpad  = key
+
             F1,           // The F1 key
             F2,           // The F2 key
             F3,           // The F3 key
@@ -125,23 +138,41 @@ namespace comet
             F13,          // The F13 key
             F14,          // The F14 key
             F15,          // The F15 key
+            F16,          // The F16 key
+            F17,          // The F17 key
+            F18,          // The F18 key
+            F19,          // The F19 key
+            F20,          // The F20 key
+            F21,          // The F21 key
+            F22,          // The F22 key
+            F23,          // The F23 key
+            F24,          // The F24 key
+            F25,          // The F25 key
             Pause,        // The Pause key
 
             KeyCount     // Keep last -- the total number of keyboard keys
         };
 
-        static bool isKeyPressed(Key key) { return m_instance->isKeyPressedImpl(key); }
-        static bool isMouseButtonPressed(MouseButton button) { return m_instance->isMouseButtonPressedImpl(button); }
-        static std::pair<int, int> getMousePosition() { return m_instance->getMousePositionImpl(); };
+        static bool isKeyPressed(Key key) { return s_instance->isKeyPressedImpl(key); }
+        static bool isMouseButtonPressed(MouseButton button) { return s_instance->isMouseButtonPressedImpl(button); }
+        static std::pair<int, int> getMousePosition() { return s_instance->getMousePositionImpl(); };
     
+        static void setActiveWindow(const Window* window) { s_instance->setInstanceActiveWindow(window); }
+        static const Window* getActiveWindow() { return s_instance->getInstanceActiveWindow(); }
 
     protected:
+        void setInstanceActiveWindow(const Window* window) { m_activeWindow = window; }
+        const Window* getInstanceActiveWindow() const { return m_activeWindow; }
+
         virtual bool isKeyPressedImpl(Key key) = 0;
         virtual bool isMouseButtonPressedImpl(MouseButton button) = 0;
         virtual std::pair<int, int> getMousePositionImpl() = 0;
 
+    protected:
+        const Window* m_activeWindow{nullptr};
+
     private:
-        static Input* m_instance;
+        static Input* s_instance;
     };
     
     inline std::ostream& operator<<(std::ostream& os, const Input::Key& key)

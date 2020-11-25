@@ -7,6 +7,7 @@
 #include <comet/application.h>
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
+#include <core/asserts.h>
 
 namespace comet
 {
@@ -107,6 +108,9 @@ namespace comet
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         // glFrontFace(GL_CW);
+
+        // Deactivate VSync (slowness of window motion on Linux when VSync is on)
+        m_window->setVSync(false);
 
         // set Event callback
         m_window->setEventCallback(BIND_METHOD(Application::onEvent));

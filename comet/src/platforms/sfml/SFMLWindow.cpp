@@ -15,6 +15,7 @@ namespace comet
     // Factory
     Window* SFMLWindow::create(const WindowSpec& spec)
     {
+        CM_CORE_LOG_DEBUG("Using SFML Window Implementation");
         return new SFMLWindow(spec);
     }
 

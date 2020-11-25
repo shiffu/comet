@@ -1,11 +1,14 @@
 #include "SFMLInput.h"
 #include <comet/application.h>
 #include <utility>
+#include <platforms/platform.h>
 
 namespace comet
 {
 
-    Input* Input::m_instance = new SFMLInput();
+    #if COMET_WINDOW_IMPL == COMET_WINDOW_IMPL_SFML
+        Input* Input::s_instance = new SFMLInput();
+    #endif
 
     std::unordered_map<Input::Key, sf::Keyboard::Key> SFMLInput::m_cometKeyToSFMLKeyMap ({
         {Key::Unknown,      sf::Keyboard::Key::Unknown},
@@ -84,16 +87,16 @@ namespace comet
         {Key::Right,        sf::Keyboard::Key::Right},
         {Key::Up,           sf::Keyboard::Key::Up},
         {Key::Down,         sf::Keyboard::Key::Down},
-        {Key::Numpad0,      sf::Keyboard::Key::Numpad0},
-        {Key::Numpad1,      sf::Keyboard::Key::Numpad1},
-        {Key::Numpad2,      sf::Keyboard::Key::Numpad2},
-        {Key::Numpad3,      sf::Keyboard::Key::Numpad3},
-        {Key::Numpad4,      sf::Keyboard::Key::Numpad4},
-        {Key::Numpad5,      sf::Keyboard::Key::Numpad5},
-        {Key::Numpad6,      sf::Keyboard::Key::Numpad6},
-        {Key::Numpad7,      sf::Keyboard::Key::Numpad7},
-        {Key::Numpad8,      sf::Keyboard::Key::Numpad8},
-        {Key::Numpad9,      sf::Keyboard::Key::Numpad9},
+        {Key::KP0,          sf::Keyboard::Key::Numpad0},
+        {Key::KP1,          sf::Keyboard::Key::Numpad1},
+        {Key::KP2,          sf::Keyboard::Key::Numpad2},
+        {Key::KP3,          sf::Keyboard::Key::Numpad3},
+        {Key::KP4,          sf::Keyboard::Key::Numpad4},
+        {Key::KP5,          sf::Keyboard::Key::Numpad5},
+        {Key::KP6,          sf::Keyboard::Key::Numpad6},
+        {Key::KP7,          sf::Keyboard::Key::Numpad7},
+        {Key::KP8,          sf::Keyboard::Key::Numpad8},
+        {Key::KP9,          sf::Keyboard::Key::Numpad9},
         {Key::F1,           sf::Keyboard::Key::F1},
         {Key::F2,           sf::Keyboard::Key::F2},
         {Key::F3,           sf::Keyboard::Key::F3},
@@ -189,16 +192,16 @@ namespace comet
         {sf::Keyboard::Key::Right,      Key::Right},
         {sf::Keyboard::Key::Up,         Key::Up},
         {sf::Keyboard::Key::Down,       Key::Down},
-        {sf::Keyboard::Key::Numpad0,    Key::Numpad0},
-        {sf::Keyboard::Key::Numpad1,    Key::Numpad1},
-        {sf::Keyboard::Key::Numpad2,    Key::Numpad2},
-        {sf::Keyboard::Key::Numpad3,    Key::Numpad3},
-        {sf::Keyboard::Key::Numpad4,    Key::Numpad4},
-        {sf::Keyboard::Key::Numpad5,    Key::Numpad5},
-        {sf::Keyboard::Key::Numpad6,    Key::Numpad6},
-        {sf::Keyboard::Key::Numpad7,    Key::Numpad7},
-        {sf::Keyboard::Key::Numpad8,    Key::Numpad8},
-        {sf::Keyboard::Key::Numpad9,    Key::Numpad9},
+        {sf::Keyboard::Key::Numpad0,    Key::KP0},
+        {sf::Keyboard::Key::Numpad1,    Key::KP1},
+        {sf::Keyboard::Key::Numpad2,    Key::KP2},
+        {sf::Keyboard::Key::Numpad3,    Key::KP3},
+        {sf::Keyboard::Key::Numpad4,    Key::KP4},
+        {sf::Keyboard::Key::Numpad5,    Key::KP5},
+        {sf::Keyboard::Key::Numpad6,    Key::KP6},
+        {sf::Keyboard::Key::Numpad7,    Key::KP7},
+        {sf::Keyboard::Key::Numpad8,    Key::KP8},
+        {sf::Keyboard::Key::Numpad9,    Key::KP9},
         {sf::Keyboard::Key::F1,         Key::F1},
         {sf::Keyboard::Key::F2,         Key::F2},
         {sf::Keyboard::Key::F3,         Key::F3},

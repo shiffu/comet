@@ -32,19 +32,24 @@ add_library(comet STATIC
 
     # Sources
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
+    ${COMET_SOURCES_DIR}/core/asserts.h
     ${COMET_SOURCES_DIR}/core/log.cpp
+    ${COMET_SOURCES_DIR}/core/singleton.h
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
-    ${COMET_SOURCES_DIR}/core/singleton.h
     ${COMET_SOURCES_DIR}/core/resourceManager.h
     ${COMET_SOURCES_DIR}/core/resourceManager.cpp
     ${COMET_SOURCES_DIR}/core/objLoader.h
     ${COMET_SOURCES_DIR}/core/objLoader.cpp
     ${COMET_SOURCES_DIR}/core/stringUtils.h
     ${COMET_SOURCES_DIR}/core/stringUtils.cpp
+    ${COMET_SOURCES_DIR}/platforms/platform.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
+    ${COMET_SOURCES_DIR}/platforms/glfw/glfwWindowWrapper.cpp
+    ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.cpp
+    ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.h
     ${COMET_SOURCES_DIR}/rendering/buffer.cpp
     ${COMET_SOURCES_DIR}/rendering/vertexBuffer.cpp
     ${COMET_SOURCES_DIR}/rendering/indexBuffer.cpp
@@ -81,6 +86,11 @@ set(SFML_BUILD_WINDOW ON)
 
 add_subdirectory(src/vendors/sfml)
 
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
+add_subdirectory(src/vendors/glfw)
+
 find_package(OpenGL REQUIRED)
 
 # Link
@@ -98,6 +108,7 @@ target_link_libraries(comet
         spdlog
     PRIVATE
         stdc++fs
+        glfw
         sfml-window
         OpenGL::GL
         ${CMAKE_DL_LIBS}
