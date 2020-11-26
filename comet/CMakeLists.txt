@@ -3,7 +3,7 @@ set(COMET_PUBLIC_HEADERS_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
 set(COMET_SOURCES_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
 add_library(comet STATIC
-    # Headers
+    # Public Headers
     ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/log.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
@@ -30,7 +30,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
 
-    # Sources
+    # Sources and private Headers
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
     ${COMET_SOURCES_DIR}/core/asserts.h
     ${COMET_SOURCES_DIR}/core/log.cpp
@@ -64,6 +64,22 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/phongMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/mesh.cpp
+    ${COMET_SOURCES_DIR}/rendering/imguiWrapper.h
+    ${COMET_SOURCES_DIR}/rendering/imguiWrapper.cpp
+
+    # ImGui
+    ${COMET_SOURCES_DIR}/vendors/imgui/imconfig.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_draw.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_widgets.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_demo.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_opengl3.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_opengl3.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_glfw.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_glfw.h
+    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
+    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
  )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -99,8 +115,10 @@ target_include_directories(comet
         ${COMET_PUBLIC_HEADERS_DIR}
         ${COMET_SOURCES_DIR}/vendors/glad/include
         ${COMET_SOURCES_DIR}/vendors/glm
+        ${COMET_SOURCES_DIR}/vendors/imgui
     PRIVATE
         ${COMET_SOURCES_DIR}
+        ${COMET_SOURCES_DIR}/vendors
 )
 
 target_link_libraries(comet

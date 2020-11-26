@@ -6,6 +6,8 @@
 namespace comet
 {
 
+    class ImguiWrapper;
+
     class Application
     {
     public:
@@ -44,6 +46,9 @@ namespace comet
         virtual bool onMouseButtonPressed(MouseButtonPressedEvent& e);
         virtual bool onMouseButtonRelease(MouseButtonReleasedEvent& e);
 
+        // Imgui Callback
+        virtual void onImGuiDraw();
+
     private:
         void init(const WindowSpec& spec = WindowSpec());
 
@@ -52,13 +57,16 @@ namespace comet
         virtual void onFixedUpdate(float fixedDeltaTime);
         virtual void onRender();
 
+        void onImGuiDebugDraw();
+
     private:
-        bool m_isRunning = false;
-        bool m_isInitialized = false;
-        Window* m_window = nullptr;
+        bool m_isRunning{false};
+        bool m_isInitialized{false};
+        Window* m_window{nullptr};
         unsigned int m_fpsCap{0};
         // Fixed update time in ms (used to onFixedUpdate function call)
         float m_fixedUpdateTime{20.0f};
+        ImguiWrapper* m_imguiWrapper{nullptr};
     };
 
 } // namespace comet

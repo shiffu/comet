@@ -11,6 +11,7 @@ public:
     virtual ~SandboxApp();
 
     void onStart() override;
+    void onImGuiDraw() override;
     void onUpdate(double deltaTime) override;
     void onFixedUpdate(float fixedDeltaTime) override;
     void onRender() override;

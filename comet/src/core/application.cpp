@@ -8,6 +8,8 @@
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
 #include <core/asserts.h>
+#include <imgui/imgui.h>
+#include <rendering/imguiWrapper.h>
 
 namespace comet
 {
@@ -115,6 +117,13 @@ namespace comet
         // set Event callback
         m_window->setEventCallback(BIND_METHOD(Application::onEvent));
 
+        // set Imgui Wrapper
+        m_imguiWrapper = ImguiWrapper::create();
+        if (m_imguiWrapper)
+        {
+            m_imguiWrapper->init(m_window);
+        }
+
         m_isInitialized = true;
         CM_CORE_LOG_DEBUG("Finished initializing the application");
     }
@@ -157,6 +166,39 @@ namespace comet
     bool Application::onHorizontalMouseWheelScrolled(HorizontalMouseWheelScrolledEvent& e) {}
     bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) {}
     bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) {}
+
+    void Application::onImGuiDraw() {}
+
+    void Application::onImGuiDebugDraw()
+    {
+        ImGui::Begin("Comet Debug");
+        static std::vector<float> values{};
+        static float fpsAverage{0};
+        static int frameIntervalCount{0};
+
+        ++frameIntervalCount;
+        auto FPS = ImGui::GetIO().Framerate;
+        fpsAverage += FPS;
+
+        if (frameIntervalCount == 100)
+        {
+            fpsAverage /= frameIntervalCount;
+            values.insert(values.begin(), frameIntervalCount);
+            if (values.size() > 100)
+            {
+                values.pop_back();
+            }
+            frameIntervalCount = 0.0f;
+            frameIntervalCount = 0;
+        }
+        ImGui::PlotLines("FPS", values.data(), values.size());
+
+        ImGui::Text("This window contains default debug information");
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / FPS, FPS);
+        ImGui::Text("Mouse position: %.3f, %.3f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y); 
+
+        ImGui::End();
+    }
 
     void Application::run()
     {
@@ -206,20 +248,32 @@ namespace comet
             deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
             onUpdate(deltaTime);
 
-            // Compute and display FPS (every 2s)
-            frameCounter++;
-            timeSinceLastFPSDisplay += elapsedTime;
-            if (timeSinceLastFPSDisplay > seconds(2))
+            if (m_imguiWrapper)
             {
-                float fps = frameCounter / (duration_cast<seconds>(timeSinceLastFPSDisplay).count());
-                frameCounter = 0;
-                timeSinceLastFPSDisplay = milliseconds::zero();
-                CM_CORE_LOG_DEBUG("FPS: {}", fps);
+                m_imguiWrapper->newFrame();
+                onImGuiDebugDraw();
+                onImGuiDraw();
             }
+
+            // Compute and display FPS (every 2s)
+            // frameCounter++;
+            // timeSinceLastFPSDisplay += elapsedTime;
+            // if (timeSinceLastFPSDisplay > seconds(2))
+            // {
+            //     float fps = frameCounter / (duration_cast<seconds>(timeSinceLastFPSDisplay).count());
+            //     frameCounter = 0;
+            //     timeSinceLastFPSDisplay = milliseconds::zero();
+            //     CM_CORE_LOG_DEBUG("FPS: {}", fps);
+            // }
 
             m_window->clearBuffers();
 
             onRender();
+
+            if (m_imguiWrapper)
+            {
+                m_imguiWrapper->render();
+            }
 
             m_window->swapBuffers();
 
@@ -235,9 +289,17 @@ namespace comet
             }
             else
             {
-                std::this_thread::sleep_for(milliseconds(1));
+                std::this_thread::sleep_for(microseconds(10));
             }
         }
+        
+        if (m_imguiWrapper)
+        {
+            m_imguiWrapper->shutdown();
+            delete m_imguiWrapper;
+            m_imguiWrapper = nullptr;
+        }
+        
         m_window->close();
         CM_CORE_LOG_DEBUG("Exit main loop");
     }

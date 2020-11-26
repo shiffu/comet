@@ -6,6 +6,7 @@
 #include <utility>
 #include <comet/input.h>
 #include <comet/vertex.h>
+#include <imgui.h>
 
 comet::Application* comet::Application::getInstance()
 {
@@ -109,6 +110,33 @@ bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
 {
     m_camera.moveFront(-e.getDelta() * 0.9f);
+}
+
+void SandboxApp::onImGuiDraw()
+{
+    ImGui::Begin("SandBox Debug");
+    
+    {
+        auto diffuseColor = m_phongMaterial.getDiffuse();
+        float colorData[] = {diffuseColor.x, diffuseColor.y, diffuseColor.z};
+        ImGui::ColorEdit3("Dragon Albido Color", colorData);
+        m_phongMaterial.setDiffuse({colorData[0], colorData[1], colorData[2]});
+    }
+    
+    {
+        auto specularColor = m_phongMaterial.getSpecular();
+        float colorData[] = {specularColor.x, specularColor.y, specularColor.z};
+        ImGui::ColorEdit3("Dragon Specular Color", colorData);
+        m_phongMaterial.setSpecular({colorData[0], colorData[1], colorData[2]});
+    }
+    
+    {
+        int shininess = m_phongMaterial.getShininess();
+        ImGui::SliderInt("Dragon Shininess", &shininess, 0, 128);
+        m_phongMaterial.setShininess(shininess);
+    }
+
+    ImGui::End();
 }
 
 void SandboxApp::onUpdate(double deltaTime)
