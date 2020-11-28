@@ -1,13 +1,14 @@
 #pragma once
 #include <glad/glad.h>
 #include <unordered_map>
-#include <comet/mesh.h>
 #include <comet/camera.h>
 #include <comet/flatColorMaterial.h>
 
 namespace comet
 {
     class ShaderDrawContext;
+    class Light;
+    class Mesh;
 
     class Renderer
     {
@@ -15,6 +16,8 @@ namespace comet
         ~Renderer();
 
         void addMesh(Mesh* mesh);
+        void addLight(Light* light);
+        const std::vector<Light*>& getLights() { return m_lights; }
         void allocateBuffersAndSetupLayouts();
         void loadData();
         void reloadInstanceData();
@@ -23,6 +26,7 @@ namespace comet
     private:
         std::unordered_map<std::string, ShaderDrawContext*> m_shaderDrawContexts;
         FlatColorMaterial m_defaultColorMaterial{glm::vec4(0.99f, 0.16, 0.97f, 1.0f)};
+        std::vector<Light*> m_lights{};
     };
 
 } // namespace comet

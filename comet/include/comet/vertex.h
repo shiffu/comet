@@ -6,6 +6,7 @@
 struct Vertex
 {
     Vertex(glm::vec3 pos) : position(pos), normal(0.0f), tc(0.0f) {}
+    Vertex(glm::vec3 pos, glm::vec3 normal) : position(pos), normal(normal) {}
     Vertex(glm::vec3 pos, glm::vec3 normal, glm::vec2 texCoord) : position(pos), normal(normal), tc(texCoord) {}
 
     glm::vec3 position;

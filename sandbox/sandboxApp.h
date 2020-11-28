@@ -1,6 +1,7 @@
 #pragma once
 
 #include <comet/comet.h>
+#include <memory>
 #include <glm/vec3.hpp>
 
 class SandboxApp : public comet::Application
@@ -26,11 +27,11 @@ private:
     comet::Renderer m_renderer;
     comet::FlatColorMaterial m_blueColorMaterial{glm::vec4(0.0f, 0.5, 1.0f, 1.0f)};
     comet::FlatColorMaterial m_lightBlueColorMaterial{glm::vec4(0.0f, 0.8, 1.0f, 1.0f)};
-    comet::FlatColorMaterial m_redColorMaterial{glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)};
     comet::PhongMaterial m_phongMaterial;
-    comet::Mesh* m_quad;
-    comet::Mesh* m_cube;
-    comet::Mesh* m_test;
-    comet::Mesh* m_terrain;
+    std::unique_ptr<comet::Mesh> m_quad;
+    std::unique_ptr<comet::Mesh> m_cube;
     bool m_pauseAnimation{false};
+    std::unique_ptr<comet::DirectionalLight> m_directionalLight{};
+    std::vector<std::unique_ptr<comet::PointLight>> m_pointLights{};
+    std::vector<std::unique_ptr<comet::SpotLight>> m_spotLights{};
 };

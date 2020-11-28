@@ -113,7 +113,7 @@ namespace comet
             // Don't leak the shader
             glDeleteShader(shader);
 
-            CM_CORE_LOG_FATAL("Failed to compile shader: {}", std::string(infoLog.data()));
+            CM_CORE_LOG_FATAL("Failed to compile shader {}: {}", m_name, std::string(infoLog.data()));
             exit(EXIT_FAILURE);
         }
 
@@ -158,7 +158,7 @@ namespace comet
                 glDeleteShader(m_shaders[i]);
             }
 
-            CM_CORE_LOG_FATAL("Failed to link the program: {}", std::string(infoLog.data()));
+            CM_CORE_LOG_FATAL("Failed to link the program {}: {}", m_name, std::string(infoLog.data()));
             exit(EXIT_FAILURE);
         }
 
@@ -204,7 +204,7 @@ namespace comet
         int location = glGetUniformLocation(m_program, name.c_str());
         if (location == GL_INVALID_INDEX)
         {
-            CM_CORE_LOG_ERROR("Uniform {} not found in sharder program", name);
+            CM_CORE_LOG_WARN("Uniform {} not found in sharder program {}", name, m_name);
         }
         m_uniformLocationsCache[name] = location;
 
@@ -220,7 +220,7 @@ namespace comet
     void Shader::setUniform(const std::string& name, unsigned int value)
     {
         int location = getUniformLocation(name);
-        glUniform1i(location, value);
+        glUniform1ui(location, value);
     }
 
     void Shader::setUniform(const std::string& name, const glm::vec2& value)

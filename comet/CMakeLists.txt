@@ -29,6 +29,10 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/mesh.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/light.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/directionalLight.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/pointLight.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/spotLight.h
 
     # Sources and private Headers
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
@@ -61,6 +65,9 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/camera.cpp
     ${COMET_SOURCES_DIR}/rendering/renderer.cpp
     ${COMET_SOURCES_DIR}/rendering/material.cpp
+    ${COMET_SOURCES_DIR}/rendering/directionalLight.cpp
+    ${COMET_SOURCES_DIR}/rendering/pointLight.cpp
+    ${COMET_SOURCES_DIR}/rendering/spotLight.cpp
     ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/phongMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/mesh.cpp

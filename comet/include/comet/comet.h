@@ -18,3 +18,6 @@
 #include <comet/phongMaterial.h>
 #include <comet/mesh.h>
 #include <comet/vertex.h>
+#include <comet/directionalLight.h>
+#include <comet/pointLight.h>
+#include <comet/spotLight.h>

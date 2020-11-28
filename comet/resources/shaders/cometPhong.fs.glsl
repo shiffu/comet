@@ -1,37 +1,132 @@
 #version 430 core
 
+#define MAX_MATERIAL_INSTANCES 32
+#define MAX_POINT_LIGHTS 4
+#define MAX_SPOT_LIGHTS 4
+
 in VS_OUT
 {
     vec3 normal;
-    vec3 to_light;
     vec3 to_camera;
+    vec3 to_point_lights[MAX_POINT_LIGHTS];
+    vec3 to_spot_lights[MAX_SPOT_LIGHTS];
+    float distances_to_point_lights[MAX_POINT_LIGHTS];
     flat uint instance_materialID;
 } fs_in;
 
-uniform vec3 light_diffuse = vec3(1.0);
-uniform vec3 light_ambient = vec3(0.07, 0.0, 0.0);
+struct DirectionalLight
+{
+    vec3 direction;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct PointLight
+{
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float linear_attenuation;
+    float quadratic_attenuation;
+};
+
+struct SpotLight
+{
+    vec3 position;
+    vec3 direction;
+    float cutoff;
+    float outer_cutoff;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
 
 // Material uniforms
-uniform vec3 material_diffuse[32];
-uniform vec3 material_specular[32];
-uniform float material_shininess[32];
+uniform vec3 material_diffuse[MAX_MATERIAL_INSTANCES];
+uniform vec3 material_specular[MAX_MATERIAL_INSTANCES];
+uniform float material_shininess[MAX_MATERIAL_INSTANCES];
+
+// Lights uniforms
+uniform uint active_point_lights_count;
+uniform uint active_spot_lights_count;
+uniform DirectionalLight dir_light;
+uniform PointLight point_lights[MAX_POINT_LIGHTS];
+uniform SpotLight spot_lights[MAX_SPOT_LIGHTS];
 
 out vec4 color;
+
+vec3 compute_common_light_effect(vec3 to_light, vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 normal, vec3 to_camera)
+{
+    // Ambient Light
+    vec3 ambient = light_ambient * material_diffuse[fs_in.instance_materialID];
+
+    // Directional Light Diffuse component
+    float diffuse_factor = max(0.0, dot(normal, to_light));
+    vec3 diffuse = material_diffuse[fs_in.instance_materialID] * light_diffuse * diffuse_factor;
+
+    // Directional Light Specular component
+    vec3 light_reflexion = reflect(-to_light, normal);
+    float specular_factor = pow(max(0.0, dot(light_reflexion, to_camera)), material_shininess[fs_in.instance_materialID]);
+    vec3 specular = specular_factor * light_specular * material_specular[fs_in.instance_materialID];
+
+    return (ambient + diffuse + specular);
+}
+
+vec3 compute_dir_light_effect(DirectionalLight light, vec3 normal, vec3 to_camera)
+{
+    vec3 to_light = normalize(-light.direction);
+
+    return compute_common_light_effect(to_light, light.ambient, light.diffuse, light.specular, normal, to_camera);
+}
+
+vec3 compute_point_light_effect(PointLight light, vec3 normal, vec3 to_camera, vec3 to_light, float distance)
+{
+    vec3 result = compute_common_light_effect(to_light, light.ambient, light.diffuse, light.specular, normal, to_camera);
+
+    float attenuation;
+    attenuation = 1.0 / (1.0 + light.linear_attenuation * distance
+                        + light.quadratic_attenuation * distance * distance);
+
+    return result * attenuation;
+}
+
+vec3 compute_spot_light_effect(SpotLight light, vec3 normal, vec3 to_camera, vec3 to_light)
+{
+    vec3 result;
+    float theta = dot(to_light, normalize(-light.direction));
+    float epsilon = light.cutoff - light.outer_cutoff;
+    float intensity = clamp((theta - light.outer_cutoff) / epsilon, 0.0, 1.0);
+
+    result = compute_common_light_effect(to_light, light.ambient, light.diffuse, light.specular, normal, to_camera);
+    result *= intensity;
+
+    return result;
+}
 
 void main()
 {
     vec3 unit_normal = normalize(fs_in.normal);
-    vec3 unit_to_light = normalize(fs_in.to_light);
     vec3 unit_to_camera = normalize(fs_in.to_camera);
 
-    // Diffuse component
-    float diffuse_factor = max(0.0, dot(unit_normal, unit_to_light));
-    vec3 diffuse = material_diffuse[fs_in.instance_materialID] * light_diffuse * diffuse_factor;
+    // Directional Light
+    vec3 frag_color;
+    frag_color = compute_dir_light_effect(dir_light, unit_normal, unit_to_camera);
 
-    // Specular component
-    vec3 light_reflexion = reflect(-unit_to_light, unit_normal);
-    float specular_factor = pow(max(0.0, dot(light_reflexion, unit_to_camera)), material_shininess[fs_in.instance_materialID]);
-    vec3 specular = specular_factor * material_specular[fs_in.instance_materialID];
+    // Point Light(s)
+    for(int i = 0; i < active_point_lights_count; i++)
+    {
+        frag_color += compute_point_light_effect(point_lights[i], unit_normal, unit_to_camera,
+                                                    fs_in.to_point_lights[i], fs_in.distances_to_point_lights[i]);
+    }
 
-    color = vec4(light_ambient + diffuse + specular, 1.0f);
+    // Spot Light(s)
+    for(int i = 0; i < active_spot_lights_count; i++)
+    {
+        frag_color += compute_spot_light_effect(spot_lights[i], unit_normal, unit_to_camera,
+                                                    fs_in.to_spot_lights[i]);
+    }
+
+    color = vec4(frag_color, 1.0f);
 }

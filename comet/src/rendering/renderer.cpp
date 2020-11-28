@@ -8,6 +8,8 @@
 #include <comet/indexBuffer.h>
 #include <comet/vertexBuffer.h>
 #include <comet/commandBuffer.h>
+#include <comet/mesh.h>
+#include <comet/light.h>
 
 namespace comet
 {
@@ -66,6 +68,11 @@ namespace comet
 
             delete pShaderDrawContext;
         }
+    }
+
+    void Renderer::addLight(Light* light)
+    {
+        m_lights.push_back(light);
     }
 
     void Renderer::addMesh(Mesh* mesh)
@@ -258,6 +265,11 @@ namespace comet
             currentShader->setUniform(currentShader->getViewProjectionMatrixName(), vpMatrix);
             currentShader->setUniform(currentShader->getViewMatrixName(), viewMatrix);
             currentShader->setUniform(currentShader->getProjectionMatrixName(), projectionMatrix);
+
+            for (auto light : getLights())
+            {
+                light->loadUniforms(currentShader);
+            }
 
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
