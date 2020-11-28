@@ -1,6 +1,7 @@
 #pragma once
 
 #include <comet/window.h>
+#include <memory>
 
 namespace comet
 {
@@ -8,7 +9,7 @@ namespace comet
     class ImguiWrapper
     {
     public:
-        static ImguiWrapper* create();
+        static std::unique_ptr<ImguiWrapper> create();
 
         virtual ~ImguiWrapper() {};
 
@@ -16,9 +17,6 @@ namespace comet
         virtual void newFrame() = 0;
         virtual void render() = 0;
         virtual void shutdown() = 0;
-        
-    private:
-        ImguiWrapper* s_imguiWrapperImp;
     };
 
 } // namespace comet

@@ -172,26 +172,7 @@ namespace comet
     void Application::onImGuiDebugDraw()
     {
         ImGui::Begin("Comet Debug");
-        static std::vector<float> values{};
-        static float fpsAverage{0};
-        static int frameIntervalCount{0};
-
-        ++frameIntervalCount;
         auto FPS = ImGui::GetIO().Framerate;
-        fpsAverage += FPS;
-
-        if (frameIntervalCount == 100)
-        {
-            fpsAverage /= frameIntervalCount;
-            values.insert(values.begin(), frameIntervalCount);
-            if (values.size() > 100)
-            {
-                values.pop_back();
-            }
-            frameIntervalCount = 0.0f;
-            frameIntervalCount = 0;
-        }
-        ImGui::PlotLines("FPS", values.data(), values.size());
 
         ImGui::Text("This window contains default debug information");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / FPS, FPS);
@@ -296,7 +277,6 @@ namespace comet
         if (m_imguiWrapper)
         {
             m_imguiWrapper->shutdown();
-            delete m_imguiWrapper;
             m_imguiWrapper = nullptr;
         }
         

@@ -6,12 +6,12 @@
 namespace comet
 {
     
-    ImguiWrapper* ImguiWrapper::create()
+    std::unique_ptr<ImguiWrapper> ImguiWrapper::create()
     {
-        ImguiWrapper* instance{nullptr};
+        std::unique_ptr<ImguiWrapper> instance{};
 
         #if COMET_WINDOW_IMPL == COMET_WINDOW_IMPL_GLFW
-            instance = new ImguiGlfwWrapper();
+            instance = std::make_unique<ImguiGlfwWrapper>();
         #elif COMET_WINDOW_IMPL == COMET_WINDOW_IMPL_SFML
             #warning "ImGui Wrapper for SFML Window management is not supported for now"
         #else

@@ -2,6 +2,7 @@
 
 #include <comet/window.h>
 #include <comet/event.h>
+#include <memory>
 
 namespace comet
 {
@@ -66,7 +67,7 @@ namespace comet
         unsigned int m_fpsCap{0};
         // Fixed update time in ms (used to onFixedUpdate function call)
         float m_fixedUpdateTime{20.0f};
-        ImguiWrapper* m_imguiWrapper{nullptr};
+        std::unique_ptr<ImguiWrapper> m_imguiWrapper;
     };
 
 } // namespace comet
