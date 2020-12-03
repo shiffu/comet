@@ -84,7 +84,7 @@ namespace comet
         {
             // Default to the mesh Material which is always there if the mesh instance
             // doesn't have any material attached to it
-            auto meshInstanceMaterial = meshInstance.getMaterial();
+            auto meshInstanceMaterial = meshInstance->getMaterial();
             if (meshInstanceMaterial == nullptr)
             {
                 if (meshMaterial == nullptr)
@@ -92,7 +92,7 @@ namespace comet
                     meshMaterial = &m_defaultColorMaterial;
                 }
                 meshInstanceMaterial = meshMaterial;
-                meshInstance.setMaterial(meshInstanceMaterial);
+                meshInstance->setMaterial(meshInstanceMaterial);
             }
             auto materialName = meshInstanceMaterial->getName();
             auto shaderName = meshInstanceMaterial->getShaderName();
@@ -114,7 +114,7 @@ namespace comet
             multiDrawIndirectContextsToUpdate.insert(drawContextMap[key]);
         }
 
-        // Update Context Buffers
+        // Update Context Buffers' size
         for (auto currentDrawContext : multiDrawIndirectContextsToUpdate)
         {
             if (mesh->hasIndices())
@@ -205,9 +205,9 @@ namespace comet
                     auto instanceCount =  mesh->getInstanceCount();
                     auto baseInstance =  pMaterialDrawContext->instanceBuffer.getCurrentCount();
 
-                    for (auto instance : mesh->getMeshInstances())
+                    for (auto& instance : mesh->getMeshInstances())
                     {
-                        auto data = instance.getInstanceData();
+                        auto data = instance->getInstanceData();
                         pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&data, sizeof(data), 1);
                     }
 
@@ -241,9 +241,9 @@ namespace comet
                 pMaterialDrawContext->instanceBuffer.mapMemory(GL_WRITE_ONLY);
                 for (auto mesh : pMaterialDrawContext->meshes)
                 {
-                    for (auto instance : mesh->getMeshInstances())
+                    for (auto& instance : mesh->getMeshInstances())
                     {
-                        auto data = instance.getInstanceData();
+                        auto data = instance->getInstanceData();
                         pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&data, sizeof(data), 1);
                     }
                 }

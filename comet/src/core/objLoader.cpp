@@ -57,7 +57,7 @@ namespace comet
                 {
                     tex.clear();
                     StringUtils::split(tex, line.substr(3));
-                    if (tex.size() != 3)
+                    if (tex.size() != 2)
                     {
                         CM_CORE_LOG_ERROR("Format of obj file '{}' is incorrect (line {})", lineNumber);
                         break;
@@ -97,12 +97,12 @@ namespace comet
             do
             {
                 verticesDef.clear();
-                vertexAttributes.clear();
                 if (line.substr(0, 2) == "f ")
                 {
                     StringUtils::split(verticesDef, line.substr(2));
                     for (auto vertexDef : verticesDef)
                     {
+                        vertexAttributes.clear();
                         StringUtils::split(vertexAttributes, vertexDef, '/');
 
                         auto positionIdx = std::stoi(vertexAttributes[0]) - 1;

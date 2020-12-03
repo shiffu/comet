@@ -33,6 +33,8 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/directionalLight.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/pointLight.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/spotLight.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/texture.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/textureRegistry.h
 
     # Sources and private Headers
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
@@ -73,6 +75,8 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/mesh.cpp
     ${COMET_SOURCES_DIR}/rendering/imguiWrapper.h
     ${COMET_SOURCES_DIR}/rendering/imguiWrapper.cpp
+    ${COMET_SOURCES_DIR}/rendering/texture.cpp
+    ${COMET_SOURCES_DIR}/rendering/textureRegistry.cpp
 
     # ImGui
     ${COMET_SOURCES_DIR}/vendors/imgui/imconfig.h
@@ -87,6 +91,10 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_glfw.h
     ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
     ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
+
+    # stb
+    ${COMET_SOURCES_DIR}/vendors/stb/stb_image.h
+    ${COMET_SOURCES_DIR}/vendors/stb/stb_image.cpp
  )
 
 set(CMAKE_CXX_STANDARD 17)

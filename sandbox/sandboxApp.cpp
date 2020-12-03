@@ -26,10 +26,10 @@ void SandboxApp::onStart()
     m_camera.setPosition(glm::vec3{0.0f, 5.0f, 17.0f});
 
     Vertex data[] = {
-        {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+        {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}
     };
 
     unsigned int indices[] = {
@@ -63,11 +63,12 @@ void SandboxApp::onStart()
     m_renderer.addLight(m_spotLights.back().get());
 
     // Create Meshes
-    m_cube = std::make_unique<comet::Mesh>("dragon.obj");
+    m_cube = std::make_unique<comet::Mesh>("torus.obj");
     m_quad = std::make_unique<comet::Mesh>(data, sizeof(data) / sizeof(data[0]),
                             (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
     
     // Set Materials
+    // m_phongMaterial.setAlbedoTexture("checkerboard.png");
     m_phongMaterial.setDiffuse(glm::vec3(0.9));
     m_phongMaterial.setSpecular(glm::vec3(1.0f));
     m_phongMaterial.setShininess(50.0f);
@@ -77,16 +78,24 @@ void SandboxApp::onStart()
 
     // Set Instances data
     auto& cubeInstance = m_cube->createMeshInstance();
-    cubeInstance.move(glm::vec3(0.0f, 0.0f, -10.0f));
-    cubeInstance.scale(0.7f);
+    cubeInstance.move(glm::vec3(0.0f, 1.0f, -10.0f));
+    cubeInstance.scale(2.0f);
+
+    auto& cubeInstance2 = m_cube->createMeshInstance();
+    cubeInstance2.move(glm::vec3(5.0f, 1.0f, -10.0f));
+    cubeInstance2.scale(1.5f);
+
+    static comet::PhongMaterial phongMaterial2;
+    phongMaterial2.setAlbedoTexture("checkerboard.png");
+    cubeInstance2.setMaterial(&phongMaterial2);
 
     const float translationStep = 1.05f;
-    const float xOffset = -18.0f;
-    const float yOffset = -2.0f;
+    const float xOffset = -10.0f;
+    const float yOffset = -5.0f;
     
-    for (uint32_t i = 0; i < 32; ++i)
+    for (uint32_t i = 0; i < 20; ++i)
     {
-        for (uint32_t j = 0; j < 32; ++j)
+        for (uint32_t j = 0; j < 20; ++j)
         {
             auto& instance = m_quad->createMeshInstance();
             instance.rotate(1.5f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -283,7 +292,7 @@ void SandboxApp::onUpdate(double deltaTime)
     if (!m_pauseAnimation)
     {
         auto angle = rotSpeed * deltaTime;
-        m_cube->getMeshInstances()[0].rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
+        m_cube->getMeshInstances()[0]->rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     m_renderer.reloadInstanceData();

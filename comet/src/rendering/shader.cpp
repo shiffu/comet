@@ -217,7 +217,13 @@ namespace comet
         glUniform1f(location, value);
     }
 
-    void Shader::setUniform(const std::string& name, unsigned int value)
+    void Shader::setUniform(const std::string& name, int value)
+    {
+        int location = getUniformLocation(name);
+        glUniform1i(location, value);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t value)
     {
         int location = getUniformLocation(name);
         glUniform1ui(location, value);
@@ -245,6 +251,12 @@ namespace comet
     {
         int location = getUniformLocation(name);
         glUniformMatrix4fv(location, 1, false, &value[0][0]);
+    }
+
+    void Shader::setUniform(const std::string& name, uint32_t count, const int* values)
+    {
+        int location = getUniformLocation(name);
+        glUniform1iv(location, count, (GLint*)values);
     }
 
     void Shader::setUniform(const std::string& name, uint32_t count, const uint32_t* values)

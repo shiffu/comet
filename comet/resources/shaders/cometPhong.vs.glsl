@@ -56,6 +56,7 @@ uniform SpotLight spot_lights[MAX_SPOT_LIGHTS];
 
 out VS_OUT
 {
+    vec2 tex_coord;
     vec3 normal;
     vec3 to_camera;
     vec3 to_point_lights[MAX_POINT_LIGHTS];
@@ -67,6 +68,8 @@ out VS_OUT
 
 void main()
 {
+    vs_out.tex_coord = texCoordinate;
+    
     vec3 world_normal = mat3(instance_model_matrix) * normal;
     world_normal = normalize(world_normal);
     vec4 world_position = instance_model_matrix * vec4(position, 1.0);

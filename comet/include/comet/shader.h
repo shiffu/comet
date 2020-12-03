@@ -45,6 +45,7 @@ namespace comet
         // Uniform methods
         // scalars
         int getUniformLocation(const std::string& name);
+        void setUniform(const std::string& name, int value);
         void setUniform(const std::string& name, uint32_t value);
         void setUniform(const std::string& name, float value);
         void setUniform(const std::string& name, const glm::vec2& value);
@@ -53,6 +54,7 @@ namespace comet
         void setUniform(const std::string& name, const glm::mat4& value);
 
         // arrays
+        void setUniform(const std::string& name, uint32_t count, const int* values);
         void setUniform(const std::string& name, uint32_t count, const uint32_t* values);
         void setUniform(const std::string& name, uint32_t count, const float* values);
         void setUniform(const std::string& name, uint32_t count, const glm::vec3* values);

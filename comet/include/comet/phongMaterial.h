@@ -3,6 +3,8 @@
 #include <comet/material.h>
 #include <vector>
 #include <glm/vec4.hpp>
+#include <memory>
+#include <comet/texture.h>
 
 namespace comet
 {
@@ -15,6 +17,9 @@ namespace comet
         PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular);
         PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular, float shininess);
         ~PhongMaterial() {}
+
+        void setAlbedoTexture(const char* filename);
+        int32_t getAlbedoTextureIndex() const { return m_albedoTextureIndex; }
 
         void setDiffuse(const glm::vec3& diffuse) { m_diffuse = diffuse; }
         const glm::vec3& getDiffuse() const { return m_diffuse; }
@@ -31,16 +36,20 @@ namespace comet
     
     private:
         std::vector<PhongMaterial*>& getMaterialInstances();
+        Texture2DArray* getAlbedoTextureArray();
         void init();
 
     private:
-        static const char* MATERIAL_NAME;
         static const char* SHADER_NAME;
+        static const char* MATERIAL_NAME;
+        static const char* MATERIAL_ALBEDO_TEXTURE_NAME;
 
     private:
         glm::vec3 m_diffuse;
         glm::vec3 m_specular;
         float m_shininess;
+        std::string m_albedoTexturePath;
+        int32_t m_albedoTextureIndex{-1};
     };
     
 } // namespace comet

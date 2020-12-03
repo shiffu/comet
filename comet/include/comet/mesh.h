@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <comet/vertex.h>
 #include <glm/mat4x4.hpp>
 #include <comet/material.h>
@@ -21,6 +22,7 @@ namespace comet
     {
     public:
         MeshInstance(Mesh* mesh) : m_mesh(mesh) {};
+        ~MeshInstance() {}
 
         // TODO: for the moment there is no check that all instances have the same material, but they must have.
         // Need to find a way to add this material constraint
@@ -75,7 +77,7 @@ namespace comet
         Material* getMeshMaterial() { return m_meshMaterial; }
 
         MeshInstance& createMeshInstance();
-        std::vector<MeshInstance>& getMeshInstances() { return m_meshInstances; };
+        std::vector<std::unique_ptr<MeshInstance>>& getMeshInstances() { return m_meshInstances; };
         uint32_t getInstanceCount() const { return m_meshInstances.size(); }
         size_t getInstanceDataSize() const { return sizeof(MeshInstanceData); }
 
@@ -84,7 +86,7 @@ namespace comet
         uint32_t m_vertexCount{0};
         std::vector<uint32_t> m_indices{};
         std::vector<Vertex> m_vertices{};
-        std::vector<MeshInstance> m_meshInstances{};
+        std::vector<std::unique_ptr<MeshInstance>> m_meshInstances{};
         Material* m_meshMaterial{nullptr};
     };
 

@@ -28,9 +28,9 @@ namespace comet
 
     MeshInstance& Mesh::createMeshInstance()
     {
-        m_meshInstances.emplace_back(this);
+        m_meshInstances.emplace_back(std::make_unique<MeshInstance>(this));
         
-        return m_meshInstances.back();
+        return *(m_meshInstances.back().get());
     }
 
     void Mesh::setData(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount)

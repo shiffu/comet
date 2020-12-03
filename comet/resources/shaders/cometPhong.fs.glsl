@@ -6,6 +6,7 @@
 
 in VS_OUT
 {
+    vec2 tex_coord;
     vec3 normal;
     vec3 to_camera;
     vec3 to_point_lights[MAX_POINT_LIGHTS];
@@ -43,10 +44,19 @@ struct SpotLight
     vec3 specular;
 };
 
+struct MaterialInstance
+{
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+    int albedo_texture_idx;
+};
+
+
 // Material uniforms
-uniform vec3 material_diffuse[MAX_MATERIAL_INSTANCES];
-uniform vec3 material_specular[MAX_MATERIAL_INSTANCES];
-uniform float material_shininess[MAX_MATERIAL_INSTANCES];
+uniform MaterialInstance material_instances[MAX_MATERIAL_INSTANCES];
+uniform sampler2D white_1x1_texture;
+uniform sampler2DArray albedo_textures;
 
 // Lights uniforms
 uniform uint active_point_lights_count;
@@ -59,17 +69,30 @@ out vec4 color;
 
 vec3 compute_common_light_effect(vec3 to_light, vec3 light_ambient, vec3 light_diffuse, vec3 light_specular, vec3 normal, vec3 to_camera)
 {
+    MaterialInstance material_instance = material_instances[fs_in.instance_materialID];
+    // vec3 tex_color = texture(albedo_textures, vec3(fs_in.tex_coord, material_instance.albedo_texture_idx)).xyz;
+    vec3 tex_color;
+    
+    if (material_instance.albedo_texture_idx >= 0)
+    {
+        tex_color = texture(albedo_textures, vec3(fs_in.tex_coord, material_instance.albedo_texture_idx)).xyz;
+    }
+    else
+    {
+        tex_color = texture(white_1x1_texture, vec2(0)).xyz;
+    }
+
     // Ambient Light
-    vec3 ambient = light_ambient * material_diffuse[fs_in.instance_materialID];
+    vec3 ambient = light_ambient * tex_color;
 
     // Directional Light Diffuse component
     float diffuse_factor = max(0.0, dot(normal, to_light));
-    vec3 diffuse = material_diffuse[fs_in.instance_materialID] * light_diffuse * diffuse_factor;
+    vec3 diffuse = material_instance.diffuse * tex_color * light_diffuse * diffuse_factor;
 
     // Directional Light Specular component
     vec3 light_reflexion = reflect(-to_light, normal);
-    float specular_factor = pow(max(0.0, dot(light_reflexion, to_camera)), material_shininess[fs_in.instance_materialID]);
-    vec3 specular = specular_factor * light_specular * material_specular[fs_in.instance_materialID];
+    float specular_factor = pow(max(0.0, dot(light_reflexion, to_camera)), material_instance.shininess);
+    vec3 specular = specular_factor * light_specular * material_instance.specular;
 
     return (ambient + diffuse + specular);
 }
