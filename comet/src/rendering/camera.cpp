@@ -59,6 +59,16 @@ namespace comet
         m_projection = glm::ortho(0.0f, m_width, 0.0f, m_height, m_near, m_far);
     }
 
+    void Camera::setOrthographic(float width, float height, float near, float far)
+    {
+        m_fov = 0.0f;
+        m_width = width;
+        m_height = height;
+        m_near = near;
+        m_far = far;
+        m_projection = glm::ortho(0.0f, m_width, 0.0f, m_height, m_near, m_far);
+    }
+
     void Camera::setOrthographic(float near, float far)
     {
         updateWidthAndHeightFromWindow();
@@ -85,7 +95,6 @@ namespace comet
         
         m_yaw = glm::angle(m_right, -glm::normalize(m_position - m_target));
         m_pitch = glm::angle(m_front, -glm::normalize(m_position - m_target));
-
         buildViewMatrix();
     }
 
@@ -123,24 +132,27 @@ namespace comet
 
     void Camera::addYaw(float yaw)
     {
-        m_yaw = yaw;
-        m_front = glm::rotate(glm::normalize(m_front), m_yaw, m_up);
+        float deltaYaw = yaw;
+        m_yaw += deltaYaw;
+        m_front = glm::rotate(glm::normalize(m_front), deltaYaw, m_up);
         updateDirections();
         buildViewMatrix();
     }
     
     void Camera::addPitch(float pitch)
     {
-        m_pitch = pitch;
-        m_front = glm::rotate(glm::normalize(m_front), m_pitch, m_right);
+        float deltaPitch = pitch;
+        m_pitch += deltaPitch;
+        m_front = glm::rotate(glm::normalize(m_front), deltaPitch, m_right);
         updateDirections();
         buildViewMatrix();
     }
     
     void Camera::addRoll(float roll)
     {
-        m_roll = roll;
-        m_up = glm::rotate(glm::normalize(m_up), -m_roll, m_front);
+        float deltaRoll = -roll;
+        m_roll += deltaRoll;
+        m_up = glm::rotate(glm::normalize(m_up), deltaRoll, m_front);
         updateDirections();
         buildViewMatrix();
     }

@@ -22,6 +22,7 @@ namespace comet
         void setPerspective(float fov, float width, float height, float near, float far);
         void setPerspective(float fov, float near, float far);
         void setOrthographic(float left, float right, float bottom, float top, float near, float far);
+        void setOrthographic(float width, float height, float near, float far);
         void setOrthographic(float near, float far);
 
         const glm::vec3& getTarget() { return m_target; };
@@ -52,7 +53,7 @@ namespace comet
         const glm::vec3& getRight() const { return m_right; }
         void setRight(const glm::vec3& right);
         
-        float getRatio() const { return m_width / m_height; }
+        float getAspectRatio() const { return m_width / m_height; }
 
         float getWidth() const { return m_width; }
         void setWidth(float width) { m_width = width; }

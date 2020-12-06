@@ -79,7 +79,7 @@ void SandboxApp::onStart()
     // Set Instances data
     auto& cubeInstance = m_cube->createMeshInstance();
     cubeInstance.move(glm::vec3(0.0f, 1.0f, -10.0f));
-    cubeInstance.scale(2.0f);
+    cubeInstance.scale(1.7f);
 
     auto& cubeInstance2 = m_cube->createMeshInstance();
     cubeInstance2.move(glm::vec3(5.0f, 1.0f, -10.0f));
@@ -233,9 +233,9 @@ void SandboxApp::onImGuiDraw()
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    static const float yawSpeed = glm::radians(360.0) / 2000.0f;
-    static const float pitchSpeed = glm::radians(360.0) / 2000.0f;
-    static const float rollSpeed = glm::radians(360.0) / 2000.0f;
+    static const float yawSpeed = glm::radians(360.0) / 3000.0f;
+    static const float pitchSpeed = glm::radians(360.0) / 3000.0f;
+    static const float rollSpeed = glm::radians(360.0) / 3000.0f;
     static const float moveSpeed = 0.015f;
     static const float rotSpeed = glm::radians(360.0) / 15000.0f;
 
