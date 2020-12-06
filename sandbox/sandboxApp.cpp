@@ -2,12 +2,13 @@
 
 #include "sandboxApp.h"
 #include <string>
+#include <sstream>
 #include <math.h>
 #include <utility>
 #include <memory>
 #include <comet/input.h>
 #include <comet/vertex.h>
-#include <imgui.h>
+#include <imgui/imgui.h>
 
 comet::Application* comet::Application::getInstance()
 {
@@ -129,24 +130,35 @@ bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledE
 
 void ligtColorEdit(const char* label, comet::Light* light)
 {
-    // Ambient
-    auto ambientColor = light->getAmbient();
-    float ambientData[] = {ambientColor.x, ambientColor.y, ambientColor.z};
-    ImGui::ColorEdit3((std::string(label) + " Light Ambient Color").c_str(), ambientData);
-    light->setAmbient({ambientData[0], ambientData[1], ambientData[2]});
+    {
+        // Ambient
+        std::stringstream ss;
+        auto ambientColor = light->getAmbient();
+        float ambientData[] = {ambientColor.x, ambientColor.y, ambientColor.z};
+        ss << label << " Light Ambient Color";
+        ImGui::ColorEdit3(ss.str().c_str(), ambientData);
+        light->setAmbient({ambientData[0], ambientData[1], ambientData[2]});
+    }
 
-    // Diffuse
-    auto diffuseColor = light->getDiffuse();
-    float diffuseData[] = {diffuseColor.x, diffuseColor.y, diffuseColor.z};
-    ImGui::ColorEdit3((std::string(label) + " Light Diffuse Color").c_str(), diffuseData);
-    light->setDiffuse({diffuseData[0], diffuseData[1], diffuseData[2]});
+    {
+        // Diffuse
+        std::stringstream ss;
+        auto diffuseColor = light->getDiffuse();
+        float diffuseData[] = {diffuseColor.x, diffuseColor.y, diffuseColor.z};
+        ss << label << " Light Diffuse Color";
+        ImGui::ColorEdit3(ss.str().c_str(), diffuseData);
+        light->setDiffuse({diffuseData[0], diffuseData[1], diffuseData[2]});
+    }
     
-    // Specular
-    auto specularColor = light->getSpecular();
-    float specularData[] = {specularColor.x, specularColor.y, specularColor.z};
-    ImGui::ColorEdit3((std::string(label) + " Light Specular Color").c_str(), specularData);
-    light->setSpecular({specularData[0], specularData[1], specularData[2]});
-
+    {
+        // Specular
+        std::stringstream ss;
+        auto specularColor = light->getSpecular();
+        float specularData[] = {specularColor.x, specularColor.y, specularColor.z};
+        ss << label << " Light Specular Color";
+        ImGui::ColorEdit3(ss.str().c_str(), specularData);
+        light->setSpecular({specularData[0], specularData[1], specularData[2]});
+    }
 }
 
 void SandboxApp::onImGuiDraw()
@@ -226,7 +238,7 @@ void SandboxApp::onImGuiDraw()
         currentSpotLight->setDirection({dir[0], dir[1], dir[2]});
     }
     
-    ligtColorEdit("Point", currentSpotLight);
+    ligtColorEdit("Spot", currentSpotLight);
 
     ImGui::End();
 }

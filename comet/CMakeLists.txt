@@ -79,22 +79,25 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/textureRegistry.cpp
 
     # ImGui
-    ${COMET_SOURCES_DIR}/vendors/imgui/imconfig.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_draw.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_widgets.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_demo.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_opengl3.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_opengl3.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_glfw.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui_impl_glfw.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imconfig.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_draw.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_widgets.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_demo.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_opengl3.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_opengl3.h
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.cpp
+    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.h
     ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
     ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
 
     # stb
     ${COMET_SOURCES_DIR}/vendors/stb/stb_image.h
     ${COMET_SOURCES_DIR}/vendors/stb/stb_image.cpp
+
+    # entt
+    ${COMET_SOURCES_DIR}/vendors/entt/entt/entt.hpp
  )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -131,6 +134,7 @@ target_include_directories(comet
         ${COMET_SOURCES_DIR}/vendors/glad/include
         ${COMET_SOURCES_DIR}/vendors/glm
         ${COMET_SOURCES_DIR}/vendors/imgui
+        ${COMET_SOURCES_DIR}/vendors/entt
     PRIVATE
         ${COMET_SOURCES_DIR}
         ${COMET_SOURCES_DIR}/vendors
