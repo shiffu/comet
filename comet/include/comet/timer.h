@@ -13,9 +13,12 @@ namespace comet
     class Timer
     {
     public:
-        Timer(const char* name) : m_name(name)
+        Timer(const char* name, bool paused = false) : m_name(name), m_paused(paused)
         {
-            start();
+            if (!m_paused)
+            {
+                start();
+            }
         }
 
         ~Timer()

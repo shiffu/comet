@@ -5,8 +5,13 @@
 namespace comet
 {
 
+    class MaterialRegistry;
+    class VertexBufferLayout;
+    
     class Material
     {
+        friend class MaterialRegistry;
+
     public:
         Material(const char* name, const char* shaderName) : m_name(name), m_shaderName(shaderName) {}
 
@@ -16,7 +21,12 @@ namespace comet
         uint32_t getInstanceId() const { return m_instanceID; }
 
         virtual Shader* getShader();
+        virtual uint32_t getTypeHash() const = 0;
         virtual void loadUniforms() = 0;
+
+        // Vertex and Instance Buffers Layout
+        virtual void updateVboDataLayout(VertexBufferLayout& layout) const = 0;
+        virtual void updateInstanceDataLayout(VertexBufferLayout& layout) const = 0;
 
     protected:
         const std::string m_name;

@@ -1,7 +1,7 @@
 #include <comet/shaderRegistry.h>
 #include <experimental/filesystem>
 #include <comet/log.h>
-#include <core/resourceManager.h>
+#include <comet/resourceManager.h>
 
 namespace comet
 {

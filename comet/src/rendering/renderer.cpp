@@ -1,26 +1,29 @@
 #include <glad/glad.h>
 #include <comet/renderer.h>
-#include <set>
-#include <unordered_map>
 #include <glm/mat4x4.hpp>
 #include <comet/shader.h>
 #include <comet/vertexArray.h>
 #include <comet/indexBuffer.h>
 #include <comet/vertexBuffer.h>
 #include <comet/commandBuffer.h>
-#include <comet/mesh.h>
 #include <comet/light.h>
+#include <comet/utils.h>
+#include <comet/scene.h>
+#include <comet/components.h>
+#include <comet/materialRegistry.h>
+#include <comet/resourceManager.h>
+
 
 namespace comet
 {
     struct MultiDrawKey
     {
-        std::string materialName{};
+        uint32_t materialType{};
         bool hasIndices;
     
         bool operator==(const MultiDrawKey& other) const
         {
-            return materialName == other.materialName && hasIndices == other.hasIndices;
+            return materialType == other.materialType && hasIndices == other.hasIndices;
         }
     };
 
@@ -28,11 +31,26 @@ namespace comet
     {
         std::size_t operator()(const MultiDrawKey& key) const
         {
-            std::size_t h1 = std::hash<std::string>()(key.materialName);
             std::size_t h2 = std::hash<bool>()(key.hasIndices);
 
-            return h1 ^ h2;
+            return key.materialType ^ h2;
         }
+    };
+
+    struct MeshInstanceData
+    {
+        MeshInstanceData() = default;
+        MeshInstanceData(const glm::mat4& transform, uint32_t materialInstanceId)
+            : modelTransform(transform), materialInstanceId(materialInstanceId) {}
+
+        glm::mat4 modelTransform{1.0f};
+        uint32_t materialInstanceId{0};
+    };
+
+    struct MeshAndInstances
+    {
+        StaticMesh* staticMesh;
+        std::vector<MeshInstanceData> instancesData;
     };
 
     struct MultiDrawIndirectContext
@@ -45,7 +63,8 @@ namespace comet
         VertexBuffer vbo{GL_STATIC_DRAW};
         VertexBuffer instanceBuffer{GL_DYNAMIC_DRAW};
         CommandBuffer commandBuffer{GL_DYNAMIC_DRAW};
-        std::vector<Mesh*> meshes;
+
+        std::unordered_map<uint32_t, MeshAndInstances> staticMeshes;
     };
 
     struct ShaderDrawContext
@@ -75,63 +94,68 @@ namespace comet
         m_lights.push_back(light);
     }
 
-    void Renderer::addMesh(Mesh* mesh)
+    void Renderer::addScene(Scene* scene)
     {
-        std::set<MultiDrawIndirectContext*> multiDrawIndirectContextsToUpdate{};
-        auto meshMaterial = mesh->getMeshMaterial();
-        
-        for (auto& meshInstance : mesh->getMeshInstances())
+        m_scene = scene;
+        auto& registry = m_scene->m_registry;
+
+        // TODO: From the doc: consider creating the group when no components have been assigned yet.
+        // If the registry is empty, preparation is extremely fast.
+        registry.group<TransformComponent, MeshComponent>().each([&](auto& transform, auto& mesh)
         {
-            // Default to the mesh Material which is always there if the mesh instance
-            // doesn't have any material attached to it
-            auto meshInstanceMaterial = meshInstance->getMaterial();
-            if (meshInstanceMaterial == nullptr)
+            auto material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
+            if (material == nullptr)
             {
-                if (meshMaterial == nullptr)
-                {
-                    meshMaterial = &m_defaultColorMaterial;
-                }
-                meshInstanceMaterial = meshMaterial;
-                meshInstance->setMaterial(meshInstanceMaterial);
+                material = &m_defaultColorMaterial;
             }
-            auto materialName = meshInstanceMaterial->getName();
-            auto shaderName = meshInstanceMaterial->getShaderName();
 
             // Check if a new Shader Draw context is needed
-            if (m_shaderDrawContexts.find(shaderName) == m_shaderDrawContexts.end())
+            auto shader = material->getShader();
+            auto shaderTypeHash = shader->getTypeHash();
+            if (m_shaderDrawContexts.find(shaderTypeHash) == m_shaderDrawContexts.end())
             {
-                m_shaderDrawContexts[shaderName] = new ShaderDrawContext();
-                m_shaderDrawContexts[shaderName]->shader = meshInstanceMaterial->getShader();
+                m_shaderDrawContexts[shaderTypeHash] = new ShaderDrawContext();
+                m_shaderDrawContexts[shaderTypeHash]->shader = shader;
             }
 
             // Check if a new Material Indirect Draw context is needed
-            auto key = MultiDrawKey{materialName, mesh->hasIndices()};
-            auto& drawContextMap = m_shaderDrawContexts[shaderName]->multiDrawIndirectContexts;
+            auto staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
+            auto staticMesh = staticMeshHandler.resource;
+            auto hasIndices = staticMesh->hasIndices();
+            auto key = MultiDrawKey{mesh.materialTypeId, hasIndices};
+            auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
             if (drawContextMap.find(key) == drawContextMap.end())
             {
-                drawContextMap[key] = new MultiDrawIndirectContext(meshInstanceMaterial);
+                drawContextMap[key] = new MultiDrawIndirectContext(material);
             }
-            multiDrawIndirectContextsToUpdate.insert(drawContextMap[key]);
-        }
 
-        // Update Context Buffers' size
-        for (auto currentDrawContext : multiDrawIndirectContextsToUpdate)
-        {
-            if (mesh->hasIndices())
+            auto currentDrawContext = drawContextMap[key];
+            // Check if we are dealing with a new StaticMesh (to update buffers' size)
+            if (currentDrawContext->staticMeshes.find(staticMeshHandler.resourceId) == currentDrawContext->staticMeshes.end())
             {
-                currentDrawContext->ibo.increaseSize(mesh->getIndicesSize());
+                if (hasIndices)
+                {
+                    currentDrawContext->ibo.increaseSize(staticMesh->getIndicesSize());
+                    currentDrawContext->commandBuffer.increaseSize(sizeof(DrawElementsIndirectCommand));
+                }
+                else
+                {
+                    currentDrawContext->commandBuffer.increaseSize(sizeof(DrawArraysIndirectCommand));
+                }
+
+                currentDrawContext->vbo.increaseSize(staticMesh->getVerticesSize());
             }
 
-            currentDrawContext->commandBuffer.increaseSize(sizeof(DrawElementsIndirectCommand));
-            currentDrawContext->vbo.increaseSize(mesh->getVerticesSize());
-            currentDrawContext->instanceBuffer.increaseSize(mesh->getInstanceCount() * mesh->getInstanceDataSize());
-            currentDrawContext->meshes.push_back(mesh);
-        }
+            currentDrawContext->instanceBuffer.increaseSize(sizeof(MeshInstanceData));
+            auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
+            meshAndInstances.staticMesh = staticMesh;
+            meshAndInstances.instancesData.emplace_back(transform.transform, mesh.materialInstanceId);
+        });
     }
 
     void Renderer::allocateBuffersAndSetupLayouts()
     {
-        for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
+        for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
@@ -142,10 +166,7 @@ namespace comet
 
                 // Buffers Layouts definition
                 VertexBufferLayout vboLayout;
-                // Assuming that all mesh in a renderer have the same data structure
-                // TODO: Should we consider having multiple Vertex data structure within on renderer?
-                auto firstMesh = pMaterialDrawContext->meshes[0];
-                firstMesh->updateVboDataLayout(vboLayout);
+                pMaterialDrawContext->material->updateVboDataLayout(vboLayout);
 
                 if (pMaterialDrawContext->ibo.getSize())
                 {
@@ -158,7 +179,7 @@ namespace comet
                 }
 
                 VertexBufferLayout instanceDataLayout;
-                firstMesh->updateInstanceDataLayout(instanceDataLayout);
+                pMaterialDrawContext->material->updateInstanceDataLayout(instanceDataLayout);
                 pMaterialDrawContext->vao.addLayout(instanceDataLayout, pMaterialDrawContext->instanceBuffer);
             }
         }
@@ -166,7 +187,7 @@ namespace comet
 
     void Renderer::loadData()
     {
-        for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
+        for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
@@ -186,29 +207,29 @@ namespace comet
                 }
 
                 // Load Data from Meshes and Mesh Instances
-                for (auto mesh : pMaterialDrawContext->meshes)
+                for (auto [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
                 {
-                    uint32_t indexCount = mesh->getIndexCount();
+                    auto staticMesh = meshAndInstancesData.staticMesh;
+                    uint32_t indexCount = staticMesh->getIndexCount();
                     if (indexCount > 0)
                     {
                         firstIndex = pMaterialDrawContext->ibo.getCurrentCount();
-                        auto indices = mesh->getIndices();
+                        auto indices = staticMesh->getIndices();
                         pMaterialDrawContext->ibo.loadDataInMappedMemory(indices.data(), indexCount);
                     }
 
-                    auto vertices = mesh->getVertices();
-                    auto verticesSize = mesh->getVerticesSize();
-                    auto vertexCount = mesh->getVertexCount();
+                    auto vertices = staticMesh->getVertices();
+                    auto verticesSize = staticMesh->getVerticesSize();
+                    auto vertexCount = staticMesh->getVertexCount();
                     firstVertex = pMaterialDrawContext->vbo.getCurrentCount();
                     pMaterialDrawContext->vbo.loadDataInMappedMemory((const void*)vertices.data(), verticesSize, vertexCount);
 
-                    auto instanceCount =  mesh->getInstanceCount();
+                    auto instanceCount =  static_cast<uint32_t>(meshAndInstancesData.instancesData.size());
                     auto baseInstance =  pMaterialDrawContext->instanceBuffer.getCurrentCount();
 
-                    for (auto& instance : mesh->getMeshInstances())
+                    for (auto& instanceData : meshAndInstancesData.instancesData)
                     {
-                        auto data = instance->getInstanceData();
-                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&data, sizeof(data), 1);
+                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
                     }
 
                     if (indexCount > 1)
@@ -234,22 +255,49 @@ namespace comet
 
     void Renderer::reloadInstanceData()
     {
-        for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
+        t1.resume();
+        auto& registry = m_scene->m_registry;
+        auto currentMeshId{0};
+        auto currentMaterialId{-1};
+        registry.group<TransformComponent, MeshComponent>().each([&](auto& transform, auto& mesh)
+        {
+            auto material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
+            auto shaderTypeHash = material->getShader()->getTypeHash();
+            auto staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
+            auto staticMesh = staticMeshHandler.resource;
+            auto hasIndices = staticMesh->hasIndices();
+            auto key = MultiDrawKey{mesh.materialTypeId, hasIndices};
+            auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
+            auto currentDrawContext = drawContextMap[key];           
+            auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
+            meshAndInstances.staticMesh = staticMesh;
+            if (currentMeshId != staticMeshHandler.resourceId)
+            {
+                currentMeshId = staticMeshHandler.resourceId;
+                meshAndInstances.instancesData.clear();
+            }
+
+            meshAndInstances.instancesData.emplace_back(transform.transform, mesh.materialInstanceId);
+        });
+        t1.pause();
+
+        t2.resume();
+        for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
                 pMaterialDrawContext->instanceBuffer.mapMemory(GL_WRITE_ONLY);
-                for (auto mesh : pMaterialDrawContext->meshes)
+                for (auto [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
                 {
-                    for (auto& instance : mesh->getMeshInstances())
+                    for (auto& instanceData : meshAndInstancesData.instancesData)
                     {
-                        auto data = instance->getInstanceData();
-                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&data, sizeof(data), 1);
+                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
                     }
                 }
                 pMaterialDrawContext->instanceBuffer.unmapMemory();
             }
         }
+        t2.pause();
     }
 
     void Renderer::render(const Camera& camera)
@@ -258,7 +306,7 @@ namespace comet
         auto viewMatrix = camera.getView();
         auto projectionMatrix = camera.getProjection();
 
-        for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
+        for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             auto currentShader = pShaderDrawContext->shader;
             currentShader->bind();
@@ -286,7 +334,8 @@ namespace comet
                 }
                 else
                 {
-                    glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, 1, 0);
+                    glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr,
+                                    pMaterialDrawContext->commandBuffer.getCurrentCount(), 0);
                 }
             }
         }

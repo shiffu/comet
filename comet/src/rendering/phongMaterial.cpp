@@ -1,6 +1,8 @@
 #include <comet/phongMaterial.h>
 #include <comet/textureRegistry.h>
-#include <core/resourceManager.h>
+#include <comet/resourceManager.h>
+#include <comet/materialRegistry.h>
+#include <comet/utils.h>
 #include <sstream>
 
 namespace comet
@@ -9,45 +11,39 @@ namespace comet
     const char* PhongMaterial::SHADER_NAME = "cometPhong";
     const char* PhongMaterial::MATERIAL_ALBEDO_TEXTURE_NAME = "cometPhongMaterial-AlbedoTextureArray";
 
-
-    std::vector<PhongMaterial*>& PhongMaterial::getMaterialInstances()
+    constexpr uint32_t getTypeHashImpl()
     {
-        static std::vector<PhongMaterial*> s_materialInstances{};
-        return s_materialInstances;
+        constexpr uint32_t typeHash = utils::hashStr("PhongMaterial");
+        return typeHash;
     }
 
     PhongMaterial::PhongMaterial()
         : Material(MATERIAL_NAME, SHADER_NAME),
             m_diffuse({1.0}), m_specular({0.0f}), m_shininess(0.1f)
     {       
-        init(); 
     }
 
     PhongMaterial::PhongMaterial(const glm::vec3& diffuse)
         : Material(MATERIAL_NAME, SHADER_NAME),
         m_diffuse(diffuse), m_specular({0.0f}), m_shininess(0.1f)
     {
-        init(); 
     }
 
     PhongMaterial::PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular)
         : Material(MATERIAL_NAME, SHADER_NAME),
         m_diffuse(diffuse), m_specular(specular), m_shininess(0.1f)
     {
-        init(); 
     }
 
     PhongMaterial::PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular, float shininess)
         : Material(MATERIAL_NAME, SHADER_NAME),
         m_diffuse(diffuse), m_specular(specular), m_shininess(shininess)
     {
-        init(); 
     }
 
-    void PhongMaterial::init()
+    uint32_t PhongMaterial::getTypeHash() const
     {
-        m_instanceID = getMaterialInstances().size();
-        getMaterialInstances().push_back(this);
+        return getTypeHashImpl();
     }
 
     Texture2DArray* PhongMaterial::getAlbedoTextureArray()
@@ -62,6 +58,23 @@ namespace comet
         m_albedoTextureIndex = textureArray->addTexture2D(filename);
     }
 
+    // Vertex and Instance Buffers Layout
+    void PhongMaterial::updateVboDataLayout(VertexBufferLayout& layout) const
+    {
+        layout.add<float>(3, false, 0); // position
+        layout.add<float>(3, false, 1); // normal
+        layout.add<float>(2, false, 2); // texture coordinate
+    }
+
+    void PhongMaterial::updateInstanceDataLayout(VertexBufferLayout& layout) const
+    {
+        layout.add<float>(4, false, 10, 1); //
+        layout.add<float>(4, false, 11, 1); //
+        layout.add<float>(4, false, 12, 1); // Instance Model to Word Matrix transform
+        layout.add<float>(4, false, 13, 1); //
+        layout.add<unsigned int>(1, false, 14, 1);  // Material ID (or index)
+    }
+
     void PhongMaterial::loadUniforms()
     {
         getShader();
@@ -70,26 +83,32 @@ namespace comet
         std::vector<glm::vec3> specularColors{};
         std::vector<float> shininessFactors{};
 
-        auto materialInstances = getMaterialInstances();
-        auto materialInstanceCount = materialInstances.size();
-        diffuseColors.reserve(materialInstanceCount);
-        specularColors.reserve(materialInstanceCount);
-        shininessFactors.reserve(materialInstanceCount);
-
-        std::stringstream ss;
-        for (int i = 0; i <  materialInstanceCount; ++i)
+        auto materialInstancesPtr = MaterialRegistry::getInstance().getMaterialInstances(getTypeHashImpl());
+        if (materialInstancesPtr)
         {
-            ss << "material_instances[" << i << "].diffuse";
-            m_shader->setUniform(ss.str(), materialInstances[i]->getDiffuse()); ss.str(""); ss.clear();
+            auto& materialInstances = *materialInstancesPtr;
+            auto materialInstanceCount = materialInstances.size();
+            diffuseColors.reserve(materialInstanceCount);
+            specularColors.reserve(materialInstanceCount);
+            shininessFactors.reserve(materialInstanceCount);
 
-            ss << "material_instances[" << i << "].specular";
-            m_shader->setUniform(ss.str(), materialInstances[i]->getSpecular()); ss.str(""); ss.clear();
+            std::stringstream ss;
+            for (int i = 0; i <  materialInstanceCount; ++i)
+            {
+                auto material = static_cast<PhongMaterial*>(materialInstances[i].get());
 
-            ss << "material_instances[" << i << "].shininess";
-            m_shader->setUniform(ss.str(), materialInstances[i]->getShininess()); ss.str(""); ss.clear();
+                ss << "material_instances[" << i << "].diffuse";
+                m_shader->setUniform(ss.str(), material->getDiffuse()); ss.str(""); ss.clear();
 
-            ss << "material_instances[" << i << "].albedo_texture_idx";
-            m_shader->setUniform(ss.str(), materialInstances[i]->getAlbedoTextureIndex()); ss.str(""); ss.clear();
+                ss << "material_instances[" << i << "].specular";
+                m_shader->setUniform(ss.str(), material->getSpecular()); ss.str(""); ss.clear();
+
+                ss << "material_instances[" << i << "].shininess";
+                m_shader->setUniform(ss.str(), material->getShininess()); ss.str(""); ss.clear();
+
+                ss << "material_instances[" << i << "].albedo_texture_idx";
+                m_shader->setUniform(ss.str(), material->getAlbedoTextureIndex()); ss.str(""); ss.clear();
+            }
         }
 
         auto textureArray = getAlbedoTextureArray();

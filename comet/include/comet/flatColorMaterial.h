@@ -6,6 +6,7 @@
 
 namespace comet
 {
+    class VertexBufferLayout;
 
     class FlatColorMaterial : public Material
     {
@@ -14,15 +15,16 @@ namespace comet
         FlatColorMaterial(const glm::vec4& color);
         ~FlatColorMaterial() = default;
 
+        uint32_t getTypeHash() const override;
+
         void setColor(const glm::vec4& color) { m_color = color; }
         const glm::vec4& getColor() const { return m_color; }
 
-        std::vector<FlatColorMaterial*>& getInstances() { return getMaterialInstances(); }
-
-        void loadUniforms() override;
+        virtual void loadUniforms() override;
     
-    private:
-        std::vector<FlatColorMaterial*>& getMaterialInstances();
+        // Vertex and Instance Buffers Layout
+        virtual void updateVboDataLayout(VertexBufferLayout& layout) const override;
+        virtual void updateInstanceDataLayout(VertexBufferLayout& layout) const override;
 
     private:
         static const char* MATERIAL_NAME;

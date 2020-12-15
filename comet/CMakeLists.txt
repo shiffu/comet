@@ -6,7 +6,12 @@ add_library(comet STATIC
     # Public Headers
     ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/log.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/assert.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/utils.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/platform.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/singleton.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/resourceManager.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/timer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/window.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
@@ -24,9 +29,10 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/materialRegistry.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/flatColorMaterial.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/phongMaterial.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/mesh.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/staticMesh.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/light.h
@@ -35,21 +41,20 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/spotLight.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/texture.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/textureRegistry.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/entity.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/scene.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/components.h
 
     # Sources and private Headers
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
-    ${COMET_SOURCES_DIR}/core/asserts.h
     ${COMET_SOURCES_DIR}/core/log.cpp
-    ${COMET_SOURCES_DIR}/core/singleton.h
     ${COMET_SOURCES_DIR}/core/application.cpp
     ${COMET_SOURCES_DIR}/core/window.cpp
-    ${COMET_SOURCES_DIR}/core/resourceManager.h
     ${COMET_SOURCES_DIR}/core/resourceManager.cpp
     ${COMET_SOURCES_DIR}/core/objLoader.h
     ${COMET_SOURCES_DIR}/core/objLoader.cpp
     ${COMET_SOURCES_DIR}/core/stringUtils.h
     ${COMET_SOURCES_DIR}/core/stringUtils.cpp
-    ${COMET_SOURCES_DIR}/platforms/platform.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
@@ -72,11 +77,12 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/spotLight.cpp
     ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
     ${COMET_SOURCES_DIR}/rendering/phongMaterial.cpp
-    ${COMET_SOURCES_DIR}/rendering/mesh.cpp
+    ${COMET_SOURCES_DIR}/rendering/staticMesh.cpp
     ${COMET_SOURCES_DIR}/rendering/imguiWrapper.h
     ${COMET_SOURCES_DIR}/rendering/imguiWrapper.cpp
     ${COMET_SOURCES_DIR}/rendering/texture.cpp
     ${COMET_SOURCES_DIR}/rendering/textureRegistry.cpp
+    ${COMET_SOURCES_DIR}/ecs/scene.cpp
 
     # ImGui
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imconfig.h

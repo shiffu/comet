@@ -2,12 +2,14 @@
 
 #include <comet/window.h>
 #include <comet/event.h>
+#include <comet/scene.h>
 #include <memory>
 
 namespace comet
 {
 
     class ImguiWrapper;
+    class Scene;
 
     class Application
     {
@@ -31,6 +33,8 @@ namespace comet
     protected:
         Application(const WindowSpec& spec = WindowSpec());
         virtual ~Application();
+
+        Scene& getActiveScene() noexcept { return m_activeScene; }
 
         // Event Callbacks
         virtual bool onWindowResized(WindowResizedEvent& e);
@@ -64,6 +68,7 @@ namespace comet
         bool m_isRunning{false};
         bool m_isInitialized{false};
         Window* m_window{nullptr};
+        Scene m_activeScene;
         unsigned int m_fpsCap{0};
         // Fixed update time in ms (used to onFixedUpdate function call)
         float m_fixedUpdateTime{20.0f};

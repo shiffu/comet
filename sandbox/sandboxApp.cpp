@@ -1,19 +1,18 @@
 #include <glad/glad.h>
 
 #include "sandboxApp.h"
+#include <comet/comet.h>
+#include <imgui/imgui.h>
 #include <string>
 #include <sstream>
 #include <math.h>
 #include <utility>
 #include <memory>
-#include <comet/input.h>
-#include <comet/vertex.h>
-#include <imgui/imgui.h>
 
 comet::Application* comet::Application::getInstance()
 {
-    static SandboxApp* instance = new SandboxApp();
-    return instance;
+    static auto instance = std::make_unique<SandboxApp>();
+    return instance.get();
 }
 
 SandboxApp::~SandboxApp()
@@ -37,6 +36,56 @@ void SandboxApp::onStart()
         0, 1, 2,
         2, 3, 0
     };
+
+
+    // Meshes
+    auto meshHandler = comet::ResourceManager::getInstance().loadStaticMesh("torus.obj");
+    auto meshGroundHandler = comet::ResourceManager::getInstance().createStaticMesh("groundTiles", data, sizeof(data) / sizeof(data[0]),
+                                                (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
+
+    // Materials
+    auto material = comet::MaterialRegistry::getInstance().createMaterial<comet::PhongMaterial>();
+    auto materialInstanceId = material->getInstanceId();
+    auto materialTypeHash = material->getTypeHash();
+
+    auto material2 = comet::MaterialRegistry::getInstance().createMaterial<comet::PhongMaterial>();
+    auto materialInstanceId2 = material2->getInstanceId();
+    auto materialTypeHash2 = material2->getTypeHash();
+    material2->setAlbedoTexture("checkerboard.png");
+    material2->setDiffuse(glm::vec3(0.9));
+    material2->setSpecular(glm::vec3(1.0f));
+    material2->setShininess(50.0f);
+
+    // Entities
+    comet::Entity e1 = m_scene.createEntity();
+    auto meshComp = e1.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
+    auto& transformComp = e1.getComponent<comet::TransformComponent>();
+    transformComp.move(glm::vec3(2.0f));
+
+    for (int i = 0; i < 2500; ++i)
+    {
+        comet::Entity e = m_scene.createEntity();
+        auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
+        auto& transformComp = e.getComponent<comet::TransformComponent>();
+        transformComp.move(glm::vec3((i * 2)  % 25, 1.0f + (i) % 25, 1.0f - (i / 20)  % 100));
+    }
+
+    const float translationStep = 1.05f;
+    const float xOffset = -10.0f;
+    const float yOffset = -5.0f;
+    
+    for (uint32_t i = 0; i < 50; ++i)
+    {
+        for (uint32_t j = 0; j < 50; ++j)
+        {
+            auto e = m_scene.createEntity();
+            auto meshComp = e.addComponent<comet::MeshComponent>(meshGroundHandler.resourceId, materialTypeHash2, materialInstanceId2);
+            auto& transformComp = e.getComponent<comet::TransformComponent>();
+
+            transformComp.rotate(1.5f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
+            transformComp.move(glm::vec3(xOffset + j * translationStep, yOffset + i * translationStep, 0.0f));
+        }
+    }
 
     // Create the lights
     // Directional Light
@@ -63,50 +112,8 @@ void SandboxApp::onStart()
     m_spotLights.back()->setDiffuse({1.0f, 1.0f, 0.0f});
     m_renderer.addLight(m_spotLights.back().get());
 
-    // Create Meshes
-    m_cube = std::make_unique<comet::Mesh>("torus.obj");
-    m_quad = std::make_unique<comet::Mesh>(data, sizeof(data) / sizeof(data[0]),
-                            (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
-    
-    // Set Materials
-    // m_phongMaterial.setAlbedoTexture("checkerboard.png");
-    m_phongMaterial.setDiffuse(glm::vec3(0.9));
-    m_phongMaterial.setSpecular(glm::vec3(1.0f));
-    m_phongMaterial.setShininess(50.0f);
-
-    m_cube->setMeshMaterial(&m_phongMaterial);
-    m_quad->setMeshMaterial(&m_phongMaterial);
-
-    // Set Instances data
-    auto& cubeInstance = m_cube->createMeshInstance();
-    cubeInstance.move(glm::vec3(0.0f, 1.0f, -10.0f));
-    cubeInstance.scale(1.7f);
-
-    auto& cubeInstance2 = m_cube->createMeshInstance();
-    cubeInstance2.move(glm::vec3(5.0f, 1.0f, -10.0f));
-    cubeInstance2.scale(1.5f);
-
-    static comet::PhongMaterial phongMaterial2;
-    phongMaterial2.setAlbedoTexture("checkerboard.png");
-    cubeInstance2.setMaterial(&phongMaterial2);
-
-    const float translationStep = 1.05f;
-    const float xOffset = -10.0f;
-    const float yOffset = -5.0f;
-    
-    for (uint32_t i = 0; i < 20; ++i)
-    {
-        for (uint32_t j = 0; j < 20; ++j)
-        {
-            auto& instance = m_quad->createMeshInstance();
-            instance.rotate(1.5f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
-            instance.move(glm::vec3(xOffset + j * translationStep, yOffset + i * translationStep, 0.0f));
-        }
-    }
-
-    m_renderer.addMesh(m_cube.get());
-    m_renderer.addMesh(m_quad.get());
-
+    // Prepare the Scene
+    m_renderer.addScene(&m_scene);
     m_renderer.allocateBuffersAndSetupLayouts();
     m_renderer.loadData();
 }
@@ -114,7 +121,7 @@ void SandboxApp::onStart()
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 {
     auto pos = m_camera.getPosition();
-    CM_LOG_DEBUG("Camera pos: {}, {}, {}", pos.x, pos.y, pos.z);
+    // CM_LOG_DEBUG("Camera pos: {}, {}, {}", pos.x, pos.y, pos.z);
 
     if (e.getKeyCode() == comet::Input::Key::Space)
     {
@@ -249,7 +256,7 @@ void SandboxApp::onUpdate(double deltaTime)
     static const float pitchSpeed = glm::radians(360.0) / 3000.0f;
     static const float rollSpeed = glm::radians(360.0) / 3000.0f;
     static const float moveSpeed = 0.015f;
-    static const float rotSpeed = glm::radians(360.0) / 15000.0f;
+    static const float rotSpeed = glm::radians(360.0) / 5000.0f;
 
     if (comet::Input::isKeyPressed(comet::Input::Key::R))
     {
@@ -304,7 +311,16 @@ void SandboxApp::onUpdate(double deltaTime)
     if (!m_pauseAnimation)
     {
         auto angle = rotSpeed * deltaTime;
-        m_cube->getMeshInstances()[0]->rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
+        m_scene.m_registry.group<comet::TransformComponent, comet::MeshComponent>().each([&](auto& transform, auto& mesh)
+        {
+            transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
+        });
+        // auto view = m_scene.m_registry.view<comet::TransformComponent, comet::MeshComponent>();
+        // for (auto e : view)
+        // {
+        //     auto [transform, mesh] = view.get<comet::TransformComponent, comet::MeshComponent>(e);
+        //     transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
+        // }
     }
 
     m_renderer.reloadInstanceData();

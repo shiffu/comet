@@ -4,6 +4,7 @@
 #include <string>
 #include <comet/shader.h>
 #include <comet/log.h>
+#include <comet/utils.h>
 
 namespace comet
 {
@@ -19,6 +20,11 @@ namespace comet
             glDeleteProgram(m_program);
             m_program = 0;
         }
+    }
+
+    uint32_t Shader::getTypeHash() const
+    {
+        return utils::hashStr(m_name.c_str());
     }
 
     Shader::Type Shader::getShaderTypeFromSuffix(const std::string& suffix)

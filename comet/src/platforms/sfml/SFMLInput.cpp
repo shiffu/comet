@@ -1,7 +1,7 @@
 #include "SFMLInput.h"
 #include <comet/application.h>
 #include <utility>
-#include <platforms/platform.h>
+#include <comet/platform.h>
 
 namespace comet
 {

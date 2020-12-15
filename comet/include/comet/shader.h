@@ -23,6 +23,7 @@ namespace comet
         Shader(const std::string& name);
         ~Shader();
 
+        uint32_t getTypeHash() const;
         const std::string& getName() const { return m_name; }
 
         Shader::Type getShaderTypeFromSuffix(const std::string& suffix);

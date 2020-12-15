@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/singleton.h>
+#include <comet/singleton.h>
 #include <comet/texture.h>
 #include <unordered_map>
 #include <memory>

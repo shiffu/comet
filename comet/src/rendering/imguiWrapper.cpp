@@ -1,5 +1,5 @@
 #include "imguiWrapper.h"
-#include <platforms/platform.h>
+#include <comet/platform.h>
 
 #include <platforms/glfw/imguiGlfwWrapper.h>
 

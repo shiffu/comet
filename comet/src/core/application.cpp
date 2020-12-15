@@ -7,7 +7,7 @@
 #include <comet/application.h>
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
-#include <core/asserts.h>
+#include <comet/assert.h>
 #include <imgui/imgui.h>
 #include <rendering/imguiWrapper.h>
 
@@ -176,7 +176,7 @@ namespace comet
 
         ImGui::Text("This window contains default debug information");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / FPS, FPS);
-        ImGui::Text("Mouse position: %.3f, %.3f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y); 
+        // ImGui::Text("Mouse position: %.3f, %.3f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y); 
 
         ImGui::End();
     }

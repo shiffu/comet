@@ -1,6 +1,7 @@
 
 add_executable(sandbox
     sandboxApp.cpp
+    sandboxMainScene.cpp
     main.cpp
 )
 

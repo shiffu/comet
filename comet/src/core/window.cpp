@@ -1,7 +1,7 @@
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
 #include <platforms/glfw/glfwWindowWrapper.h>
-#include <platforms/platform.h>
+#include <comet/platform.h>
 
 namespace comet
 {

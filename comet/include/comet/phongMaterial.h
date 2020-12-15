@@ -8,6 +8,7 @@
 
 namespace comet
 {
+    class VertexBufferLayout;
 
     class PhongMaterial : public Material
     {
@@ -17,6 +18,8 @@ namespace comet
         PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular);
         PhongMaterial(const glm::vec3& diffuse, const glm::vec3& specular, float shininess);
         ~PhongMaterial() {}
+
+        uint32_t getTypeHash() const override;
 
         void setAlbedoTexture(const char* filename);
         int32_t getAlbedoTextureIndex() const { return m_albedoTextureIndex; }
@@ -29,13 +32,14 @@ namespace comet
 
         void setShininess(float shininess) { m_shininess = shininess; }
         float getShininess() const { return m_shininess; }
-
-        std::vector<PhongMaterial*>& getInstances() { return getMaterialInstances(); }
+    
+        // Vertex and Instance Buffers Layout
+        virtual void updateVboDataLayout(VertexBufferLayout& layout) const override;
+        virtual void updateInstanceDataLayout(VertexBufferLayout& layout) const override;
 
         void loadUniforms() override;
     
     private:
-        std::vector<PhongMaterial*>& getMaterialInstances();
         Texture2DArray* getAlbedoTextureArray();
         void init();
 

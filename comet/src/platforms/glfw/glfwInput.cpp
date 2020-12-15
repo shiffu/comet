@@ -2,7 +2,7 @@
 #include <comet/application.h>
 #include <GLFW/glfw3.h>
 #include <utility>
-#include <platforms/platform.h>
+#include <comet/platform.h>
 
 namespace comet
 {

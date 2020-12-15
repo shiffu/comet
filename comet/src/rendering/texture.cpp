@@ -1,10 +1,10 @@
 #include <glad/glad.h>
 #include <comet/texture.h>
-#include <core/resourceManager.h>
+#include <comet/resourceManager.h>
 #include <comet/log.h>
 #include <fstream>
 #include <stb/stb_image.h>
-#include <core/asserts.h>
+#include <comet/assert.h>
 
 namespace comet
 {

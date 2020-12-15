@@ -1,7 +1,7 @@
 #pragma once
 
-#include <platforms/platform.h>
-
+#include <comet/platform.h>
+#include <comet/log.h>
 
 #define ASSERTION_ENABLED 1
 
