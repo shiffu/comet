@@ -1,7 +1,6 @@
 #pragma once
 #include <glad/glad.h>
 #include <unordered_map>
-#include <comet/camera.h>
 #include <comet/flatColorMaterial.h>
 #include <comet/timer.h>
 
@@ -22,7 +21,7 @@ namespace comet
         void allocateBuffersAndSetupLayouts();
         void loadData();
         void reloadInstanceData();
-        void render(const Camera& camera);
+        void render(const glm::mat4& view, const glm::mat4& projection);
 
         void addScene(Scene* scene);
 

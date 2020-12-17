@@ -4,6 +4,7 @@
 #include <glm/vec3.hpp>
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace comet
 {
@@ -31,7 +32,14 @@ namespace comet
 
         const WindowSpec& getWindowSpec() const { return m_windowSpec; }
 
-        void setEventCallback(const EventCallbackFn& callback) { m_eventCallbackFn = callback; }
+        void addEventCallback(const EventCallbackFn& callback) { m_eventCallbacks.emplace_back(callback); }
+        void dispatchEvent(Event& e)
+        {
+            for (auto& callbackFn : m_eventCallbacks)
+            {
+                callbackFn(e);
+            }
+        }
 
         virtual void swapBuffers() const = 0;
         virtual void clearBuffers() const = 0;
@@ -51,7 +59,7 @@ namespace comet
         static Window* create(const WindowSpec& spec = WindowSpec());
 
     protected:
-        EventCallbackFn m_eventCallbackFn;
+        std::vector<EventCallbackFn> m_eventCallbacks;
         WindowSpec m_windowSpec;
     };
 

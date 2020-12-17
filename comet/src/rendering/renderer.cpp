@@ -300,19 +300,17 @@ namespace comet
         t2.pause();
     }
 
-    void Renderer::render(const Camera& camera)
+    void Renderer::render(const glm::mat4& view, const glm::mat4& projection)
     {
-        auto vpMatrix = camera.getViewProjection();
-        auto viewMatrix = camera.getView();
-        auto projectionMatrix = camera.getProjection();
+        auto vpMatrix = projection * view;
 
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             auto currentShader = pShaderDrawContext->shader;
             currentShader->bind();
             currentShader->setUniform(currentShader->getViewProjectionMatrixName(), vpMatrix);
-            currentShader->setUniform(currentShader->getViewMatrixName(), viewMatrix);
-            currentShader->setUniform(currentShader->getProjectionMatrixName(), projectionMatrix);
+            currentShader->setUniform(currentShader->getViewMatrixName(), view);
+            currentShader->setUniform(currentShader->getProjectionMatrixName(), projection);
 
             for (auto light : getLights())
             {

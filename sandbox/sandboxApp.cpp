@@ -5,8 +5,6 @@
 #include <imgui/imgui.h>
 #include <string>
 #include <sstream>
-#include <math.h>
-#include <utility>
 #include <memory>
 
 comet::Application* comet::Application::getInstance()
@@ -22,8 +20,9 @@ SandboxApp::~SandboxApp()
 
 void SandboxApp::onStart()
 {
-    m_camera.setPerspective(glm::radians(45.0f), 0.1f, 400.0f);
-    m_camera.setPosition(glm::vec3{0.0f, 5.0f, 17.0f});
+    m_camera.setPerspective(glm::radians(45.0f), 16.0f/9.0f, 0.1f, 400.0f);
+    m_cameraController.setPosition(glm::vec3{0.0f, 5.0f, 17.0f});
+    getActiveScene().setCameraController(&m_cameraController);
 
     Vertex data[] = {
         {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
@@ -57,14 +56,14 @@ void SandboxApp::onStart()
     material2->setShininess(50.0f);
 
     // Entities
-    comet::Entity e1 = m_scene.createEntity();
+    comet::Entity e1 = getActiveScene().createEntity();
     auto meshComp = e1.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
     auto& transformComp = e1.getComponent<comet::TransformComponent>();
     transformComp.move(glm::vec3(2.0f));
 
     for (int i = 0; i < 2500; ++i)
     {
-        comet::Entity e = m_scene.createEntity();
+        comet::Entity e = getActiveScene().createEntity();
         auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
         auto& transformComp = e.getComponent<comet::TransformComponent>();
         transformComp.move(glm::vec3((i * 2)  % 25, 1.0f + (i) % 25, 1.0f - (i / 20)  % 100));
@@ -78,7 +77,7 @@ void SandboxApp::onStart()
     {
         for (uint32_t j = 0; j < 50; ++j)
         {
-            auto e = m_scene.createEntity();
+            auto e = getActiveScene().createEntity();
             auto meshComp = e.addComponent<comet::MeshComponent>(meshGroundHandler.resourceId, materialTypeHash2, materialInstanceId2);
             auto& transformComp = e.getComponent<comet::TransformComponent>();
 
@@ -92,47 +91,41 @@ void SandboxApp::onStart()
     m_directionalLight = std::make_unique<comet::DirectionalLight>(glm::vec3(1.0f, -0.55f, -0.3f));
     m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
     m_directionalLight->setSpecular({0.9f, 0.9f, 0.9f});
-    m_renderer.addLight(m_directionalLight.get());
+    getActiveScene().addLight(m_directionalLight.get());
 
     // Point Lights
     m_pointLights.emplace_back(std::make_unique<comet::PointLight>(glm::vec3(0.37f, 0.19f, 2.9f)));
     m_pointLights.back()->setDiffuse({0.0f, 0.0f, 1.0f});
-    m_renderer.addLight(m_pointLights.back().get());
+    getActiveScene().addLight(m_pointLights.back().get());
 
     m_pointLights.emplace_back(std::make_unique<comet::PointLight>(glm::vec3(-3.6f, 0.19f, 0.7f)));
     m_pointLights.back()->setDiffuse({1.0f, 0.0f, 0.0f});
-    m_renderer.addLight(m_pointLights.back().get());
+    getActiveScene().addLight(m_pointLights.back().get());
 
     // Spot Lights
     m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(0.0f, 2.0f, 0.0f)));
     m_spotLights.back()->setDiffuse({1.0f, 0.0f, 1.0f});
-    m_renderer.addLight(m_spotLights.back().get());
+    getActiveScene().addLight(m_spotLights.back().get());
 
     m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(-3.6f, 1.19f, 0.7f)));
     m_spotLights.back()->setDiffuse({1.0f, 1.0f, 0.0f});
-    m_renderer.addLight(m_spotLights.back().get());
+    getActiveScene().addLight(m_spotLights.back().get());
 
     // Prepare the Scene
-    m_renderer.addScene(&m_scene);
-    m_renderer.allocateBuffersAndSetupLayouts();
-    m_renderer.loadData();
+    getActiveScene().prepare();
+}
+
+void SandboxApp::onEvent(comet::Event& e)
+{
+    m_cameraController.onEvent(e);
 }
 
 bool SandboxApp::onKeyPressed(comet::KeyPressedEvent& e)
 {
-    auto pos = m_camera.getPosition();
-    // CM_LOG_DEBUG("Camera pos: {}, {}, {}", pos.x, pos.y, pos.z);
-
     if (e.getKeyCode() == comet::Input::Key::Space)
     {
         m_pauseAnimation = !m_pauseAnimation;
     }
-
-}
-
-bool SandboxApp::onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e)
-{
-    m_camera.moveFront(-e.getDelta() * 0.9f);
 }
 
 void ligtColorEdit(const char* label, comet::Light* light)
@@ -252,85 +245,21 @@ void SandboxApp::onImGuiDraw()
 
 void SandboxApp::onUpdate(double deltaTime)
 {
-    static const float yawSpeed = glm::radians(360.0) / 3000.0f;
-    static const float pitchSpeed = glm::radians(360.0) / 3000.0f;
-    static const float rollSpeed = glm::radians(360.0) / 3000.0f;
-    static const float moveSpeed = 0.015f;
     static const float rotSpeed = glm::radians(360.0) / 5000.0f;
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::R))
-    {
-        m_camera.lookAt(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
-    }
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::A))
-    {
-        m_camera.moveRight(-moveSpeed * deltaTime);
-    }
-    else if (comet::Input::isKeyPressed(comet::Input::Key::D))
-    {
-        m_camera.moveRight(moveSpeed * deltaTime);
-    }
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::S))
-    {
-        m_camera.moveUp(-moveSpeed * deltaTime);
-    }
-    else if (comet::Input::isKeyPressed(comet::Input::Key::W))
-    {
-        m_camera.moveUp(moveSpeed * deltaTime);
-    }
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::Left))
-    {
-        m_camera.addYaw(yawSpeed * deltaTime);
-    }
-    else if (comet::Input::isKeyPressed(comet::Input::Key::Right))
-    {
-        m_camera.addYaw(-yawSpeed * deltaTime);
-    }
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::Up))
-    {
-        m_camera.addPitch(pitchSpeed * deltaTime);
-    }
-    else if (comet::Input::isKeyPressed(comet::Input::Key::Down))
-    {
-        m_camera.addPitch(-pitchSpeed * deltaTime);
-    }
-
-    if (comet::Input::isKeyPressed(comet::Input::Key::Z))
-    {
-        m_camera.addRoll(rollSpeed * deltaTime);
-    }
-    else if (comet::Input::isKeyPressed(comet::Input::Key::X))
-    {
-        m_camera.addRoll(-rollSpeed * deltaTime);
-    }
 
     if (!m_pauseAnimation)
     {
         auto angle = rotSpeed * deltaTime;
-        m_scene.m_registry.group<comet::TransformComponent, comet::MeshComponent>().each([&](auto& transform, auto& mesh)
+        getActiveScene().getRegistry().group<comet::TransformComponent, comet::MeshComponent>().each([&](auto& transform, auto& mesh)
         {
             transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
         });
-        // auto view = m_scene.m_registry.view<comet::TransformComponent, comet::MeshComponent>();
+
+        // auto view = getActiveScene().m_registry.view<comet::TransformComponent, comet::MeshComponent>();
         // for (auto e : view)
         // {
         //     auto [transform, mesh] = view.get<comet::TransformComponent, comet::MeshComponent>(e);
         //     transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
         // }
     }
-
-    m_renderer.reloadInstanceData();
-}
-
-void SandboxApp::onFixedUpdate(float fixedDeltaTime)
-{
-}
-
-void SandboxApp::onRender()
-{
-    m_renderer.render(m_camera);
 }

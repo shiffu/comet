@@ -11,21 +11,18 @@ public:
     SandboxApp() { CM_LOG_DEBUG("SandboxApp contructor"); } ;
     virtual ~SandboxApp();
 
-    void onStart() override;
-    void onImGuiDraw() override;
-    void onUpdate(double deltaTime) override;
-    void onFixedUpdate(float fixedDeltaTime) override;
-    void onRender() override;
+    virtual void onStart() override;
+    virtual void onImGuiDraw() override;
+    virtual void onUpdate(double deltaTime) override;
 
-    virtual bool onKeyPressed(comet::KeyPressedEvent& e);
-    virtual bool onVerticalMouseWheelScrolled(comet::VerticalMouseWheelScrolledEvent& e);
+    virtual void onEvent(comet::Event& e) override;
+    virtual bool onKeyPressed(comet::KeyPressedEvent& e) override;
 
 private:
     double m_angle{0.0};
     glm::vec3 m_offset{0.0f};
     comet::Camera m_camera;
-    comet::Renderer m_renderer;
-    comet::Scene m_scene;
+    comet::CameraController m_cameraController{m_camera};
     comet::FlatColorMaterial m_blueColorMaterial{glm::vec4(0.0f, 0.5, 1.0f, 1.0f)};
     comet::FlatColorMaterial m_lightBlueColorMaterial{glm::vec4(0.0f, 0.8, 1.0f, 1.0f)};
     comet::PhongMaterial m_phongMaterial;

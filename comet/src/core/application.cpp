@@ -115,7 +115,7 @@ namespace comet
         m_window->setVSync(false);
 
         // set Event callback
-        m_window->setEventCallback(BIND_METHOD(Application::onEvent));
+        m_window->addEventCallback(BIND_METHOD(Application::onEventDispatch));
 
         // set Imgui Wrapper
         m_imguiWrapper = ImguiWrapper::create();
@@ -131,11 +131,9 @@ namespace comet
     void Application::onStart() {}
     void Application::onUpdate(double deltaTime) {}
     void Application::onFixedUpdate(float fixedDeltaTime) {}
-    void Application::onRender() {}
 
-    void Application::onEvent(Event& e)
+    void Application::onEventDispatch(Event& e)
     {
-        // CM_CORE_LOG_DEBUG("Application::onEvent - Event received: {}", e.toString());
         EventDispatcher dispatcher(e);
 
         dispatcher.dispatch<WindowResizedEvent>(BIND_METHOD(Application::onWindowResized));
@@ -151,6 +149,9 @@ namespace comet
         dispatcher.dispatch<HorizontalMouseWheelScrolledEvent>(BIND_METHOD(Application::onHorizontalMouseWheelScrolled));
         dispatcher.dispatch<MouseButtonPressedEvent>(BIND_METHOD(Application::onMouseButtonPressed));
         dispatcher.dispatch<MouseButtonReleasedEvent>(BIND_METHOD(Application::onMouseButtonRelease));
+
+        // Dispatch the event further
+        onEvent(e);
     }
 
     bool Application::onWindowResized(WindowResizedEvent& e) {}
@@ -229,6 +230,11 @@ namespace comet
             deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
             onUpdate(deltaTime);
 
+            if (auto cameraController = m_activeScene.getCameraController())
+            {
+                cameraController->onUpdate(deltaTime);
+            }
+
             if (m_imguiWrapper)
             {
                 m_imguiWrapper->newFrame();
@@ -248,8 +254,7 @@ namespace comet
             // }
 
             m_window->clearBuffers();
-
-            onRender();
+            m_activeScene.render();
 
             if (m_imguiWrapper)
             {

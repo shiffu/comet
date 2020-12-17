@@ -89,63 +89,63 @@ namespace comet
                 {
                     glViewport(0, 0, event.size.width, event.size.height);
                     WindowResizedEvent cometEvent(event.size.width, event.size.height);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::LostFocus:
                 {
                     WindowLostFocusEvent cometEvent;
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::GainedFocus:
                 {
                     WindowGainedFocusEvent cometEvent;
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::KeyPressed:
                 {
                     KeyPressedEvent cometEvent(SFMLInput::sfmlKeyToCometKey(event.key.code), 0);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::KeyReleased:
                 {
                     KeyReleasedEvent cometEvent(SFMLInput::sfmlKeyToCometKey(event.key.code));
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::TextEntered:
                 {
                     KeyTextEnteredEvent cometEvent(event.text.unicode);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::MouseMoved:
                 {
                     MouseMovedEvent cometEvent(event.mouseMove.x, event.mouseMove.y);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::MouseEntered:
                 {
                     MouseEnteredWindowEvent cometEvent;
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::MouseLeft:
                 {
                     MouseLeftWindowEvent cometEvent;
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
@@ -154,12 +154,12 @@ namespace comet
                     if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
                     {
                         VerticalMouseWheelScrolledEvent cometEvent(event.mouseWheelScroll.delta);
-                        m_eventCallbackFn(cometEvent);
+                        dispatchEvent(cometEvent);
                     }
                     else if (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
                     {
                         HorizontalMouseWheelScrolledEvent cometEvent(event.mouseWheelScroll.delta);
-                        m_eventCallbackFn(cometEvent);
+                        dispatchEvent(cometEvent);
                     }
                     break;
                 }
@@ -167,14 +167,14 @@ namespace comet
                 case sf::Event::MouseButtonPressed:
                 {
                     MouseButtonPressedEvent cometEvent((Input::MouseButton)event.mouseButton.button, event.mouseButton.x, event.mouseButton.y);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 
                 case sf::Event::MouseButtonReleased:
                 {
                     MouseButtonReleasedEvent cometEvent((Input::MouseButton)event.mouseButton.button, event.mouseButton.x, event.mouseButton.y);
-                    m_eventCallbackFn(cometEvent);
+                    dispatchEvent(cometEvent);
                     break;
                 }
 

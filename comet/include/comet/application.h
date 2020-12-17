@@ -3,13 +3,13 @@
 #include <comet/window.h>
 #include <comet/event.h>
 #include <comet/scene.h>
+#include <comet/renderer.h>
 #include <memory>
 
 namespace comet
 {
 
     class ImguiWrapper;
-    class Scene;
 
     class Application
     {
@@ -22,7 +22,7 @@ namespace comet
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
 
-        void onEvent(Event& e);
+        void onEventDispatch(Event& e);
         virtual void run();
         
         Window& getWindow() const { return *m_window; }
@@ -37,6 +37,7 @@ namespace comet
         Scene& getActiveScene() noexcept { return m_activeScene; }
 
         // Event Callbacks
+        virtual void onEvent(Event& e) {}   // Generic event handler
         virtual bool onWindowResized(WindowResizedEvent& e);
         virtual bool onWindowLostFocus(WindowLostFocusEvent& e);
         virtual bool onWindowGainedFocus(WindowGainedFocusEvent& e);
@@ -60,7 +61,6 @@ namespace comet
         virtual void onStart();
         virtual void onUpdate(double deltaTime);
         virtual void onFixedUpdate(float fixedDeltaTime);
-        virtual void onRender();
 
         void onImGuiDebugDraw();
 
@@ -68,6 +68,7 @@ namespace comet
         bool m_isRunning{false};
         bool m_isInitialized{false};
         Window* m_window{nullptr};
+        Renderer m_renderer;
         Scene m_activeScene;
         unsigned int m_fpsCap{0};
         // Fixed update time in ms (used to onFixedUpdate function call)

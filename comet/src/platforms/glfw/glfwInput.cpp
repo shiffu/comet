@@ -280,8 +280,8 @@ namespace comet
 
     bool GLFWInput::isMouseButtonPressedImpl(MouseButton button)
     {
-        //TODO: Map like for the keys?
-        return true;
+        auto glfw_window = (GLFWwindow*)m_activeWindow->getPlatformWindow();
+        return (glfwGetMouseButton(glfw_window, m_cometButtonToGLFWButtonMap[button]) == GLFW_PRESS);
     }
 
     std::pair<int, int> GLFWInput::getMousePositionImpl()

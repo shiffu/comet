@@ -27,6 +27,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shaderRegistry.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/cameraController.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/materialRegistry.h
@@ -70,6 +71,7 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/shader.cpp
     ${COMET_SOURCES_DIR}/rendering/shaderRegistry.cpp
     ${COMET_SOURCES_DIR}/rendering/camera.cpp
+    ${COMET_SOURCES_DIR}/rendering/cameraController.cpp
     ${COMET_SOURCES_DIR}/rendering/renderer.cpp
     ${COMET_SOURCES_DIR}/rendering/material.cpp
     ${COMET_SOURCES_DIR}/rendering/directionalLight.cpp

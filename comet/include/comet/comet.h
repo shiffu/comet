@@ -13,6 +13,7 @@
 #include <comet/vertexBufferLayout.h>
 #include <comet/shader.h>
 #include <comet/camera.h>
+#include <comet/cameraController.h>
 #include <comet/renderer.h>
 #include <comet/material.h>
 #include <comet/materialRegistry.h>

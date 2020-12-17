@@ -62,7 +62,7 @@ namespace comet
 
             glViewport(0, 0, width, height);
             WindowResizedEvent cometEvent(width, height);
-            windowWrapper->m_eventCallbackFn(cometEvent);
+            windowWrapper->dispatchEvent(cometEvent);
         });
 
         glfwSetWindowFocusCallback(m_window, [](GLFWwindow* window, int hasFocus)
@@ -72,12 +72,12 @@ namespace comet
             if (hasFocus)
             {
                 WindowGainedFocusEvent cometEvent;
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
             else
             {
                 WindowLostFocusEvent cometEvent;
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
         });
 
@@ -90,21 +90,21 @@ namespace comet
                 case GLFW_PRESS:
                 {
                     KeyPressedEvent cometEvent(GLFWInput::glfwKeyToCometKey(key), 0);
-                    windowWrapper->m_eventCallbackFn(cometEvent);
+                    windowWrapper->dispatchEvent(cometEvent);
                     break;
                 }
 
                 case GLFW_REPEAT:
                 {
                     KeyPressedEvent cometEvent(GLFWInput::glfwKeyToCometKey(key), 1);
-                    windowWrapper->m_eventCallbackFn(cometEvent);
+                    windowWrapper->dispatchEvent(cometEvent);
                     break;
                 }
 
                 case GLFW_RELEASE:
                 {
                     KeyReleasedEvent cometEvent(GLFWInput::glfwKeyToCometKey(key));
-                    windowWrapper->m_eventCallbackFn(cometEvent);
+                    windowWrapper->dispatchEvent(cometEvent);
                     break;
                 }
             }
@@ -116,7 +116,7 @@ namespace comet
             auto windowWrapper = (GLFWWindowWrapper*)glfwGetWindowUserPointer(window);
 
             KeyTextEnteredEvent cometEvent(codePoint);
-            windowWrapper->m_eventCallbackFn(cometEvent);
+            windowWrapper->dispatchEvent(cometEvent);
         });
 
         glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xPos, double yPos)
@@ -124,7 +124,7 @@ namespace comet
             auto windowWrapper = (GLFWWindowWrapper*)glfwGetWindowUserPointer(window);
 
             MouseMovedEvent cometEvent(xPos, yPos);
-            windowWrapper->m_eventCallbackFn(cometEvent);
+            windowWrapper->dispatchEvent(cometEvent);
         });
 
         glfwSetCursorEnterCallback(m_window, [](GLFWwindow* window, int entered)
@@ -134,12 +134,12 @@ namespace comet
             if (entered)
             {
                 MouseEnteredWindowEvent cometEvent;
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
             else
             {
                 MouseLeftWindowEvent cometEvent;
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
         });
 
@@ -154,14 +154,14 @@ namespace comet
                 case GLFW_PRESS:
                 {
                     MouseButtonPressedEvent cometEvent(GLFWInput::glfwButtonToCometButton(button), xPos, yPos);
-                    windowWrapper->m_eventCallbackFn(cometEvent);
+                    windowWrapper->dispatchEvent(cometEvent);
                     break;
                 }
 
                 case GLFW_RELEASE:
                 {
                     MouseButtonReleasedEvent cometEvent(GLFWInput::glfwButtonToCometButton(button), xPos, yPos);
-                    windowWrapper->m_eventCallbackFn(cometEvent);
+                    windowWrapper->dispatchEvent(cometEvent);
                     break;
                 }
             }
@@ -175,13 +175,13 @@ namespace comet
             if (yOffset != 0.0)
             {
                 VerticalMouseWheelScrolledEvent cometEvent(yOffset);
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
             
             if (xOffset != 0.0)
             {
                 HorizontalMouseWheelScrolledEvent cometEvent(xOffset);
-                windowWrapper->m_eventCallbackFn(cometEvent);
+                windowWrapper->dispatchEvent(cometEvent);
             }
         });
 
