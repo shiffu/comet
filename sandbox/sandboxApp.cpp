@@ -254,12 +254,5 @@ void SandboxApp::onUpdate(double deltaTime)
         {
             transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
         });
-
-        // auto view = getActiveScene().m_registry.view<comet::TransformComponent, comet::MeshComponent>();
-        // for (auto e : view)
-        // {
-        //     auto [transform, mesh] = view.get<comet::TransformComponent, comet::MeshComponent>(e);
-        //     transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
-        // }
     }
 }

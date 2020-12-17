@@ -30,8 +30,6 @@ namespace comet
         FlatColorMaterial m_defaultColorMaterial{glm::vec4(0.99f, 0.16, 0.97f, 1.0f)};
         std::vector<Light*> m_lights{};
         Scene* m_scene{nullptr};
-        Timer t1{"T1", true};
-        Timer t2{"T2", true};
     };
 
 } // namespace comet
