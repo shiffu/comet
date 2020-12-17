@@ -20,13 +20,14 @@ namespace comet
         template<typename T, typename... Args>
         T& addComponent(Args&&... args)
         {
-            ASSERT(!hasComponent<T>());
+            ASSERT(!hasComponent<T>(), "Component already exists in this entity");
             return m_scene->m_registry.emplace<T>(m_entityId, std::forward<Args>(args)...);
         }
 
         template<typename T>
         void removeComponent(T comp)
         {
+            ASSERT(hasComponent<T>(), "Component is not in this entity");
             m_scene->m_registry.remove<T>(m_entityId);
         }
 
@@ -39,6 +40,7 @@ namespace comet
         template<typename T>
         T& getComponent()
         {
+            ASSERT(hasComponent<T>(), "Component is not in this entity");
             return m_scene->m_registry.get<T>(m_entityId);
         }
 
