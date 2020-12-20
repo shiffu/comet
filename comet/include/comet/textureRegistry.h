@@ -2,8 +2,8 @@
 
 #include <comet/singleton.h>
 #include <comet/texture.h>
+
 #include <unordered_map>
-#include <memory>
 #include <string>
 
 namespace comet
@@ -12,7 +12,7 @@ namespace comet
     {
     public:
         Texture2D* getTexture2D(const std::string& filepath);
-        Texture2D* getGeneratedWhiteTexture2D();
+        Texture2D* getWhiteTexture2D();
         Texture2DArray* getTexture2DArray(const std::string& uniqueName);
 
     private:

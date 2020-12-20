@@ -3,6 +3,7 @@
 #include <comet/singleton.h>
 #include <comet/shader.h>
 #include <unordered_map>
+#include <memory>
 
 namespace comet
 {
@@ -15,7 +16,7 @@ namespace comet
         void compileLinkAndValidateShaders(Shader* shader);
 
     private:
-        std::unordered_map<std::string, Shader*> m_shaders;
+        std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
     };
 
 } // namespace comet

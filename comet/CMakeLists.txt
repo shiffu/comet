@@ -4,11 +4,11 @@ set(COMET_SOURCES_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
 add_library(comet STATIC
     # Public Headers
-    ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/log.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/assert.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/utils.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/platform.h
+    ${COMET_PUBLIC_HEADERS_DIR}/comet/graphicApiConfig.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/singleton.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/resourceManager.h
@@ -17,15 +17,8 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/event.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/input.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/buffer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBuffer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/indexBuffer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/commandBuffer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexBufferLayout.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/vertexArray.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/shaderRegistry.h
-    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/cameraController.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
@@ -35,7 +28,6 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/phongMaterial.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/staticMesh.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/drawingContext.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/light.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/directionalLight.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/pointLight.h
@@ -45,7 +37,7 @@ add_library(comet STATIC
     ${COMET_PUBLIC_HEADERS_DIR}/comet/entity.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/scene.h
     ${COMET_PUBLIC_HEADERS_DIR}/comet/components.h
-
+    
     # Sources and private Headers
     ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
     ${COMET_SOURCES_DIR}/core/log.cpp
@@ -56,17 +48,42 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/core/objLoader.cpp
     ${COMET_SOURCES_DIR}/core/stringUtils.h
     ${COMET_SOURCES_DIR}/core/stringUtils.cpp
+
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBuffer.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBuffer.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglIndexBuffer.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglIndexBuffer.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglCommandBuffer.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglCommandBuffer.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexArray.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexArray.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBufferLayout.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBufferLayout.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglTexture.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglTexture.cpp
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglShader.h
+    ${COMET_SOURCES_DIR}/platforms/opengl/openglShader.cpp
+    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
     ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
     ${COMET_SOURCES_DIR}/platforms/glfw/glfwWindowWrapper.cpp
     ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.cpp
     ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.h
-    ${COMET_SOURCES_DIR}/rendering/buffer.cpp
+    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
+    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
+
+    ${COMET_SOURCES_DIR}/rendering/graphicApiConfig.cpp
+    ${COMET_SOURCES_DIR}/rendering/buffer.h
+    ${COMET_SOURCES_DIR}/rendering/vertexBuffer.h
     ${COMET_SOURCES_DIR}/rendering/vertexBuffer.cpp
+    ${COMET_SOURCES_DIR}/rendering/indexBuffer.h
     ${COMET_SOURCES_DIR}/rendering/indexBuffer.cpp
+    ${COMET_SOURCES_DIR}/rendering/commandBuffer.h
     ${COMET_SOURCES_DIR}/rendering/commandBuffer.cpp
+    ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.h
     ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
+    ${COMET_SOURCES_DIR}/rendering/vertexArray.h
     ${COMET_SOURCES_DIR}/rendering/vertexArray.cpp
     ${COMET_SOURCES_DIR}/rendering/shader.cpp
     ${COMET_SOURCES_DIR}/rendering/shaderRegistry.cpp
@@ -84,7 +101,13 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/rendering/imguiWrapper.cpp
     ${COMET_SOURCES_DIR}/rendering/texture.cpp
     ${COMET_SOURCES_DIR}/rendering/textureRegistry.cpp
+    
     ${COMET_SOURCES_DIR}/ecs/scene.cpp
+    
+    ## Vendors ##
+
+    # glad
+    ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
 
     # ImGui
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imconfig.h
@@ -97,8 +120,6 @@ add_library(comet STATIC
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_opengl3.h
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.cpp
     ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.h
-    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
-    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
 
     # stb
     ${COMET_SOURCES_DIR}/vendors/stb/stb_image.h
@@ -143,8 +164,9 @@ target_include_directories(comet
         ${COMET_SOURCES_DIR}/vendors/glm
         ${COMET_SOURCES_DIR}/vendors/imgui
         ${COMET_SOURCES_DIR}/vendors/entt
-    PRIVATE
+        # TODO: Move this to private / build a more robust include structure
         ${COMET_SOURCES_DIR}
+    PRIVATE
         ${COMET_SOURCES_DIR}/vendors
 )
 

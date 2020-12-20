@@ -61,18 +61,18 @@ namespace comet
     // Vertex and Instance Buffers Layout
     void PhongMaterial::updateVboDataLayout(VertexBufferLayout& layout) const
     {
-        layout.add<float>(3, false, 0); // position
-        layout.add<float>(3, false, 1); // normal
-        layout.add<float>(2, false, 2); // texture coordinate
+        layout.addFloat(3, false, 0); // position
+        layout.addFloat(3, false, 1); // normal
+        layout.addFloat(2, false, 2); // texture coordinate
     }
 
     void PhongMaterial::updateInstanceDataLayout(VertexBufferLayout& layout) const
     {
-        layout.add<float>(4, false, 10, 1); //
-        layout.add<float>(4, false, 11, 1); //
-        layout.add<float>(4, false, 12, 1); // Instance Model to Word Matrix transform
-        layout.add<float>(4, false, 13, 1); //
-        layout.add<unsigned int>(1, false, 14, 1);  // Material ID (or index)
+        layout.addFloat(4, false, 10, 1); //
+        layout.addFloat(4, false, 11, 1); //
+        layout.addFloat(4, false, 12, 1); // Instance Model to Word Matrix transform
+        layout.addFloat(4, false, 13, 1); //
+        layout.addUInt(1, false, 14, 1);  // Material ID (or index)
     }
 
     void PhongMaterial::loadUniforms()
@@ -126,7 +126,7 @@ namespace comet
             m_shader->setUniform("albedo_textures", 1);
         }
 
-        TextureRegistry::getInstance().getGeneratedWhiteTexture2D()->bind();
+        TextureRegistry::getInstance().getWhiteTexture2D()->bind();
         m_shader->setUniform("white_1x1_texture", 0);
     }
 

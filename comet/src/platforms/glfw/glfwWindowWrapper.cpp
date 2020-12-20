@@ -7,6 +7,68 @@
 
 namespace comet
 {
+
+    static void APIENTRY glDebugCallback(GLenum source,
+                                        GLenum type,
+                                        GLuint id,
+                                        GLenum severity,
+                                        GLsizei length,
+                                        const GLchar* message,
+                                        const void* userParam)
+    {
+        std::string msgType;
+        bool error_category = false;
+        bool warn_category = false;
+        switch(type)
+        {
+            case GL_DEBUG_TYPE_ERROR:
+                msgType = "ERROR";
+                error_category = true;
+            break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                msgType = "DEPRECATED_BEHAVIOR";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                msgType = "UNDEFINED_BEHAVIOR";
+                error_category = true;
+            break;
+            case GL_DEBUG_TYPE_PORTABILITY:
+                msgType = "PORTABILITY";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_PERFORMANCE:
+                msgType = "PERFORMANCE";
+                warn_category = true;
+            break;
+            case GL_DEBUG_TYPE_MARKER:
+                msgType = "MARKER";
+            break;
+            case GL_DEBUG_TYPE_PUSH_GROUP:
+                msgType = "PSUH_GROUP";
+            break;
+            case GL_DEBUG_TYPE_POP_GROUP:
+                msgType = "POP_GROUP";
+            break;
+            case GL_DEBUG_TYPE_OTHER:
+                msgType = "OTHER";
+            break;
+        }
+
+        if (error_category)
+        {
+            CM_CORE_LOG_ERROR("[OpenGL:{}]: {}", msgType, message);
+        }
+        else if (warn_category)
+        {
+            CM_CORE_LOG_WARN("[OpenGL:{}]: {}", msgType, message);
+        }
+        else
+        {
+            CM_CORE_LOG_TRACE("[OpenGL:{}]: {}", msgType, message);
+        }
+    }
+
     // Factory
     Window* GLFWWindowWrapper::create(const WindowSpec& spec)
     {
@@ -200,6 +262,18 @@ namespace comet
             CM_CORE_LOG_FATAL("Glad failed to initialize");
             exit(EXIT_FAILURE);
         }
+
+        // Setup OpenGL Debug Messages
+        glDebugMessageCallback(glDebugCallback, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+        glEnable(GL_DEBUG_OUTPUT);
+
+        // Enable OpenGL Flags
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        // glFrontFace(GL_CW);
 
         CM_CORE_LOG_INFO("Graphic card: {}", glGetString(GL_RENDERER));
         CM_CORE_LOG_INFO("GL Version: {}", glGetString(GL_VERSION));

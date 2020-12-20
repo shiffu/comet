@@ -7,17 +7,19 @@ namespace comet
     {
         if (m_texture2DRegistry.find(filepath) == m_texture2DRegistry.end())
         {
-            m_texture2DRegistry[filepath] = std::make_unique<Texture2D>(filepath.c_str());
+            m_texture2DRegistry[filepath] = Texture2D::create(filepath.c_str());
         }
 
         return m_texture2DRegistry[filepath].get();
     }
 
-    Texture2D* TextureRegistry::getGeneratedWhiteTexture2D()
+    Texture2D* TextureRegistry::getWhiteTexture2D()
     {
         if (m_generatedWhiteTexture2d == nullptr)
         {
-            m_generatedWhiteTexture2d = Texture2D::generateWhiteTexture();
+            auto texturePtr = Texture2D::create();
+            texturePtr->makeItWhite();
+            m_generatedWhiteTexture2d = std::move(texturePtr);
         }
 
         return m_generatedWhiteTexture2d.get();
@@ -27,7 +29,7 @@ namespace comet
     {
         if (m_texture2DArrayRegistry.find(uniqueName) == m_texture2DArrayRegistry.end())
         {
-            m_texture2DArrayRegistry[uniqueName] = std::make_unique<Texture2DArray>();
+            m_texture2DArrayRegistry[uniqueName] = Texture2DArray::create();
         }
 
         return m_texture2DArrayRegistry[uniqueName].get();

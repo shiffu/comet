@@ -1,18 +1,21 @@
-#include <glad/glad.h>
-#include <utility>
-#include <type_traits>
-#include <comet/commandBuffer.h>
+#include <rendering/commandBuffer.h>
+#include <comet/assert.h>
+#include <comet/graphicApiConfig.h>
+#include <platforms/opengl/openglCommandBuffer.h>
 
 namespace comet
 {
-    CommandBuffer::CommandBuffer(uint32_t usage)
-        : Buffer(GL_DRAW_INDIRECT_BUFFER, usage)
+
+    std::unique_ptr<CommandBuffer> CommandBuffer::create(uint32_t usage)
     {
+        switch (GraphicApiConfig::getApiImpl())
+        {
+            case GraphicApiConfig::API::OPENGL:
+                return std::make_unique<OpenglCommandBuffer>(usage);
+        }
+        
+        ASSERT(false, "Graphic API not supported for now!");
+        return std::unique_ptr<OpenglCommandBuffer>(nullptr);
     }
 
-    CommandBuffer& CommandBuffer::operator=(CommandBuffer&& other) noexcept
-    {
-        Buffer::operator=(std::move(other));
-        return *this;
-    }
 }

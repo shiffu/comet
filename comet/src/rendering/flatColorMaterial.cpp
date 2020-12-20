@@ -1,5 +1,5 @@
 #include <comet/flatColorMaterial.h>
-#include <comet/vertexBufferLayout.h>
+#include <rendering/vertexBufferLayout.h>
 #include <comet/materialRegistry.h>
 #include <comet/utils.h>
 
@@ -32,18 +32,18 @@ namespace comet
     // Vertex and Instance Buffers Layout
     void FlatColorMaterial::updateVboDataLayout(VertexBufferLayout& layout) const
     {
-        layout.add<float>(3, false, 0); // position
-        layout.add<float>(3, false, 1); // normal
-        layout.add<float>(2, false, 2); // texture coordinate
+        layout.addFloat(3, false, 0); // position
+        layout.addFloat(3, false, 1); // normal
+        layout.addFloat(2, false, 2); // texture coordinate
     }
 
     void FlatColorMaterial::updateInstanceDataLayout(VertexBufferLayout& layout) const
     {
-        layout.add<float>(4, false, 10, 1); //
-        layout.add<float>(4, false, 11, 1); //
-        layout.add<float>(4, false, 12, 1); // Instance Model to Word Matrix transform
-        layout.add<float>(4, false, 13, 1); //
-        layout.add<unsigned int>(1, false, 14, 1);  // Material ID (or index)
+        layout.addFloat(4, false, 10, 1); //
+        layout.addFloat(4, false, 11, 1); //
+        layout.addFloat(4, false, 12, 1); // Instance Model to Word Matrix transform
+        layout.addFloat(4, false, 13, 1); //
+        layout.addUInt(1, false, 14, 1);  // Material ID (or index)
     }
 
     void FlatColorMaterial::loadUniforms()

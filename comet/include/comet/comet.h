@@ -7,10 +7,6 @@
 #include <comet/timer.h>
 #include <comet/input.h>
 #include <comet/event.h>
-#include <comet/indexBuffer.h>
-#include <comet/vertexBuffer.h>
-#include <comet/vertexArray.h>
-#include <comet/vertexBufferLayout.h>
 #include <comet/shader.h>
 #include <comet/camera.h>
 #include <comet/cameraController.h>

@@ -1,8 +1,9 @@
 #pragma once
-#include <glad/glad.h>
-#include <unordered_map>
+
 #include <comet/flatColorMaterial.h>
 #include <comet/timer.h>
+
+#include <unordered_map>
 
 namespace comet
 {

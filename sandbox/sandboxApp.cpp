@@ -1,8 +1,8 @@
-#include <glad/glad.h>
-
 #include "sandboxApp.h"
+
 #include <comet/comet.h>
 #include <imgui/imgui.h>
+
 #include <string>
 #include <sstream>
 #include <memory>

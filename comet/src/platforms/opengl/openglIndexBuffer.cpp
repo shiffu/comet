@@ -1,17 +1,18 @@
-#include <type_traits>
-#include <utility>
-#include <comet/buffer.h>
+#include "openglIndexBuffer.h"
 #include <comet/log.h>
+
+#include <glad/glad.h>
 
 namespace comet
 {
-    Buffer::Buffer(uint32_t target, uint32_t usage)
-        : m_target(target), m_usage(usage)
+
+    OpenglIndexBuffer::OpenglIndexBuffer(uint32_t usage)
+        : m_usage(usage)
     {
         glGenBuffers(1, &m_bufferId);
     }
 
-    Buffer::~Buffer()
+    OpenglIndexBuffer::~OpenglIndexBuffer()
     {
         if (m_bufferId)
         {
@@ -20,18 +21,17 @@ namespace comet
         }
     };
 
-    Buffer::Buffer(Buffer&& other)
-        : m_target(std::move(other.m_target)),
-        m_usage(std::move(other.m_usage)),
+    OpenglIndexBuffer::OpenglIndexBuffer(OpenglIndexBuffer&& other)
+        : m_usage(std::move(other.m_usage)),
         m_bufferId(std::move(other.m_bufferId)),
         m_size(std::move(other.m_size)),
-        m_currentCount(std::move(other.m_currentCount)),
+        m_count(std::move(other.m_count)),
         m_pMappedMemory(std::move(other.m_pMappedMemory))
     {
         other.m_bufferId = 0;
     }
 
-    Buffer& Buffer::operator=(Buffer&& other) noexcept
+    OpenglIndexBuffer& OpenglIndexBuffer::operator=(OpenglIndexBuffer&& other) noexcept
     {
         if (&other == this)
         {
@@ -43,11 +43,10 @@ namespace comet
             glDeleteBuffers(1, &m_bufferId);
         }
 
-        m_target = std::move(other.m_target);
         m_usage = std::move(other.m_usage);
         m_bufferId = std::move(other.m_bufferId);
         m_size = std::move(other.m_size);
-        m_currentCount = std::move(other.m_currentCount);
+        m_count = std::move(other.m_count);
         m_pMappedMemory = std::move(other.m_pMappedMemory);
 
         other.m_bufferId = 0;
@@ -55,33 +54,38 @@ namespace comet
         return *this;
     }
 
-    void Buffer::bind() const
+    uint32_t OpenglIndexBuffer::getCount() const
     {
-        glBindBuffer(m_target, m_bufferId);
+        return m_count;
     }
 
-    void Buffer::unbind() const
+    void OpenglIndexBuffer::bind() const
     {
-        glBindBuffer(m_target, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
     }
 
-    void Buffer::allocate()
+    void OpenglIndexBuffer::unbind() const
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    void OpenglIndexBuffer::allocate()
     {
         if (m_size)
         {
             bind();
-            glBufferData(m_target, m_size, nullptr, m_usage);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_size, nullptr, m_usage);
         }
     }
 
-    void Buffer::allocate(uint32_t size)
+    void OpenglIndexBuffer::allocate(size_t size)
     {
         bind();
         m_size = size;
-        glBufferData(m_target, size, nullptr, m_usage);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, m_usage);
     }
 
-    void Buffer::loadDataInMappedMemory(const void* data, uint32_t size, uint32_t count, uint32_t offset /*= 0*/)
+    void OpenglIndexBuffer::loadDataInMappedMemory(const uint32_t* data, uint32_t count, uint32_t offset /*= 0*/)
     {
         if (m_pMappedMemory == nullptr)
         {
@@ -94,25 +98,28 @@ namespace comet
             m_pMappedMemory = static_cast<char*>(m_pMappedMemory) + offset;
         }
 
+        auto size = count * sizeof(uint32_t);
         memcpy(m_pMappedMemory, data, size);
         m_pMappedMemory = static_cast<char*>(m_pMappedMemory) + size;
-        m_currentCount += count;
+        m_count += count;
     }
 
-    void* Buffer::mapMemory(GLenum access)
+    void* OpenglIndexBuffer::mapMemory(uint32_t access)
     {
         bind();
-        m_pMappedMemory = glMapBuffer(m_target, access);
+        m_pMappedMemory = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLenum)access);
         return m_pMappedMemory;
     }
 
-    void Buffer::unmapMemory()
+    void OpenglIndexBuffer::unmapMemory()
     {
         bind();
-        if (!glUnmapBuffer(m_target))
+        if (!glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER))
         {
-            CM_CORE_LOG_ERROR("Error while unmapping Buffer");
+            CM_CORE_LOG_ERROR("Error while unmapping OpenglIndexBuffer");
         }
         m_pMappedMemory = nullptr;
     }
-}
+
+    
+} // namespace comet

@@ -1,80 +1,18 @@
-#include <glad/glad.h>
-#include <iostream>
+#include <comet/application.h>
+#include <comet/log.h>
+#include <comet/window.h>
+#include <platforms/sfml/SFMLWindow.h>
+#include <rendering/imguiWrapper.h>
+
+#include <imgui/imgui.h>
+
 #include <functional>
 #include <chrono>
 #include <thread>
-#include <comet/log.h>
-#include <comet/application.h>
-#include <comet/window.h>
-#include <platforms/sfml/SFMLWindow.h>
-#include <comet/assert.h>
-#include <imgui/imgui.h>
-#include <rendering/imguiWrapper.h>
 
 namespace comet
 {
     #define BIND_METHOD(m) std::bind(&m, this, std::placeholders::_1)
-
-    static void APIENTRY glDebugCallback(GLenum source,
-                                        GLenum type,
-                                        GLuint id,
-                                        GLenum severity,
-                                        GLsizei length,
-                                        const GLchar* message,
-                                        const void* userParam)
-    {
-        std::string msgType;
-        bool error_category = false;
-        bool warn_category = false;
-        switch(type)
-        {
-            case GL_DEBUG_TYPE_ERROR:
-                msgType = "ERROR";
-                error_category = true;
-            break;
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-                msgType = "DEPRECATED_BEHAVIOR";
-                warn_category = true;
-            break;
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-                msgType = "UNDEFINED_BEHAVIOR";
-                error_category = true;
-            break;
-            case GL_DEBUG_TYPE_PORTABILITY:
-                msgType = "PORTABILITY";
-                warn_category = true;
-            break;
-            case GL_DEBUG_TYPE_PERFORMANCE:
-                msgType = "PERFORMANCE";
-                warn_category = true;
-            break;
-            case GL_DEBUG_TYPE_MARKER:
-                msgType = "MARKER";
-            break;
-            case GL_DEBUG_TYPE_PUSH_GROUP:
-                msgType = "PSUH_GROUP";
-            break;
-            case GL_DEBUG_TYPE_POP_GROUP:
-                msgType = "POP_GROUP";
-            break;
-            case GL_DEBUG_TYPE_OTHER:
-                msgType = "OTHER";
-            break;
-        }
-
-        if (error_category)
-        {
-            CM_CORE_LOG_ERROR("[OpenGL:{}]: {}", msgType, message);
-        }
-        else if (warn_category)
-        {
-            CM_CORE_LOG_WARN("[OpenGL:{}]: {}", msgType, message);
-        }
-        else
-        {
-            CM_CORE_LOG_TRACE("[OpenGL:{}]: {}", msgType, message);
-        }
-    }
 
     Application::Application(const WindowSpec& spec)
     {
@@ -98,18 +36,6 @@ namespace comet
         
         CM_CORE_LOG_DEBUG("Initializing the application");
         m_window = Window::create(spec);
-
-        // Setup OpenGL Debug Messages
-        glDebugMessageCallback(glDebugCallback, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-        glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, nullptr, GL_FALSE);
-        glEnable(GL_DEBUG_OUTPUT);
-
-        // Enable OpenGL Flags
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        // glFrontFace(GL_CW);
 
         // Deactivate VSync (slowness of window motion on Linux when VSync is on)
         m_window->setVSync(false);
@@ -275,7 +201,7 @@ namespace comet
             }
             else
             {
-                std::this_thread::sleep_for(microseconds(10));
+                std::this_thread::sleep_for(microseconds(5));
             }
         }
         

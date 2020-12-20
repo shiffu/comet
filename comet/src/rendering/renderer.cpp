@@ -1,17 +1,19 @@
 #include <glad/glad.h>
+
 #include <comet/renderer.h>
-#include <glm/mat4x4.hpp>
 #include <comet/shader.h>
-#include <comet/vertexArray.h>
-#include <comet/indexBuffer.h>
-#include <comet/vertexBuffer.h>
-#include <comet/commandBuffer.h>
+#include <rendering/vertexArray.h>
+#include <rendering/indexBuffer.h>
+#include <rendering/vertexBuffer.h>
+#include <rendering/commandBuffer.h>
 #include <comet/light.h>
 #include <comet/utils.h>
 #include <comet/scene.h>
 #include <comet/components.h>
 #include <comet/materialRegistry.h>
 #include <comet/resourceManager.h>
+
+#include <glm/mat4x4.hpp>
 
 
 namespace comet
@@ -58,11 +60,11 @@ namespace comet
         MultiDrawIndirectContext(Material* _material) : material(_material) {}
 
         Material* material{nullptr};
-        VertexArray vao{};
-        IndexBuffer ibo{GL_STATIC_DRAW};
-        VertexBuffer vbo{GL_STATIC_DRAW};
-        VertexBuffer instanceBuffer{GL_DYNAMIC_DRAW};
-        CommandBuffer commandBuffer{GL_DYNAMIC_DRAW};
+        std::unique_ptr<VertexArray> vao;
+        std::unique_ptr<IndexBuffer> ibo;
+        std::unique_ptr<VertexBuffer> vbo;
+        std::unique_ptr<VertexBuffer> instanceBuffer;
+        std::unique_ptr<CommandBuffer> commandBuffer;
 
         std::unordered_map<uint32_t, MeshAndInstances> staticMeshes;
     };
@@ -126,7 +128,14 @@ namespace comet
             auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
             if (drawContextMap.find(key) == drawContextMap.end())
             {
-                drawContextMap[key] = new MultiDrawIndirectContext(material);
+                auto context = new MultiDrawIndirectContext(material);
+                context->ibo = IndexBuffer::create(GL_STATIC_DRAW);
+                context->vbo = VertexBuffer::create(GL_STATIC_DRAW);
+                context->instanceBuffer = VertexBuffer::create(GL_DYNAMIC_DRAW);
+                context->commandBuffer = CommandBuffer::create(GL_DYNAMIC_DRAW);
+                context->vao = VertexArray::create();
+
+                drawContextMap[key] = context;
             }
 
             auto currentDrawContext = drawContextMap[key];
@@ -135,18 +144,18 @@ namespace comet
             {
                 if (hasIndices)
                 {
-                    currentDrawContext->ibo.increaseSize(staticMesh->getIndicesSize());
-                    currentDrawContext->commandBuffer.increaseSize(sizeof(DrawElementsIndirectCommand));
+                    currentDrawContext->ibo->increaseSize(staticMesh->getIndicesSize());
+                    currentDrawContext->commandBuffer->increaseSize(sizeof(DrawElementsIndirectCommand));
                 }
                 else
                 {
-                    currentDrawContext->commandBuffer.increaseSize(sizeof(DrawArraysIndirectCommand));
+                    currentDrawContext->commandBuffer->increaseSize(sizeof(DrawArraysIndirectCommand));
                 }
 
-                currentDrawContext->vbo.increaseSize(staticMesh->getVerticesSize());
+                currentDrawContext->vbo->increaseSize(staticMesh->getVerticesSize());
             }
 
-            currentDrawContext->instanceBuffer.increaseSize(sizeof(MeshInstanceData));
+            currentDrawContext->instanceBuffer->increaseSize(sizeof(MeshInstanceData));
             auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
             meshAndInstances.staticMesh = staticMesh;
             meshAndInstances.instancesData.emplace_back(transform.transform, mesh.materialInstanceId);
@@ -160,27 +169,29 @@ namespace comet
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
                 // Buffers Allocation
-                pMaterialDrawContext->vbo.allocate();
-                pMaterialDrawContext->instanceBuffer.allocate();
-                pMaterialDrawContext->commandBuffer.allocate();
+                pMaterialDrawContext->vbo->allocate();
+                pMaterialDrawContext->instanceBuffer->allocate();
+                pMaterialDrawContext->commandBuffer->allocate();
 
                 // Buffers Layouts definition
-                VertexBufferLayout vboLayout;
+                auto vboLayoutPtr = VertexBufferLayout::create();
+                auto& vboLayout = *vboLayoutPtr.get();
                 pMaterialDrawContext->material->updateVboDataLayout(vboLayout);
 
-                if (pMaterialDrawContext->ibo.getSize())
+                if (pMaterialDrawContext->ibo->getSize())
                 {
-                    pMaterialDrawContext->ibo.allocate();
-                    pMaterialDrawContext->vao.addLayout(vboLayout, pMaterialDrawContext->vbo, &pMaterialDrawContext->ibo);
+                    pMaterialDrawContext->ibo->allocate();
+                    pMaterialDrawContext->vao->addLayout(vboLayout, *pMaterialDrawContext->vbo.get(), pMaterialDrawContext->ibo.get());
                 }
                 else
                 {
-                    pMaterialDrawContext->vao.addLayout(vboLayout, pMaterialDrawContext->vbo, nullptr);
+                    pMaterialDrawContext->vao->addLayout(vboLayout, *pMaterialDrawContext->vbo.get(), nullptr);
                 }
 
-                VertexBufferLayout instanceDataLayout;
+                auto instanceDataLayoutPtr = VertexBufferLayout::create();
+                auto& instanceDataLayout = *instanceDataLayoutPtr.get();
                 pMaterialDrawContext->material->updateInstanceDataLayout(instanceDataLayout);
-                pMaterialDrawContext->vao.addLayout(instanceDataLayout, pMaterialDrawContext->instanceBuffer);
+                pMaterialDrawContext->vao->addLayout(instanceDataLayout, *pMaterialDrawContext->instanceBuffer.get());
             }
         }
     }
@@ -196,14 +207,14 @@ namespace comet
                 uint32_t baseVertex{0};
 
                 // Map Buffers memory
-                pMaterialDrawContext->vbo.mapMemory(GL_WRITE_ONLY);
-                pMaterialDrawContext->instanceBuffer.mapMemory(GL_WRITE_ONLY);
-                pMaterialDrawContext->commandBuffer.mapMemory(GL_WRITE_ONLY);
-                bool indexBufferExists = (pMaterialDrawContext->ibo.getSize() > 0);
+                pMaterialDrawContext->vbo->mapMemory(GL_WRITE_ONLY);
+                pMaterialDrawContext->instanceBuffer->mapMemory(GL_WRITE_ONLY);
+                pMaterialDrawContext->commandBuffer->mapMemory(GL_WRITE_ONLY);
+                bool indexBufferExists = (pMaterialDrawContext->ibo->getSize() > 0);
 
                 if (indexBufferExists)
                 {
-                    pMaterialDrawContext->ibo.mapMemory(GL_WRITE_ONLY);
+                    pMaterialDrawContext->ibo->mapMemory(GL_WRITE_ONLY);
                 }
 
                 // Load Data from Meshes and Mesh Instances
@@ -213,42 +224,42 @@ namespace comet
                     uint32_t indexCount = staticMesh->getIndexCount();
                     if (indexCount > 0)
                     {
-                        firstIndex = pMaterialDrawContext->ibo.getCurrentCount();
+                        firstIndex = pMaterialDrawContext->ibo->getCount();
                         auto indices = staticMesh->getIndices();
-                        pMaterialDrawContext->ibo.loadDataInMappedMemory(indices.data(), indexCount);
+                        pMaterialDrawContext->ibo->loadDataInMappedMemory(indices.data(), indexCount);
                     }
 
                     auto vertices = staticMesh->getVertices();
                     auto verticesSize = staticMesh->getVerticesSize();
                     auto vertexCount = staticMesh->getVertexCount();
-                    firstVertex = pMaterialDrawContext->vbo.getCurrentCount();
-                    pMaterialDrawContext->vbo.loadDataInMappedMemory((const void*)vertices.data(), verticesSize, vertexCount);
+                    firstVertex = pMaterialDrawContext->vbo->getCount();
+                    pMaterialDrawContext->vbo->loadDataInMappedMemory((const void*)vertices.data(), verticesSize, vertexCount);
 
                     auto instanceCount =  static_cast<uint32_t>(meshAndInstancesData.instancesData.size());
-                    auto baseInstance =  pMaterialDrawContext->instanceBuffer.getCurrentCount();
+                    auto baseInstance =  pMaterialDrawContext->instanceBuffer->getCount();
 
                     for (auto& instanceData : meshAndInstancesData.instancesData)
                     {
-                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
+                        pMaterialDrawContext->instanceBuffer->loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
                     }
 
                     if (indexCount > 1)
                     {
                         DrawElementsIndirectCommand cmd{indexCount, instanceCount, firstIndex, baseVertex, baseInstance};
-                        pMaterialDrawContext->commandBuffer.loadDataInMappedMemory((const void*)&cmd, sizeof(cmd), 1);
+                        pMaterialDrawContext->commandBuffer->loadDataInMappedMemory((const void*)&cmd, sizeof(cmd), 1);
                         baseVertex += vertexCount;
                     }
                     else
                     {
                         DrawArraysIndirectCommand cmd{vertexCount, instanceCount, firstVertex, baseInstance};
-                        pMaterialDrawContext->commandBuffer.loadDataInMappedMemory((const void*)&cmd, sizeof(cmd), 1);
+                        pMaterialDrawContext->commandBuffer->loadDataInMappedMemory((const void*)&cmd, sizeof(cmd), 1);
                     }
                 }
 
-                pMaterialDrawContext->ibo.unmapMemory();
-                pMaterialDrawContext->vbo.unmapMemory();
-                pMaterialDrawContext->instanceBuffer.unmapMemory();
-                pMaterialDrawContext->commandBuffer.unmapMemory();
+                pMaterialDrawContext->ibo->unmapMemory();
+                pMaterialDrawContext->vbo->unmapMemory();
+                pMaterialDrawContext->instanceBuffer->unmapMemory();
+                pMaterialDrawContext->commandBuffer->unmapMemory();
             }
         }
     }
@@ -301,15 +312,15 @@ namespace comet
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
                 // TODO: This mapMemory can be quite slow for big buffers. Check if splitting in multiple buffers would be faster!
-                pMaterialDrawContext->instanceBuffer.mapMemory(GL_WRITE_ONLY);
+                pMaterialDrawContext->instanceBuffer->mapMemory(GL_WRITE_ONLY);
                 for (auto [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
                 {
                     for (auto& instanceData : meshAndInstancesData.instancesData)
                     {
-                        pMaterialDrawContext->instanceBuffer.loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
+                        pMaterialDrawContext->instanceBuffer->loadDataInMappedMemory((const void*)&instanceData, sizeof(instanceData), 1);
                     }
                 }
-                pMaterialDrawContext->instanceBuffer.unmapMemory();
+                pMaterialDrawContext->instanceBuffer->unmapMemory();
             }
         }
     }
@@ -336,18 +347,18 @@ namespace comet
                 auto currentMaterial = pMaterialDrawContext->material;
                 currentMaterial->loadUniforms();
 
-                pMaterialDrawContext->vao.bind();
-                pMaterialDrawContext->commandBuffer.bind();
+                pMaterialDrawContext->vao->bind();
+                pMaterialDrawContext->commandBuffer->bind();
 
                 if (key.hasIndices)
                 {
                     glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr,
-                                    pMaterialDrawContext->commandBuffer.getCurrentCount(), 0);
+                                    pMaterialDrawContext->commandBuffer->getCount(), 0);
                 }
                 else
                 {
                     glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr,
-                                    pMaterialDrawContext->commandBuffer.getCurrentCount(), 0);
+                                    pMaterialDrawContext->commandBuffer->getCount(), 0);
                 }
             }
         }

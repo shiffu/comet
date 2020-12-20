@@ -1,6 +1,8 @@
 #pragma once
-#include <cstdint>
-#include <comet/buffer.h>
+
+#include <rendering/buffer.h>
+
+#include <memory>
 
 namespace comet
 {
@@ -13,10 +15,10 @@ namespace comet
             uint32_t _baseInstance) : vertexCount(_vertexCount), instanceCount(_instanceCount),
                                     firstVertex(_firstVertex), baseInstance(_baseInstance) {}
 
-        GLuint vertexCount;
-        GLuint instanceCount;
-        GLuint firstVertex;
-        GLuint baseInstance;
+        uint32_t vertexCount;
+        uint32_t instanceCount;
+        uint32_t firstVertex;
+        uint32_t baseInstance;
     };
 
     struct DrawElementsIndirectCommand
@@ -29,19 +31,20 @@ namespace comet
             uint32_t _baseInstance) : indexCount(_indexCount), instanceCount(_instanceCount),
                                     firstIndex(_firstIndex), baseVertex(_baseVertex), baseInstance(_baseInstance) {}
 
-        GLuint indexCount;
-        GLuint instanceCount;
-        GLuint firstIndex;
-        GLuint baseVertex;
-        GLuint baseInstance;
+        uint32_t indexCount;
+        uint32_t instanceCount;
+        uint32_t firstIndex;
+        uint32_t baseVertex;
+        uint32_t baseInstance;
     };
 
     class CommandBuffer : public Buffer
     {
     public:
-        CommandBuffer(uint32_t usage);
-        ~CommandBuffer() {};
+        virtual ~CommandBuffer() {};
 
-        CommandBuffer& operator=(CommandBuffer&& other) noexcept;
+        virtual void loadDataInMappedMemory(const void* data, size_t size, uint32_t count, uint32_t offset = 0) = 0;
+
+        static std::unique_ptr<CommandBuffer> create(uint32_t usage);
     };
 }
