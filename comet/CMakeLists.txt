@@ -1,185 +1,246 @@
+cmake_minimum_required(VERSION 3.17)
 
-set(COMET_PUBLIC_HEADERS_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
-set(COMET_SOURCES_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
+# Options
+option(COMET_BUILD_WITH_GLFW "Build GLFW Library" ON)
+option(COMET_BUILD_WITH_SFML "Build SFML Library" OFF)
 
-add_library(comet STATIC
-    # Public Headers
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/log.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/assert.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/utils.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/platform.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/graphicApiConfig.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/application.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/singleton.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/resourceManager.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/timer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/window.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/comet.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/event.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/input.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/shader.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/shaderRegistry.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/camera.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/cameraController.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/renderer.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/material.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/materialRegistry.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/flatColorMaterial.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/phongMaterial.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/staticMesh.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/vertex.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/light.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/directionalLight.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/pointLight.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/spotLight.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/texture.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/textureRegistry.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/entity.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/scene.h
-    ${COMET_PUBLIC_HEADERS_DIR}/comet/components.h
-    
-    # Sources and private Headers
-    ${COMET_SOURCES_DIR}/vendors/glad/src/glad.c
-    ${COMET_SOURCES_DIR}/core/log.cpp
-    ${COMET_SOURCES_DIR}/core/application.cpp
-    ${COMET_SOURCES_DIR}/core/window.cpp
-    ${COMET_SOURCES_DIR}/core/resourceManager.cpp
-    ${COMET_SOURCES_DIR}/core/objLoader.h
-    ${COMET_SOURCES_DIR}/core/objLoader.cpp
-    ${COMET_SOURCES_DIR}/core/stringUtils.h
-    ${COMET_SOURCES_DIR}/core/stringUtils.cpp
-
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBuffer.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBuffer.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglIndexBuffer.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglIndexBuffer.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglCommandBuffer.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglCommandBuffer.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexArray.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexArray.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBufferLayout.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglVertexBufferLayout.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglTexture.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglTexture.cpp
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglShader.h
-    ${COMET_SOURCES_DIR}/platforms/opengl/openglShader.cpp
-    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.h
-    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLWindow.cpp
-    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.h
-    ${COMET_SOURCES_DIR}/platforms/sfml/SFMLInput.cpp
-    ${COMET_SOURCES_DIR}/platforms/glfw/glfwWindowWrapper.cpp
-    ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.cpp
-    ${COMET_SOURCES_DIR}/platforms/glfw/glfwInput.h
-    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.h
-    ${COMET_SOURCES_DIR}/platforms/glfw/imguiGlfwWrapper.cpp
-
-    ${COMET_SOURCES_DIR}/rendering/graphicApiConfig.cpp
-    ${COMET_SOURCES_DIR}/rendering/buffer.h
-    ${COMET_SOURCES_DIR}/rendering/vertexBuffer.h
-    ${COMET_SOURCES_DIR}/rendering/vertexBuffer.cpp
-    ${COMET_SOURCES_DIR}/rendering/indexBuffer.h
-    ${COMET_SOURCES_DIR}/rendering/indexBuffer.cpp
-    ${COMET_SOURCES_DIR}/rendering/commandBuffer.h
-    ${COMET_SOURCES_DIR}/rendering/commandBuffer.cpp
-    ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.h
-    ${COMET_SOURCES_DIR}/rendering/vertexBufferLayout.cpp
-    ${COMET_SOURCES_DIR}/rendering/vertexArray.h
-    ${COMET_SOURCES_DIR}/rendering/vertexArray.cpp
-    ${COMET_SOURCES_DIR}/rendering/shader.cpp
-    ${COMET_SOURCES_DIR}/rendering/shaderRegistry.cpp
-    ${COMET_SOURCES_DIR}/rendering/camera.cpp
-    ${COMET_SOURCES_DIR}/rendering/cameraController.cpp
-    ${COMET_SOURCES_DIR}/rendering/renderer.cpp
-    ${COMET_SOURCES_DIR}/rendering/material.cpp
-    ${COMET_SOURCES_DIR}/rendering/directionalLight.cpp
-    ${COMET_SOURCES_DIR}/rendering/pointLight.cpp
-    ${COMET_SOURCES_DIR}/rendering/spotLight.cpp
-    ${COMET_SOURCES_DIR}/rendering/flatColorMaterial.cpp
-    ${COMET_SOURCES_DIR}/rendering/phongMaterial.cpp
-    ${COMET_SOURCES_DIR}/rendering/staticMesh.cpp
-    ${COMET_SOURCES_DIR}/rendering/imguiWrapper.h
-    ${COMET_SOURCES_DIR}/rendering/imguiWrapper.cpp
-    ${COMET_SOURCES_DIR}/rendering/texture.cpp
-    ${COMET_SOURCES_DIR}/rendering/textureRegistry.cpp
-    
-    ${COMET_SOURCES_DIR}/ecs/scene.cpp
-    
-    ## Vendors ##
-
-    # glad
-    ${COMET_SOURCES_DIR}/vendors/glad/include/glad/glad.h
-
-    # ImGui
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imconfig.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_draw.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_widgets.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_demo.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_opengl3.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_opengl3.h
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.cpp
-    ${COMET_SOURCES_DIR}/vendors/imgui/imgui/imgui_impl_glfw.h
-
-    # stb
-    ${COMET_SOURCES_DIR}/vendors/stb/stb_image.h
-    ${COMET_SOURCES_DIR}/vendors/stb/stb_image.cpp
-
-    # entt
-    ${COMET_SOURCES_DIR}/vendors/entt/entt/entt.hpp
- )
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # For Debugging
 set(CMAKE_VERBOSE_MAKEFILE OFF)
+
+
+add_library(comet STATIC)
+
+if(COMET_BUILD_WITH_GLFW)
+    target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
+    message(STATUS "Option BUILD_GLFW was set to ON")
+elseif(COMET_BUILD_WITH_SFML)
+    target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_SFML)
+    message(STATUS "Option BUILD_SFML was set to ON")
+else()
+    message(FATAL_ERROR "Either COMET_BUILD_WITH_GLFW or COMET_BUILD_WITH_SFML option should be set to ON")
+endif()
+
+target_compile_features(comet PRIVATE cxx_std_17)
+
+target_sources(comet
+    INTERFACE
+        include/comet/comet.h
+
+    PUBLIC
+        include/comet/log.h
+        include/comet/assert.h
+        include/comet/utils.h
+        include/comet/platform.h
+        include/comet/graphicApiConfig.h
+        include/comet/application.h
+        include/comet/singleton.h
+        include/comet/resourceManager.h
+        include/comet/timer.h
+        include/comet/window.h
+        include/comet/event.h
+        include/comet/input.h
+        include/comet/shader.h
+        include/comet/shaderRegistry.h
+        include/comet/camera.h
+        include/comet/cameraController.h
+        include/comet/renderer.h
+        include/comet/material.h
+        include/comet/materialRegistry.h
+        include/comet/flatColorMaterial.h
+        include/comet/phongMaterial.h
+        include/comet/staticMesh.h
+        include/comet/vertex.h
+        include/comet/light.h
+        include/comet/directionalLight.h
+        include/comet/pointLight.h
+        include/comet/spotLight.h
+        include/comet/texture.h
+        include/comet/textureRegistry.h
+        include/comet/entity.h
+        include/comet/scene.h
+        include/comet/components.h
+
+    PRIVATE
+        src/core/log.cpp
+        src/core/application.cpp
+        src/core/window.cpp
+        src/core/resourceManager.cpp
+        src/core/objLoader.h
+        src/core/objLoader.cpp
+        src/core/stringUtils.h
+        src/core/stringUtils.cpp
+
+        src/platforms/opengl/openglVertexBuffer.h
+        src/platforms/opengl/openglVertexBuffer.cpp
+        src/platforms/opengl/openglIndexBuffer.h
+        src/platforms/opengl/openglIndexBuffer.cpp
+        src/platforms/opengl/openglCommandBuffer.h
+        src/platforms/opengl/openglCommandBuffer.cpp
+        src/platforms/opengl/openglVertexArray.h
+        src/platforms/opengl/openglVertexArray.cpp
+        src/platforms/opengl/openglVertexBufferLayout.h
+        src/platforms/opengl/openglVertexBufferLayout.cpp
+        src/platforms/opengl/openglTexture.h
+        src/platforms/opengl/openglTexture.cpp
+        src/platforms/opengl/openglShader.h
+        src/platforms/opengl/openglShader.cpp
+
+        src/rendering/graphicApiConfig.cpp
+        src/rendering/buffer.h
+        src/rendering/vertexBuffer.h
+        src/rendering/vertexBuffer.cpp
+        src/rendering/indexBuffer.h
+        src/rendering/indexBuffer.cpp
+        src/rendering/commandBuffer.h
+        src/rendering/commandBuffer.cpp
+        src/rendering/vertexBufferLayout.h
+        src/rendering/vertexBufferLayout.cpp
+        src/rendering/vertexArray.h
+        src/rendering/vertexArray.cpp
+        src/rendering/shader.cpp
+        src/rendering/shaderRegistry.cpp
+        src/rendering/camera.cpp
+        src/rendering/cameraController.cpp
+        src/rendering/renderer.cpp
+        src/rendering/material.cpp
+        src/rendering/directionalLight.cpp
+        src/rendering/pointLight.cpp
+        src/rendering/spotLight.cpp
+        src/rendering/flatColorMaterial.cpp
+        src/rendering/phongMaterial.cpp
+        src/rendering/staticMesh.cpp
+        src/rendering/imguiWrapper.h
+        src/rendering/imguiWrapper.cpp
+        src/rendering/texture.cpp
+        src/rendering/textureRegistry.cpp
+
+        src/ecs/scene.cpp
+        
+        ## Vendors ##
+        # glad
+        src/vendors/glad/include/glad/glad.h
+        src/vendors/glad/src/glad.c
+
+        # ImGui
+        src/vendors/imgui/imgui/imconfig.h
+        src/vendors/imgui/imgui/imgui.cpp
+        src/vendors/imgui/imgui/imgui.h
+        src/vendors/imgui/imgui/imgui_draw.cpp
+        src/vendors/imgui/imgui/imgui_widgets.cpp
+        src/vendors/imgui/imgui/imgui_demo.cpp
+        src/vendors/imgui/imgui/imgui_impl_opengl3.cpp
+        src/vendors/imgui/imgui/imgui_impl_opengl3.h
+        src/vendors/imgui/imgui/imgui_impl_glfw.cpp
+        src/vendors/imgui/imgui/imgui_impl_glfw.h
+
+        # stb
+        src/vendors/stb/stb/stb_image.h
+        src/vendors/stb/stb/stb_image.cpp
+
+        # entt
+        src/vendors/entt/entt/entt.hpp
+ )
+
+ # Only when BUILD_GLFW = ON
+ if (COMET_BUILD_WITH_GLFW)
+    target_sources(comet
+        PRIVATE
+            src/platforms/glfw/glfwWindowWrapper.cpp
+            src/platforms/glfw/glfwInput.cpp
+            src/platforms/glfw/glfwInput.h
+            src/platforms/glfw/imguiGlfwWrapper.h
+            src/platforms/glfw/imguiGlfwWrapper.cpp
+    )
+endif()
+
+ # Only when BUILD_SFML = ON
+ if (COMET_BUILD_WITH_SFML)
+    target_sources(comet
+        PRIVATE
+            src/platforms/sfml/SFMLWindow.h
+            src/platforms/sfml/SFMLWindow.cpp
+            src/platforms/sfml/SFMLInput.h
+            src/platforms/sfml/SFMLInput.cpp
+    )
+endif()
 
 # Dependencies
 #   spdlog
 add_subdirectory(src/vendors/spdlog)
 
+#   GLFW
+if (COMET_BUILD_WITH_GLFW)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    set(GLFW_BUILD_TESTS OFF)
+    set(GLFW_BUILD_DOCS OFF)
+    add_subdirectory(src/vendors/glfw)
+endif()
+
 #   SFML
-set(SFML_BUILD_EXAMPLES OFF)
-set(SFML_BUILD_DOC OFF)
-set(SFML_BUILD_AUDIO OFF)
-set(SFML_BUILD_NETWORK OFF)
-set(SFML_BUILD_GRAPHICS OFF)
-set(SFML_BUILD_WINDOW ON)
-
-add_subdirectory(src/vendors/sfml)
-
-set(GLFW_BUILD_EXAMPLES OFF)
-set(GLFW_BUILD_TESTS OFF)
-set(GLFW_BUILD_DOCS OFF)
-add_subdirectory(src/vendors/glfw)
+if (COMET_BUILD_WITH_SFML)
+    set(SFML_BUILD_EXAMPLES OFF)
+    set(SFML_BUILD_DOC OFF)
+    set(SFML_BUILD_AUDIO OFF)
+    set(SFML_BUILD_NETWORK OFF)
+    set(SFML_BUILD_GRAPHICS OFF)
+    set(SFML_BUILD_WINDOW ON)
+    add_subdirectory(src/vendors/sfml)
+endif()
 
 find_package(OpenGL REQUIRED)
 
 # Link
 target_include_directories(comet
     PUBLIC
-        ${COMET_PUBLIC_HEADERS_DIR}
-        ${COMET_SOURCES_DIR}/vendors/glad/include
-        ${COMET_SOURCES_DIR}/vendors/glm
-        ${COMET_SOURCES_DIR}/vendors/imgui
-        ${COMET_SOURCES_DIR}/vendors/entt
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/glm
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/imgui
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/entt
         # TODO: Move this to private / build a more robust include structure
-        ${COMET_SOURCES_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src
     PRIVATE
-        ${COMET_SOURCES_DIR}/vendors
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/glad/include
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/spdlog/include
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/stb 
 )
+
+if (COMET_BUILD_WITH_GLFW)
+    target_include_directories(comet
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/vendors/glfw/include
+    )
+endif()
+
+if (COMET_BUILD_WITH_SFML)
+    target_include_directories(comet
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/vendors/sfml/include
+    )
+endif()
 
 target_link_libraries(comet
     PUBLIC
         spdlog
     PRIVATE
         stdc++fs
-        glfw
-        sfml-window
         OpenGL::GL
         ${CMAKE_DL_LIBS}
 )
+
+if (COMET_BUILD_WITH_GLFW)
+    target_link_libraries(comet
+        PRIVATE
+            glfw
+    )
+endif()
+
+if (COMET_BUILD_WITH_SFML)
+    target_link_libraries(comet
+        PRIVATE
+            sfml-window
+    )
+endif()
 
 include(CMakePrintHelpers)
 cmake_print_properties(
@@ -188,4 +249,5 @@ cmake_print_properties(
         INCLUDE_DIRECTORIES
         LINK_LIBRARIES
         SOURCE_DIR
+        COMPILE_DEFINITIONS
 )
