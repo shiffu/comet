@@ -198,6 +198,11 @@ namespace comet
 
     void Renderer::loadData()
     {
+        auto& sceneStats = m_scene->getStatistics();
+        sceneStats.indicesCount = 0;
+        sceneStats.verticesCount = 0;
+        sceneStats.drawCommandsCount = 0;
+
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
@@ -256,6 +261,11 @@ namespace comet
                     }
                 }
 
+                // Stats
+                sceneStats.indicesCount = pMaterialDrawContext->ibo->getCount();
+                sceneStats.verticesCount = pMaterialDrawContext->vbo->getCount();
+                sceneStats.drawCommandsCount = pMaterialDrawContext->commandBuffer->getCount();
+
                 pMaterialDrawContext->ibo->unmapMemory();
                 pMaterialDrawContext->vbo->unmapMemory();
                 pMaterialDrawContext->instanceBuffer->unmapMemory();
@@ -266,6 +276,9 @@ namespace comet
 
     void Renderer::reloadInstanceData()
     {
+        auto& sceneStats = m_scene->getStatistics();
+        sceneStats.entitiesCount = 0;
+
         auto& registry = m_scene->m_registry;
         auto currentMeshId{0};
         auto currentMaterialId{-1};
@@ -277,6 +290,8 @@ namespace comet
             ResourceHandler<StaticMesh> staticMeshHandler;
             StaticMesh* staticMesh;
             bool hasIndices;
+
+            sceneStats.entitiesCount++;
 
             if (currentMeshTypeId != mesh.meshTypeId)
             {
@@ -327,6 +342,8 @@ namespace comet
 
     void Renderer::render(const glm::mat4& view, const glm::mat4& projection)
     {
+        auto& sceneStats = m_scene->getStatistics();
+        sceneStats.drawCalls = 0;
         auto vpMatrix = projection * view;
 
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
@@ -349,6 +366,8 @@ namespace comet
 
                 pMaterialDrawContext->vao->bind();
                 pMaterialDrawContext->commandBuffer->bind();
+
+                sceneStats.drawCalls++;
 
                 if (key.hasIndices)
                 {

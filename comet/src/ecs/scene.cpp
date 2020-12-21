@@ -7,6 +7,7 @@ namespace comet
     Entity Scene::createEntity()
     {
         Entity entity{ m_registry.create(), this};
+        m_sceneStatistics.entitiesCount++;
         return entity;
     }
 

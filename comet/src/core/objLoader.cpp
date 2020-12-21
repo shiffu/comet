@@ -102,6 +102,14 @@ namespace comet
                     StringUtils::split(verticesDef, line.substr(2));
                     for (auto vertexDef : verticesDef)
                     {
+                        // The vertex index has already been used before, so get the index from it
+                        if (usedVertices.find(vertexDef) != usedVertices.end())
+                        {
+                            indices.push_back(usedVertices[vertexDef]);
+                            continue;
+                        }
+
+                        // Vertex index has not been used before, so we need to create a new Vertex
                         vertexAttributes.clear();
                         StringUtils::split(vertexAttributes, vertexDef, '/');
 
@@ -118,38 +126,32 @@ namespace comet
                             normalIdx = std::stoi(vertexAttributes[2]) - 1;
                         }
 
-                        // The vertex index has already been used before, so get the index from it
-                        if (usedVertices.find(vertexDef) != usedVertices.end())
+                        auto position = positions[positionIdx];
+
+                        glm::vec2 texCoord{0.0f};
+                        if (texCoordIdx != -1)
                         {
-                            indices.push_back(usedVertices[vertexDef]);
+                            texCoord = texCoords[texCoordIdx];
                         }
-                        // Vertex index has not been used before, so we need to create a new Vertex
-                        else
+
+                        glm::vec3 normal{0.0f};
+                        if (normalIdx != -1)
                         {
-                            auto position = positions[positionIdx];
-
-                            glm::vec2 texCoord{0.0f};
-                            if (texCoordIdx != -1)
-                            {
-                                texCoord = texCoords[texCoordIdx];
-                            }
-
-                            glm::vec3 normal{0.0f};
-                            if (normalIdx != -1)
-                            {
-                                normal = normals[normalIdx];
-                            }
-
-                            vertices.emplace_back(position, normal, texCoord);
-                            uint32_t newIndex = vertices.size() - 1;
-                            indices.push_back(newIndex);
-                            usedVertices.insert({vertexDef, newIndex});
+                            normal = normals[normalIdx];
                         }
+
+                        vertices.emplace_back(position, normal, texCoord);
+                        uint32_t newIndex = vertices.size() - 1;
+                        indices.push_back(newIndex);
+                        usedVertices.insert({vertexDef, newIndex});
                     }
                 }
                 lineNumber++;
                 
             } while (getline(ifs, line));
         }
+
+        CM_CORE_LOG_DEBUG("Obj file '{}' has {} vertices and {} indices",
+            filepath.string(), vertices.size(), indices.size());
     }
 } // namespace comet

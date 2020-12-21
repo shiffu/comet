@@ -68,7 +68,6 @@ namespace comet
         bool m_isRunning{false};
         bool m_isInitialized{false};
         Window* m_window{nullptr};
-        Renderer m_renderer;
         Scene m_activeScene;
         unsigned int m_fpsCap{0};
         // Fixed update time in ms (used to onFixedUpdate function call)

@@ -99,11 +99,16 @@ namespace comet
     void Application::onImGuiDebugDraw()
     {
         ImGui::Begin("Comet Debug");
+        ImGui::Text("Scene statistics debug information");
+        
         auto FPS = ImGui::GetIO().Framerate;
-
-        ImGui::Text("This window contains default debug information");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / FPS, FPS);
-        // ImGui::Text("Mouse position: %.3f, %.3f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y); 
+        ImGui::Text("Frame time %.3f ms (%.1f FPS)", 1000.0f / FPS, FPS);
+        
+        auto& stats = m_activeScene.getStatistics();
+        ImGui::Text("Lights: %d", stats.lightsCount);
+        ImGui::Text("Entities: %d", stats.entitiesCount);
+        ImGui::Text("Vertices: %d / Indices: %d", stats.verticesCount, stats.indicesCount);
+        ImGui::Text("Draw calls: %d / Draw commands: %d", stats.drawCalls, stats.drawCommandsCount);
 
         ImGui::End();
     }

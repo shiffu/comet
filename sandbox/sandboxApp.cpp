@@ -61,7 +61,7 @@ void SandboxApp::onStart()
     auto& transformComp = e1.getComponent<comet::TransformComponent>();
     transformComp.move(glm::vec3(2.0f));
 
-    for (int i = 0; i < 2500; ++i)
+    for (int i = 0; i < 1000; ++i)
     {
         comet::Entity e = getActiveScene().createEntity();
         auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);

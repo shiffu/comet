@@ -53,7 +53,6 @@ namespace comet
             ObjLoader loader;
             auto meshResourcePath = ResourceManager::getInstance().getResourcePath(ResourceType::MESH, filename);
             auto staticMesh = std::make_unique<StaticMesh>(filename);
-            loader.loadFile(meshResourcePath, staticMesh->getVertices(), staticMesh->getIndices());
             m_meshMap[staticMeshId] = std::move(staticMesh);
         }
         
