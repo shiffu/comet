@@ -77,6 +77,8 @@ target_sources(comet
         src/platforms/opengl/openglIndexBuffer.cpp
         src/platforms/opengl/openglCommandBuffer.h
         src/platforms/opengl/openglCommandBuffer.cpp
+        src/platforms/opengl/openglFramebuffer.h
+        src/platforms/opengl/openglFramebuffer.cpp
         src/platforms/opengl/openglVertexArray.h
         src/platforms/opengl/openglVertexArray.cpp
         src/platforms/opengl/openglVertexBufferLayout.h
@@ -94,6 +96,8 @@ target_sources(comet
         src/rendering/indexBuffer.cpp
         src/rendering/commandBuffer.h
         src/rendering/commandBuffer.cpp
+        src/rendering/framebuffer.h
+        src/rendering/framebuffer.cpp
         src/rendering/vertexBufferLayout.h
         src/rendering/vertexBufferLayout.cpp
         src/rendering/vertexArray.h
