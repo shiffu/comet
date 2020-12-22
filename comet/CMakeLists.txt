@@ -133,6 +133,7 @@ target_sources(comet
         src/vendors/imgui/imgui/imgui_draw.cpp
         src/vendors/imgui/imgui/imgui_widgets.cpp
         src/vendors/imgui/imgui/imgui_demo.cpp
+        src/vendors/imgui/imgui/imgui_tables.cpp
         src/vendors/imgui/imgui/imgui_impl_opengl3.cpp
         src/vendors/imgui/imgui/imgui_impl_opengl3.h
         src/vendors/imgui/imgui/imgui_impl_glfw.cpp

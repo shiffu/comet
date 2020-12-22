@@ -4,6 +4,8 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include <GLFW/glfw3.h>
+
 namespace comet
 {
     
@@ -12,6 +14,12 @@ namespace comet
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+
+        // Flags
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
@@ -33,6 +41,15 @@ namespace comet
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
     }
 
     void ImguiGlfwWrapper::shutdown()
