@@ -14,6 +14,7 @@ namespace comet
         NONE = 0,
         SHADER,
         TEXTURE,
+        FONT,
         MESH,
         AUDIO
     };
@@ -46,6 +47,7 @@ namespace comet
     private:
         const char* SHADER_SUBFOLDER = "shaders";
         const char* TEXTURE_SUBFOLDER = "textures";
+        const char* FONT_SUBFOLDER = "fonts";
         const char* MESH_SUBFOLDER = "meshes";
         const char* AUDIO_SUBFOLDER = "audio";
 

@@ -13,7 +13,8 @@ namespace comet
 
         virtual ~ImguiWrapper() {};
 
-        virtual void init(const Window* window) = 0;
+        virtual void init() = 0;
+        virtual void initPlatform(const Window* window) = 0;
         virtual void newFrame() = 0;
         virtual void render() = 0;
         virtual void shutdown() = 0;

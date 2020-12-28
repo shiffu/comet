@@ -26,9 +26,11 @@ namespace comet
 
         void setDiffuse(const glm::vec3& diffuse) { m_diffuse = diffuse; }
         const glm::vec3& getDiffuse() const { return m_diffuse; }
+        glm::vec3& getDiffuse() { return m_diffuse; }
 
         void setSpecular(const glm::vec3& specular) { m_specular = specular; }
         const glm::vec3& getSpecular() const { return m_specular; }
+        glm::vec3& getSpecular() { return m_specular; }
 
         void setShininess(float shininess) { m_shininess = shininess; }
         float getShininess() const { return m_shininess; }
@@ -51,7 +53,7 @@ namespace comet
     private:
         glm::vec3 m_diffuse;
         glm::vec3 m_specular;
-        float m_shininess;
+        float m_shininess{1.0f};
         std::string m_albedoTexturePath;
         int32_t m_albedoTextureIndex{-1};
     };

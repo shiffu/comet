@@ -51,7 +51,7 @@ namespace comet
         glm::vec3 m_lastSetPosition;
         float m_moveSpeed{0.04f};
         float m_rotationSpeed{0.04f};
-        float m_zoomSpeed{0.1f};
+        float m_zoomSpeed{0.05f};
         float m_previousMouseX{0.0f};
         float m_previousMouseY{0.0f};
         bool m_pan{false};

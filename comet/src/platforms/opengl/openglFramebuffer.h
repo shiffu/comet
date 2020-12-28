@@ -1,4 +1,4 @@
-#include <rendering/framebuffer.h>
+#include <comet/framebuffer.h>
 
 namespace comet
 {
@@ -18,7 +18,6 @@ namespace comet
         virtual void unbind() const override;
     
     private:
-        FramebufferSpec m_spec;
         uint32_t m_bufferId{0};
         uint32_t m_colorAttachment{0};
         uint32_t m_depthAttachment{0};

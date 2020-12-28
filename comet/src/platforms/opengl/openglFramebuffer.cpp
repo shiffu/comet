@@ -7,7 +7,7 @@
 namespace comet
 {
 
-    OpenglFramebuffer::OpenglFramebuffer(const FramebufferSpec& spec) : m_spec(spec)
+    OpenglFramebuffer::OpenglFramebuffer(const FramebufferSpec& spec) : Framebuffer(spec)
     {
         glGenFramebuffers(1, &m_bufferId);
     }
@@ -22,8 +22,7 @@ namespace comet
     }
 
     OpenglFramebuffer::OpenglFramebuffer(OpenglFramebuffer&& other)
-        : m_spec(std::move(other.m_spec)),
-        m_bufferId(std::move(other.m_bufferId)),
+        : m_bufferId(std::move(other.m_bufferId)),
         m_colorAttachment(std::move(other.m_colorAttachment)),
         m_depthAttachment(std::move(other.m_depthAttachment))
     {
@@ -42,7 +41,6 @@ namespace comet
             glDeleteFramebuffers(1, &m_bufferId);
         }
 
-        m_spec = std::move(other.m_spec);
         m_bufferId = std::move(other.m_bufferId);
         m_colorAttachment = std::move(other.m_colorAttachment);
         m_depthAttachment = std::move(other.m_depthAttachment);
@@ -88,6 +86,8 @@ namespace comet
 
         // Unbind
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glViewport(0, 0, m_spec.width, m_spec.height);
     }
 
     void OpenglFramebuffer::bind() const

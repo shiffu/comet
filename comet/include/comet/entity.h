@@ -11,11 +11,14 @@ namespace comet
     class Entity
     {
     public:
+        Entity() = default;
         Entity(entt::entity entityId, Scene* scene)
             : m_entityId(entityId) , m_scene(scene)
         {
-            addComponent<TransformComponent>();
         }
+
+        entt::entity getId() const { return m_entityId; }
+        Scene* getScene() { return m_scene; }
 
         template<typename T, typename... Args>
         T& addComponent(Args&&... args)
@@ -25,7 +28,7 @@ namespace comet
         }
 
         template<typename T>
-        void removeComponent(T comp)
+        void removeComponent()
         {
             ASSERT(hasComponent<T>(), "Component is not in this entity");
             m_scene->m_registry.remove<T>(m_entityId);
@@ -42,6 +45,18 @@ namespace comet
         {
             ASSERT(hasComponent<T>(), "Component is not in this entity");
             return m_scene->m_registry.get<T>(m_entityId);
+        }
+
+        inline bool isValid() { return m_scene != nullptr && m_scene->m_registry.valid(m_entityId); }
+
+        inline bool operator==(const Entity& other)
+        {
+            return (m_entityId == other.m_entityId && m_scene == other.m_scene);
+        }
+
+        inline bool operator!=(const Entity& other)
+        {
+            return !(*this == other);
         }
 
     private:

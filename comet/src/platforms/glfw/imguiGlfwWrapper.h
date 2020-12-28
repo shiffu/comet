@@ -10,7 +10,8 @@ namespace comet
     public:
         ~ImguiGlfwWrapper() {};
 
-        void init(const Window* window) override;
+        void init() override;
+        void initPlatform(const Window* window) override;
         void newFrame() override;
         void render() override;
         void shutdown() override;

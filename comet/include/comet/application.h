@@ -6,6 +6,8 @@
 #include <comet/renderer.h>
 #include <memory>
 
+#include <comet/timer.h>
+
 namespace comet
 {
 
@@ -52,8 +54,12 @@ namespace comet
         virtual bool onMouseButtonPressed(MouseButtonPressedEvent& e);
         virtual bool onMouseButtonRelease(MouseButtonReleasedEvent& e);
 
+        virtual void onPreRenderScene() {}
+        virtual void onPostRenderScene() {}
+
         // Imgui Callback
-        virtual void onImGuiDraw();
+        virtual void onImGuiInit() {}
+        virtual void onImGuiDraw() {}
 
     private:
         void init(const WindowSpec& spec = WindowSpec());
@@ -73,6 +79,12 @@ namespace comet
         // Fixed update time in ms (used to onFixedUpdate function call)
         float m_fixedUpdateTime{20.0f};
         std::unique_ptr<ImguiWrapper> m_imguiWrapper;
+
+        Timer T_gameloop{"GameLoop - Total", true};
+        Timer T_fixed_udpate{"GameLoop - FixedUpdate", true};
+        Timer T_update{"GameLoop - Update", true};
+        Timer T_render{"GameLoop - Render", true};
+        Timer T_draw_imgui{"GameLoop - Draw ImGui", true};
     };
 
 } // namespace comet

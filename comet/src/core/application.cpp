@@ -47,7 +47,7 @@ namespace comet
         m_imguiWrapper = ImguiWrapper::create();
         if (m_imguiWrapper)
         {
-            m_imguiWrapper->init(m_window);
+            m_imguiWrapper->init();
         }
 
         m_isInitialized = true;
@@ -94,8 +94,6 @@ namespace comet
     bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) {}
     bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) {}
 
-    void Application::onImGuiDraw() {}
-
     void Application::onImGuiDebugDraw()
     {
         ImGui::Begin("Comet Debug");
@@ -115,6 +113,12 @@ namespace comet
 
     void Application::run()
     {
+        if (m_imguiWrapper)
+        {
+            onImGuiInit();
+            m_imguiWrapper->initPlatform(m_window);
+        }
+
         CM_CORE_LOG_INFO("Start running the application");
         m_isRunning = true;
 
@@ -142,6 +146,7 @@ namespace comet
 
         while(!m_window->isCloseRequested())
         {
+            T_gameloop.resume();
             currentTime = steady_clock::now();
             elapsedTime = currentTime - previousTime;
             previousTime = currentTime;
@@ -150,14 +155,17 @@ namespace comet
             // poll window events
             m_window->pollEvent();
 
+            T_fixed_udpate.resume();
             // Update as lag permits
             while(lag >= fixedUpdateTime)
             {
-                // CM_CORE_LOG_DEBUG("calling onFixedUpda`te function. lag: {}", lag.count());
+                // CM_CORE_LOG_DEBUG("calling onFixedUpdate function. lag: {}", lag.count());
                 onFixedUpdate(fixedUpdateTime.count());
                 lag -= fixedUpdateTime;
             }
+            T_fixed_udpate.pause();
 
+            T_update.resume();
             deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
             onUpdate(deltaTime);
 
@@ -165,13 +173,16 @@ namespace comet
             {
                 cameraController->onUpdate(deltaTime);
             }
+            T_update.pause();
 
+            T_draw_imgui.resume();
             if (m_imguiWrapper)
             {
                 m_imguiWrapper->newFrame();
-                onImGuiDebugDraw();
                 onImGuiDraw();
+                onImGuiDebugDraw();
             }
+            T_draw_imgui.pause();
 
             // Compute and display FPS (every 2s)
             // frameCounter++;
@@ -184,15 +195,23 @@ namespace comet
             //     CM_CORE_LOG_DEBUG("FPS: {}", fps);
             // }
 
+            T_render.resume();
             m_window->clearBuffers();
+            onPreRenderScene();
             m_activeScene.render();
+            onPostRenderScene();
+            T_render.pause();
 
+            T_draw_imgui.resume();
             if (m_imguiWrapper)
             {
                 m_imguiWrapper->render();
             }
+            T_draw_imgui.pause();
 
             m_window->swapBuffers();
+
+            T_gameloop.pause();
 
             // Is FPS Cap needed?
             if (m_fpsCap)

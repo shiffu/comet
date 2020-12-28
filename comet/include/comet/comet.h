@@ -8,6 +8,7 @@
 #include <comet/input.h>
 #include <comet/event.h>
 #include <comet/shader.h>
+#include <comet/framebuffer.h>
 #include <comet/camera.h>
 #include <comet/cameraController.h>
 #include <comet/renderer.h>

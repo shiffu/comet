@@ -59,30 +59,30 @@ void SandboxApp::onStart()
     comet::Entity e1 = getActiveScene().createEntity();
     auto meshComp = e1.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
     auto& transformComp = e1.getComponent<comet::TransformComponent>();
-    transformComp.move(glm::vec3(2.0f));
+    transformComp.translation = glm::vec3(2.0f);
 
     for (int i = 0; i < 1000; ++i)
     {
         comet::Entity e = getActiveScene().createEntity();
         auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
         auto& transformComp = e.getComponent<comet::TransformComponent>();
-        transformComp.move(glm::vec3((i * 2)  % 25, 1.0f + (i) % 25, 1.0f - (i / 20)  % 100));
+        transformComp.translation = glm::vec3((i * 2)  % 25, 1.0f + (i) % 25, 1.0f - (i / 20)  % 100);
     }
 
     const float translationStep = 1.05f;
     const float xOffset = -10.0f;
-    const float yOffset = -5.0f;
+    const float zOffset = -5.0f;
     
-    for (uint32_t i = 0; i < 50; ++i)
+    for (uint32_t i = 0; i < 40; ++i)
     {
-        for (uint32_t j = 0; j < 50; ++j)
+        for (uint32_t j = 0; j < 40; ++j)
         {
             auto e = getActiveScene().createEntity();
             auto meshComp = e.addComponent<comet::MeshComponent>(meshGroundHandler.resourceId, materialTypeHash2, materialInstanceId2);
             auto& transformComp = e.getComponent<comet::TransformComponent>();
 
-            transformComp.rotate(1.5f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
-            transformComp.move(glm::vec3(xOffset + j * translationStep, yOffset + i * translationStep, 0.0f));
+            transformComp.rotation = glm::vec3(-0.5f * glm::pi<float>(), 0.0f, 0.0f);
+            transformComp.translation = glm::vec3(xOffset + j * translationStep, 0.0f, zOffset + i * translationStep);
         }
     }
 
@@ -252,7 +252,7 @@ void SandboxApp::onUpdate(double deltaTime)
         auto angle = rotSpeed * deltaTime;
         getActiveScene().getRegistry().group<comet::TransformComponent, comet::MeshComponent>().each([&](auto& transform, auto& mesh)
         {
-            transform.rotate(angle, glm::vec3(1.0f, 0.0f, 0.0f));
+            transform.rotation += glm::vec3(angle, 0.0f, 0.0f);
         });
     }
 }

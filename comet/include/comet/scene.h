@@ -37,6 +37,7 @@ namespace comet
 
     public:
         Entity createEntity();
+        void destroyEntity(Entity& entity);
 
         void setCameraController(CameraController* cameraController) { m_cameraController = cameraController; }
         CameraController* getCameraController() { return m_cameraController; }

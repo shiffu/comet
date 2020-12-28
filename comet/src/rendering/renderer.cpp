@@ -14,7 +14,9 @@
 #include <comet/resourceManager.h>
 
 #include <glm/mat4x4.hpp>
+#include <unordered_set>
 
+#include <comet/log.h>
 
 namespace comet
 {
@@ -79,6 +81,11 @@ namespace comet
 
     Renderer::~Renderer()
     {
+        cleanUp();
+    }
+
+    void Renderer::cleanUp()
+    {
         for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
@@ -86,9 +93,11 @@ namespace comet
                 delete pMaterialDrawContext;
                 pMaterialDrawContext = nullptr;
             }
+            pShaderDrawContext->multiDrawIndirectContexts.clear();
 
             delete pShaderDrawContext;
         }
+        m_shaderDrawContexts.clear();
     }
 
     void Renderer::addLight(Light* light)
@@ -96,8 +105,10 @@ namespace comet
         m_lights.push_back(light);
     }
 
-    void Renderer::addScene(Scene* scene)
+    void Renderer::setScene(Scene* scene)
     {
+        m_isReady = false;
+        cleanUp();
         m_scene = scene;
         auto& registry = m_scene->m_registry;
 
@@ -158,7 +169,7 @@ namespace comet
             currentDrawContext->instanceBuffer->increaseSize(sizeof(MeshInstanceData));
             auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
             meshAndInstances.staticMesh = staticMesh;
-            meshAndInstances.instancesData.emplace_back(transform.transform, mesh.materialInstanceId);
+            meshAndInstances.instancesData.emplace_back(transform.getTransform(), mesh.materialInstanceId);
         });
     }
 
@@ -272,19 +283,25 @@ namespace comet
                 pMaterialDrawContext->commandBuffer->unmapMemory();
             }
         }
+        m_isReady = true;
     }
 
     void Renderer::reloadInstanceData()
     {
+        T3.resume();
+        if (!isReady())
+            return;
+
         auto& sceneStats = m_scene->getStatistics();
         sceneStats.entitiesCount = 0;
 
         auto& registry = m_scene->m_registry;
-        auto currentMeshId{0};
         auto currentMaterialId{-1};
         uint32_t currentMeshTypeId{0};
         uint32_t currentMaterialTypeId{0};
+        std::unordered_set<uint32_t> tmpMeshTypes;
         
+        T1.resume();
         registry.group<TransformComponent, MeshComponent>().each([&](auto& transform, auto& mesh)
         {
             ResourceHandler<StaticMesh> staticMeshHandler;
@@ -293,42 +310,39 @@ namespace comet
 
             sceneStats.entitiesCount++;
 
-            if (currentMeshTypeId != mesh.meshTypeId)
-            {
-                staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
-                staticMesh = staticMeshHandler.resource;
-                hasIndices = staticMesh->hasIndices();
-            }
+            staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
+            staticMesh = staticMeshHandler.resource;
+            hasIndices = staticMesh->hasIndices();
 
             MultiDrawKey key;
             Material* material{nullptr};
-            if (currentMaterialTypeId != mesh.materialTypeId)
-            {
-                key = MultiDrawKey{mesh.materialTypeId, hasIndices};
-                material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
-            }
+            key = MultiDrawKey{mesh.materialTypeId, hasIndices};
+            material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
 
             auto shaderTypeHash = material->getShader()->getTypeHash();
             auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
             auto currentDrawContext = drawContextMap[key];           
             auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
             meshAndInstances.staticMesh = staticMesh;
-            if (currentMeshId != staticMeshHandler.resourceId)
+
+            // Reset the instancesData vector first time it is accessed for a specific Mesh Type
+            if (tmpMeshTypes.find(staticMeshHandler.resourceId) == tmpMeshTypes.end())
             {
-                currentMeshId = staticMeshHandler.resourceId;
+                tmpMeshTypes.insert(staticMeshHandler.resourceId);
                 meshAndInstances.instancesData.clear();
             }
-
-            meshAndInstances.instancesData.emplace_back(transform.transform, mesh.materialInstanceId);
+            meshAndInstances.instancesData.emplace_back(transform.getTransform(), mesh.materialInstanceId);
         });
+        T1.pause();
 
+        T2.resume();
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
                 // TODO: This mapMemory can be quite slow for big buffers. Check if splitting in multiple buffers would be faster!
                 pMaterialDrawContext->instanceBuffer->mapMemory(GL_WRITE_ONLY);
-                for (auto [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
+                for (auto& [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
                 {
                     for (auto& instanceData : meshAndInstancesData.instancesData)
                     {
@@ -338,6 +352,8 @@ namespace comet
                 pMaterialDrawContext->instanceBuffer->unmapMemory();
             }
         }
+        T2.pause();
+        T3.pause();
     }
 
     void Renderer::render(const glm::mat4& view, const glm::mat4& projection)

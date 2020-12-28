@@ -21,6 +21,10 @@ namespace comet
                 path.append(TEXTURE_SUBFOLDER);
                 break;
 
+            case ResourceType::FONT:
+                path.append(FONT_SUBFOLDER);
+                break;
+
             case ResourceType::MESH:
                 path.append(MESH_SUBFOLDER);
                 break;
@@ -69,7 +73,7 @@ namespace comet
         
         if (m_meshMap.find(staticMeshId) == m_meshMap.end())
         {
-            auto staticMesh = std::make_unique<StaticMesh>(vertices, vertexCount);
+            auto staticMesh = std::make_unique<StaticMesh>(name, vertices, vertexCount);
             m_meshMap[staticMeshId] = std::move(staticMesh);
         }
         
@@ -87,7 +91,7 @@ namespace comet
         
         if (m_meshMap.find(staticMeshId) == m_meshMap.end())
         {
-            auto staticMesh = std::make_unique<StaticMesh>(vertices, vertexCount, indices, indexCount);
+            auto staticMesh = std::make_unique<StaticMesh>(name, vertices, vertexCount, indices, indexCount);
             m_meshMap[staticMeshId] = std::move(staticMesh);
         }
         

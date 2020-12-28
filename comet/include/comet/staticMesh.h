@@ -1,9 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <comet/vertex.h>
 #include <rendering/vertexBufferLayout.h>
+
+#include <vector>
+#include <memory>
+#include <string>
 
 namespace comet
 {
@@ -12,9 +14,10 @@ namespace comet
     {
     public:
         StaticMesh(const char* filename);
-        StaticMesh(Vertex* vertices, uint32_t vertexCount);
-        StaticMesh(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
+        StaticMesh(const char* name, Vertex* vertices, uint32_t vertexCount);
+        StaticMesh(const char* name, Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
 
+        const std::string& getName() const { return m_name; }
         void setData(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount);
 
         void setVertices(Vertex* vertices, uint32_t vertexCount);
@@ -31,6 +34,7 @@ namespace comet
         size_t getIndicesSize() const { return m_indexCount * sizeof(uint32_t); }
 
     private:
+        std::string m_name;
         uint32_t m_indexCount{0};
         uint32_t m_vertexCount{0};
         std::vector<uint32_t> m_indices{};

@@ -5,7 +5,7 @@
 namespace comet
 {
     
-    StaticMesh::StaticMesh(const char* filename)
+    StaticMesh::StaticMesh(const char* filename) : m_name(filename)
     {
         auto meshResourcePath = ResourceManager::getInstance().getResourcePath(ResourceType::MESH, filename);
         ObjLoader loader;
@@ -14,12 +14,14 @@ namespace comet
         m_indexCount = m_indices.size();
     }
 
-    StaticMesh::StaticMesh(Vertex* vertices, uint32_t vertexCount)
+    StaticMesh::StaticMesh(const char* name, Vertex* vertices, uint32_t vertexCount)
+         : m_name(name)
     {
         setVertices(vertices, vertexCount);
     }
     
-    StaticMesh::StaticMesh(Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount)
+    StaticMesh::StaticMesh(const char* name, Vertex* vertices, uint32_t vertexCount, const uint32_t* indices, uint32_t indexCount)
+         : m_name(name)
     {
         setData(vertices, vertexCount, indices, indexCount);
     }

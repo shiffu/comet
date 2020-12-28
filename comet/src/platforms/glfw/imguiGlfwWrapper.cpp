@@ -9,7 +9,7 @@
 namespace comet
 {
     
-    void ImguiGlfwWrapper::init(const Window* window)
+    void ImguiGlfwWrapper::init()
     {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -18,12 +18,10 @@ namespace comet
         // Flags
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-
+    }
+    
+    void ImguiGlfwWrapper::initPlatform(const Window* window)
+    {
         // Setup Platform/Renderer bindings
         ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window->getPlatformWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 430");

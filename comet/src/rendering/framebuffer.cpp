@@ -1,4 +1,4 @@
-#include "framebuffer.h"
+#include <comet/framebuffer.h>
 #include <comet/assert.h>
 #include <comet/graphicApiConfig.h>
 #include <platforms/opengl/openglFramebuffer.h>
