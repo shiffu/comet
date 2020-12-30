@@ -1,19 +1,22 @@
 #pragma once
 
-#include <comet/flatColorMaterial.h>
 #include <comet/timer.h>
+
+#include <glm/mat4x4.hpp>
 
 #include <unordered_map>
 
 namespace comet
 {
     class ShaderDrawContext;
+    class Material;
     class Light;
     class Scene;
 
     class Renderer
     {
     public:
+        Renderer();
         ~Renderer();
 
         void addLight(Light* light);
@@ -32,7 +35,7 @@ namespace comet
 
     private:
         std::unordered_map<uint32_t, ShaderDrawContext*> m_shaderDrawContexts;
-        FlatColorMaterial m_defaultColorMaterial{glm::vec4(0.99f, 0.16, 0.97f, 1.0f)};
+        Material* m_defaultMaterial{nullptr};
         std::vector<Light*> m_lights{};
         Scene* m_scene{nullptr};
         bool m_isReady{false};

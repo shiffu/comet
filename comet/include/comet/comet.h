@@ -14,8 +14,6 @@
 #include <comet/renderer.h>
 #include <comet/material.h>
 #include <comet/materialRegistry.h>
-#include <comet/flatColorMaterial.h>
-#include <comet/phongMaterial.h>
 #include <comet/staticMesh.h>
 #include <comet/vertex.h>
 #include <comet/directionalLight.h>

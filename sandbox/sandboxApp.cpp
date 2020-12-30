@@ -43,13 +43,14 @@ void SandboxApp::onStart()
                                                 (const unsigned int*)indices, sizeof(indices) / sizeof(indices[0]));
 
     // Materials
-    auto material = comet::MaterialRegistry::getInstance().createMaterial<comet::PhongMaterial>();
+    auto material = comet::MaterialRegistry::getInstance().createMaterialInstance("material1");
     auto materialInstanceId = material->getInstanceId();
-    auto materialTypeHash = material->getTypeHash();
+    material->setDiffuse({0.8f, 0.0f, 0.0f});
+    material->setSpecular(glm::vec3(1.0f));
+    material->setShininess(10.0f);
 
-    auto material2 = comet::MaterialRegistry::getInstance().createMaterial<comet::PhongMaterial>();
+    auto material2 = comet::MaterialRegistry::getInstance().createMaterialInstance("checkerboardMaterial");
     auto materialInstanceId2 = material2->getInstanceId();
-    auto materialTypeHash2 = material2->getTypeHash();
     material2->setAlbedoTexture("checkerboard.png");
     material2->setDiffuse(glm::vec3(0.9));
     material2->setSpecular(glm::vec3(1.0f));
@@ -57,14 +58,16 @@ void SandboxApp::onStart()
 
     // Entities
     comet::Entity e1 = getActiveScene().createEntity();
-    auto meshComp = e1.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
+    auto meshComp = e1.addComponent<comet::MeshComponent>(meshHandler.resourceId);
+    e1.addComponent<comet::MaterialComponent>(materialInstanceId);
     auto& transformComp = e1.getComponent<comet::TransformComponent>();
     transformComp.translation = glm::vec3(2.0f);
 
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 500; ++i)
     {
         comet::Entity e = getActiveScene().createEntity();
-        auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
+        auto meshComp = e.addComponent<comet::MeshComponent>(meshHandler.resourceId);
+        e.addComponent<comet::MaterialComponent>(materialInstanceId);
         auto& transformComp = e.getComponent<comet::TransformComponent>();
         transformComp.translation = glm::vec3((i * 2)  % 25, 1.0f + (i) % 25, 1.0f - (i / 20)  % 100);
     }
@@ -73,12 +76,13 @@ void SandboxApp::onStart()
     const float xOffset = -10.0f;
     const float zOffset = -5.0f;
     
-    for (uint32_t i = 0; i < 40; ++i)
+    for (uint32_t i = 0; i < 20; ++i)
     {
-        for (uint32_t j = 0; j < 40; ++j)
+        for (uint32_t j = 0; j < 20; ++j)
         {
             auto e = getActiveScene().createEntity();
-            auto meshComp = e.addComponent<comet::MeshComponent>(meshGroundHandler.resourceId, materialTypeHash2, materialInstanceId2);
+            auto meshComp = e.addComponent<comet::MeshComponent>(meshGroundHandler.resourceId);
+            e.addComponent<comet::MaterialComponent>(materialInstanceId2);
             auto& transformComp = e.getComponent<comet::TransformComponent>();
 
             transformComp.rotation = glm::vec3(-0.5f * glm::pi<float>(), 0.0f, 0.0f);
@@ -164,28 +168,6 @@ void ligtColorEdit(const char* label, comet::Light* light)
 void SandboxApp::onImGuiDraw()
 {
     ImGui::Begin("SandBox Debug");
-    
-    // Dragon
-    {
-        ImGui::Text("Material Attributes");
-        auto diffuseColor = m_phongMaterial.getDiffuse();
-        float colorData[] = {diffuseColor.x, diffuseColor.y, diffuseColor.z};
-        ImGui::ColorEdit3("Diffuse Color", colorData);
-        m_phongMaterial.setDiffuse({colorData[0], colorData[1], colorData[2]});
-    }
-    
-    {
-        auto specularColor = m_phongMaterial.getSpecular();
-        float colorData[] = {specularColor.x, specularColor.y, specularColor.z};
-        ImGui::ColorEdit3("Specular Color", colorData);
-        m_phongMaterial.setSpecular({colorData[0], colorData[1], colorData[2]});
-    }
-    
-    {
-        int shininess = m_phongMaterial.getShininess();
-        ImGui::SliderInt("Shininess", &shininess, 0, 128);
-        m_phongMaterial.setShininess(shininess);
-    }
     
     // Directional Light
     {

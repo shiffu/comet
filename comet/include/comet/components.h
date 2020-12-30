@@ -41,15 +41,30 @@ namespace comet
         std::string name{"Unamed"};
     };
     
+    struct TagComponent
+    {
+        TagComponent() = default;
+    };
+    
+    struct PlayerTagComponent
+    {
+        PlayerTagComponent() = default;
+    };
+    
     struct MeshComponent
     {
         MeshComponent() = default;
         MeshComponent(uint32_t meshTypeId) : meshTypeId(meshTypeId) {};
-        MeshComponent(uint32_t meshTypeId, uint32_t materialTypeId, uint32_t materialInstanceId)
-            : meshTypeId(meshTypeId), materialTypeId(materialTypeId), materialInstanceId(materialInstanceId) {};
 
         uint32_t meshTypeId{0};
-        uint32_t materialTypeId{0};
+    };
+    
+    struct MaterialComponent
+    {
+        MaterialComponent() = default;
+        MaterialComponent(uint32_t materialInstanceId)
+            : materialInstanceId(materialInstanceId) {};
+
         uint32_t materialInstanceId{0};
     };
 

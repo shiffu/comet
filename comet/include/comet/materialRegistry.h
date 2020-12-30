@@ -2,12 +2,10 @@
 
 #include <comet/singleton.h>
 #include <comet/material.h>
-#include <comet/utils.h>
+
 #include <cstdint>
 #include <vector>
-#include <unordered_map>
 #include <memory>
-#include <optional>
 
 namespace comet
 {
@@ -17,55 +15,44 @@ namespace comet
     public:
         ~MaterialRegistry() = default;
 
-        template<typename T, typename... Args>
-        T* createMaterial(Args&&... args)
+        template<typename... Args>
+        Material* createMaterialInstance(Args&&... args)
         {
-            auto materialInstancePtr = std::make_unique<T>(std::forward<Args>(args)...);
-            auto materialTypeHash = materialInstancePtr->getTypeHash();
+            auto materialInstancePtr = std::make_unique<Material>(std::forward<Args>(args)...);
 
-            auto& materials = m_materials[materialTypeHash];
-            uint32_t instanceId = materials.size();
+            uint32_t instanceId = m_materials.size();
             materialInstancePtr->m_instanceID = instanceId;
-            materials.push_back(std::move(materialInstancePtr));
+            m_materials.push_back(std::move(materialInstancePtr));
             
-            return static_cast<T*>(materials.back().get());
+            return m_materials.back().get();
         }
 
-        bool hasMaterial(uint32_t materialTypeHash, uint32_t materialInstanceId) const noexcept
+        bool hasMaterial(uint32_t materialInstanceId) const noexcept
         {   
-            auto it = m_materials.find(materialTypeHash);
-            if (it == m_materials.end())
-            {
-                return false;
-            }
-
-            return materialInstanceId < it->second.size();
+            return materialInstanceId < m_materials.size();
         }
 
-        const std::vector<std::unique_ptr<Material>>* getMaterialInstances(uint32_t materialTypeHash) const noexcept
+        std::vector<std::unique_ptr<Material>>& getMaterialInstances() noexcept
         {
-            auto it = m_materials.find(materialTypeHash);
-            if (it == m_materials.end())
-            {
-                return nullptr;
-            }
-
-            return &(it->second);
+            return m_materials;
         }
 
-        Material* getMaterial(uint32_t materialTypeHash, uint32_t materialInstanceId) const noexcept
+        uint32_t getMaterialInstanceCount() const { return m_materials.size(); }
+
+        Material* getMaterialInstance(uint32_t instanceId) noexcept
         {
-            if (!hasMaterial(materialTypeHash, materialInstanceId))
+            Material* material = nullptr;
+
+            if (instanceId < m_materials.size())
             {
-                return nullptr;
+                material = m_materials[instanceId].get();
             }
 
-            auto it = m_materials.find(materialTypeHash);
-            return it->second[materialInstanceId].get();
+            return material;
         }
 
     private:
-        std::unordered_map<uint32_t, std::vector<std::unique_ptr<Material>>> m_materials;
+        std::vector<std::unique_ptr<Material>> m_materials;
     };
     
 } // namespace comet

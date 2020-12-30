@@ -1,12 +1,12 @@
 #include "propertiesPanel.h"
 #include <comet/resourceManager.h>
 #include <comet/materialRegistry.h>
-#include <comet/phongMaterial.h>
 #include <comet/staticMesh.h>
 
 #include <imgui/imgui.h>
 
 #include <string>
+#include <sstream>
 #include <utility>
 #include <tuple>
 
@@ -31,34 +31,76 @@ namespace comet
         ImGui::Separator();
         ImGui::PopStyleVar(2);
 
-        std::pair<const char*, const char*> predefinedMeshes[]  = {
-            {"Cube", "cube.obj"},
-            {"Cylinder", "cylinder.obj"},
-            {"Torus", "torus.obj"},
-            {"Scooter", "scooterBlender.obj"},
-            {"Dragon", "dragon.obj"}
-        };
-
         if (ImGui::BeginPopup("addComponentPopup"))
         {
+            // Mesh Component
             if (!selectedEntity.hasComponent<MeshComponent>())
             {
                 if (ImGui::BeginMenu("Mesh"))
                 {
+                    std::pair<const char*, const char*> predefinedMeshes[]  = {
+                        {"Cube", "cube.obj"},
+                        {"Cylinder", "cylinder.obj"},
+                        {"Torus", "torus.obj"},
+                        {"Scooter", "scooterBlender.obj"},
+                        {"Dragon", "dragon.obj"}
+                    };
+
                     for(auto& predefineMesh : predefinedMeshes)
                     {
                         if (ImGui::MenuItem(predefineMesh.first))
                         {
-                            auto material = MaterialRegistry::getInstance().createMaterial<PhongMaterial>();
                             auto meshHandler = ResourceManager::getInstance().loadStaticMesh(predefineMesh.second);
-                            selectedEntity.addComponent<MeshComponent>(meshHandler.resourceId, material->getTypeHash(), material->getInstanceId());
+                            selectedEntity.addComponent<MeshComponent>(meshHandler.resourceId);
                             activeScene.prepare();
                         }
                     }
                     ImGui::EndMenu();
                 }
             }
-            ImGui::Selectable("Light");
+
+            // Material Component
+            if (!selectedEntity.hasComponent<MaterialComponent>())
+            {
+                if (ImGui::BeginMenu("Material"))
+                {
+                    if (ImGui::BeginMenu("existing"))
+                    {
+                        auto& materialInstances = MaterialRegistry::getInstance().getMaterialInstances();
+
+                        for(auto& materialInstance : materialInstances)
+                        {
+                            // First instance is the Comet default one
+                            if (materialInstance->getInstanceId() == 0)
+                            {
+                                continue;
+                            }
+                            if (ImGui::MenuItem(materialInstance->getName().c_str()))
+                            {
+                                selectedEntity.addComponent<MaterialComponent>(materialInstance->getInstanceId());
+                                activeScene.prepare();
+                            }
+                        }
+                        ImGui::EndMenu();
+                    }
+
+                    if (ImGui::MenuItem("New"))
+                    {
+                        auto count = MaterialRegistry::getInstance().getMaterialInstanceCount();
+                        std::stringstream ss;
+                        ss << "new" << count;
+                        auto newMaterialInstance = MaterialRegistry::getInstance().createMaterialInstance(ss.str().c_str());
+                        newMaterialInstance->setDiffuse({0.8f, 0.8f, 0.8f});
+                        newMaterialInstance->setSpecular({0.8f, 0.8f, 0.8f});
+                        newMaterialInstance->setShininess(1.1f);
+
+                        selectedEntity.addComponent<MaterialComponent>(newMaterialInstance->getInstanceId());
+                        activeScene.prepare();
+                    }
+
+                    ImGui::EndMenu();
+                }
+            }
             ImGui::EndPopup();
         }
 
@@ -70,6 +112,9 @@ namespace comet
 
         if (selectedEntity.hasComponent<MeshComponent>())
             drawMeshComponent(selectedEntity);
+
+        if (selectedEntity.hasComponent<MaterialComponent>())
+            drawMaterialComponent(selectedEntity);
 
         ImGui::End();
     }
@@ -166,10 +211,13 @@ namespace comet
         }
     }
 
-    void PropertiesPanel::drawMeshComponent(Entity& entity)
+    template<typename T, typename FUNC>
+    void drawRemovableComponent(const char* title, Entity& entity, FUNC callback)
     {
         headerFlags |= ImGuiTreeNodeFlags_AllowItemOverlap;
-        bool expand = ImGui::CollapsingHeader("Mesh", headerFlags);
+        bool expand = ImGui::CollapsingHeader(title, headerFlags);
+
+        ImGui::PushID(title);
 
         static const char* deleteText = "X";
         auto textWidth = ImGui::CalcTextSize(deleteText).x;
@@ -183,46 +231,70 @@ namespace comet
         ImGui::PopStyleColor(3);
         if (clicked)
         {
-            entity.removeComponent<MeshComponent>();
+            entity.removeComponent<T>();
             entity.getScene()->prepare();
+            ImGui::PopID();
             return;
         }
 
         if (expand)
         {
+            callback(entity);
+        }
+        ImGui::PopID();
+    }
+
+    void PropertiesPanel::drawMeshComponent(Entity& entity)
+    {
+        drawRemovableComponent<MeshComponent>("Mesh", entity, [](Entity& entity)
+        {
             if (ImGui::BeginTable("##tableMeshComponent", 2, tableFlags))
             {
                 static constexpr float firstColWidth = 145.0f;
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
-                auto& meshComponent = entity.getComponent<MeshComponent>();
 
+                auto& meshComponent = entity.getComponent<MeshComponent>();
                 ImGui::TableNextColumn();
                 ImGui::Text("Mesh Type ID");
                 ImGui::TableNextColumn();
                 ImGui::Text("%d", meshComponent.meshTypeId);
 
                 auto staticMesh = ResourceManager::getInstance().getStaticMesh(meshComponent.meshTypeId).resource;
-                auto material = (PhongMaterial*)MaterialRegistry::getInstance().getMaterial(meshComponent.materialTypeId, meshComponent.materialInstanceId);
-
                 ImGui::TableNextColumn();
                 ImGui::Text("Mesh Type");
                 ImGui::TableNextColumn();
                 ImGui::Text("%s", staticMesh->getName().c_str());
+            }
+            ImGui::EndTable();
+        });
+    }
 
-                ImGui::TableNextColumn();
-                ImGui::Text("Material Type ID");
-                ImGui::TableNextColumn();
-                ImGui::Text("%d", meshComponent.materialTypeId);
+    void PropertiesPanel::drawMaterialComponent(Entity& entity)
+    {
+        drawRemovableComponent<MaterialComponent>("Material", entity, [](Entity& entity)
+        {
+            if (ImGui::BeginTable("##tableComponent", 2, tableFlags))
+            {
+                static constexpr float firstColWidth = 145.0f;
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+                auto& materialComponent = entity.getComponent<MaterialComponent>();
+                auto material = MaterialRegistry::getInstance().getMaterialInstance(materialComponent.materialInstanceId);
 
                 ImGui::TableNextColumn();
                 ImGui::Text("Material Instance ID");
                 ImGui::TableNextColumn();
-                ImGui::Text("%d", meshComponent.materialInstanceId);
+                ImGui::Text("%d", materialComponent.materialInstanceId);
 
                 ImGui::TableNextColumn();
                 ImGui::Text("Material Name");
                 ImGui::TableNextColumn();
-                ImGui::Text("%s", material->getName().c_str());
+                constexpr size_t size = 128;
+                static char buffer[size];
+                auto& materialName = material->getName();
+                memset(buffer, 0, size);
+                strncpy(buffer, materialName.c_str(), size);
+                ImGui::InputText("##Name", buffer, size);
+                materialName = buffer;
 
                 ImGui::TableNextColumn();
                 ImGui::Text("Material Diffuse");
@@ -249,6 +321,6 @@ namespace comet
                 material->setShininess(shininess);
             }
             ImGui::EndTable();
-        }
+        });
     }
 }

@@ -22,12 +22,11 @@ namespace comet
 {
     struct MultiDrawKey
     {
-        uint32_t materialType{};
         bool hasIndices;
     
         bool operator==(const MultiDrawKey& other) const
         {
-            return materialType == other.materialType && hasIndices == other.hasIndices;
+            return hasIndices == other.hasIndices;
         }
     };
 
@@ -35,9 +34,7 @@ namespace comet
     {
         std::size_t operator()(const MultiDrawKey& key) const
         {
-            std::size_t h2 = std::hash<bool>()(key.hasIndices);
-
-            return key.materialType ^ h2;
+            return std::hash<bool>()(key.hasIndices);
         }
     };
 
@@ -79,6 +76,14 @@ namespace comet
         std::unordered_map<MultiDrawKey, MultiDrawIndirectContext*, hash_fn> multiDrawIndirectContexts;
     };
 
+    Renderer::Renderer()
+    {
+        m_defaultMaterial = MaterialRegistry::getInstance().createMaterialInstance("__cometDefaultMaterial");
+        m_defaultMaterial->setDiffuse({0.7f, 0.7f, 0.7f});
+        m_defaultMaterial->setSpecular({0.8f, 0.8f, 0.8f});
+        m_defaultMaterial->setShininess(1.1f);
+    }
+
     Renderer::~Renderer()
     {
         cleanUp();
@@ -114,12 +119,23 @@ namespace comet
 
         // TODO: From the doc: consider creating the group when no components have been assigned yet.
         // If the registry is empty, preparation is extremely fast.
-        registry.group<TransformComponent, MeshComponent>().each([&](auto& transform, auto& mesh)
+        registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
         {
-            auto material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
+            uint32_t materialInstanceId;
+            Material* material = nullptr;
+
+            bool hasMaterial = registry.has<MaterialComponent>(entity);
+            if (hasMaterial)
+            {
+                auto materialComponent = registry.get<MaterialComponent>(entity);
+                materialInstanceId = materialComponent.materialInstanceId;
+                material = MaterialRegistry::getInstance().getMaterialInstance(materialInstanceId);
+            }
+
             if (material == nullptr)
             {
-                material = &m_defaultColorMaterial;
+                material = m_defaultMaterial;
+                materialInstanceId = material->getInstanceId();
             }
 
             // Check if a new Shader Draw context is needed
@@ -135,7 +151,7 @@ namespace comet
             auto staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
             auto staticMesh = staticMeshHandler.resource;
             auto hasIndices = staticMesh->hasIndices();
-            auto key = MultiDrawKey{mesh.materialTypeId, hasIndices};
+            auto key = MultiDrawKey{hasIndices};
             auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
             if (drawContextMap.find(key) == drawContextMap.end())
             {
@@ -169,7 +185,7 @@ namespace comet
             currentDrawContext->instanceBuffer->increaseSize(sizeof(MeshInstanceData));
             auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
             meshAndInstances.staticMesh = staticMesh;
-            meshAndInstances.instancesData.emplace_back(transform.getTransform(), mesh.materialInstanceId);
+            meshAndInstances.instancesData.emplace_back(transform.getTransform(), materialInstanceId);
         });
     }
 
@@ -302,10 +318,12 @@ namespace comet
         std::unordered_set<uint32_t> tmpMeshTypes;
         
         T1.resume();
-        registry.group<TransformComponent, MeshComponent>().each([&](auto& transform, auto& mesh)
+        registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
         {
             ResourceHandler<StaticMesh> staticMeshHandler;
             StaticMesh* staticMesh;
+            Material* material{nullptr};
+            uint32_t materialInstanceId{0};
             bool hasIndices;
 
             sceneStats.entitiesCount++;
@@ -314,10 +332,22 @@ namespace comet
             staticMesh = staticMeshHandler.resource;
             hasIndices = staticMesh->hasIndices();
 
+            bool hasMaterial = registry.has<MaterialComponent>(entity);
+            if (hasMaterial)
+            {
+                auto materialComponent = registry.get<MaterialComponent>(entity);
+                materialInstanceId = materialComponent.materialInstanceId;
+                material = MaterialRegistry::getInstance().getMaterialInstance(materialInstanceId);
+            }
+
+            if (material == nullptr)
+            {
+                material = m_defaultMaterial;
+                materialInstanceId = material->getInstanceId();
+            }
+
             MultiDrawKey key;
-            Material* material{nullptr};
-            key = MultiDrawKey{mesh.materialTypeId, hasIndices};
-            material = MaterialRegistry::getInstance().getMaterial(mesh.materialTypeId , mesh.materialInstanceId);
+            key = MultiDrawKey{hasIndices};
 
             auto shaderTypeHash = material->getShader()->getTypeHash();
             auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
@@ -331,7 +361,7 @@ namespace comet
                 tmpMeshTypes.insert(staticMeshHandler.resourceId);
                 meshAndInstances.instancesData.clear();
             }
-            meshAndInstances.instancesData.emplace_back(transform.getTransform(), mesh.materialInstanceId);
+            meshAndInstances.instancesData.emplace_back(transform.getTransform(), materialInstanceId);
         });
         T1.pause();
 

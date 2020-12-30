@@ -26,15 +26,16 @@ namespace comet
         m_frameBuffer = Framebuffer::create({1280, 720});
         m_frameBuffer->invalidate();
 
-
         // TEST SCENE
-        auto material = MaterialRegistry::getInstance().createMaterial<PhongMaterial>();
-        auto materialInstanceId = material->getInstanceId();
-        auto materialTypeHash = material->getTypeHash();
+        auto material = MaterialRegistry::getInstance().createMaterialInstance("blue");
+        material->setDiffuse({0.0f, 0.0f, 0.7f});
+        material->setSpecular({0.0f, 0.0f, 1.0f});
+        material->setShininess(20);
 
-        auto material2 = MaterialRegistry::getInstance().createMaterial<PhongMaterial>();
-        auto material2InstanceId = material2->getInstanceId();
-        auto material2TypeHash = material2->getTypeHash();
+        auto material2 = MaterialRegistry::getInstance().createMaterialInstance("red");
+        material2->setDiffuse({0.7f, 0.0f, 0.0f});
+        material2->setSpecular({1.0f, 0.0f, 0.0f});
+        material2->setShininess(1.5f);
 
         auto meshHandler = ResourceManager::getInstance().loadStaticMesh("torus.obj");
         auto meshHandlerScooter = ResourceManager::getInstance().loadStaticMesh("scooterBlender.obj");
@@ -42,19 +43,20 @@ namespace comet
         auto e1 = getActiveScene().createEntity();
         e1.getComponent<NameComponent>().name = "Torus1";
         e1.getComponent<TransformComponent>().translation = glm::vec3(1.0f, 0.0f, -2.0f);
-        e1.addComponent<MeshComponent>(meshHandler.resourceId, materialTypeHash, materialInstanceId);
+        e1.addComponent<MeshComponent>(meshHandler.resourceId);
         
         auto e2 = getActiveScene().createEntity();
         e2.getComponent<NameComponent>().name = "Scooter Remi";
         e2.getComponent<TransformComponent>().translation = glm::vec3(-0.4f, 0.5f, -0.3f);
-        e2.getComponent<TransformComponent>().scale = glm::vec3(0.1f);
+        e2.getComponent<TransformComponent>().scale = glm::vec3(0.15f);
         e2.getComponent<TransformComponent>().rotation = glm::vec3(.028f, -1.9f, 0.0f);
-        e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId, material2TypeHash, material2InstanceId);
+        e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId);
 
         m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.3f));
         m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
         m_directionalLight->setSpecular({0.9f, 0.9f, 0.9f});
         getActiveScene().addLight(m_directionalLight.get());
+
 
         // Prepare the Scene
         getActiveScene().prepare();

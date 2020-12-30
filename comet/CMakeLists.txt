@@ -48,8 +48,6 @@ target_sources(comet
         include/comet/renderer.h
         include/comet/material.h
         include/comet/materialRegistry.h
-        include/comet/flatColorMaterial.h
-        include/comet/phongMaterial.h
         include/comet/staticMesh.h
         include/comet/vertex.h
         include/comet/light.h
@@ -111,8 +109,6 @@ target_sources(comet
         src/rendering/directionalLight.cpp
         src/rendering/pointLight.cpp
         src/rendering/spotLight.cpp
-        src/rendering/flatColorMaterial.cpp
-        src/rendering/phongMaterial.cpp
         src/rendering/staticMesh.cpp
         src/rendering/imguiWrapper.h
         src/rendering/imguiWrapper.cpp
