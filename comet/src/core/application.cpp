@@ -168,11 +168,6 @@ namespace comet
             T_update.resume();
             deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
             onUpdate(deltaTime);
-
-            if (auto cameraController = m_activeScene.getCameraController())
-            {
-                cameraController->onUpdate(deltaTime);
-            }
             T_update.pause();
 
             T_draw_imgui.resume();

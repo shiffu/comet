@@ -2,7 +2,8 @@
 
 #include <comet/camera.h>
 #include <comet/event.h>
-#include <glm/mat4x4.hpp>
+
+#include <glm/glm.hpp>
 
 namespace comet
 {
@@ -12,14 +13,10 @@ namespace comet
         CameraController(Camera& camera) : m_camera(camera) {}
         ~CameraController() = default;
 
-        const glm::mat4& getTransform() const { return m_transform; }
-        void setTransform(const glm::mat4& transform) { m_transform = transform; }
         void reset();
 
         glm::mat4 getView() const;
         const glm::mat4& getProjection() const;
-
-        void onUpdate(double deltaTime);
 
         void onEvent(Event& e);
         bool onWindowResized(WindowResizedEvent& e);
@@ -29,9 +26,12 @@ namespace comet
         bool onMouseButtonPressed(MouseButtonPressedEvent& e);
         bool onMouseButtonRelease(MouseButtonReleasedEvent& e);
 
+        const glm::vec3& getTargetPosition() const { return m_focusTarget; }
+        void setTargetPosition(const glm::vec3& pos) { m_focusTarget = pos; calculateView(); }
+
         const glm::vec3& getPosition() const;
         void setPosition(const glm::vec3& pos);
-        void move(const glm::vec3& translation);
+        void move(const glm::vec4& translation);
         
         void setMoveSpeed(float moveSpeed) {m_moveSpeed = moveSpeed; }
         float getMoveSpeed() const noexcept { return m_moveSpeed; }
@@ -42,21 +42,28 @@ namespace comet
         void setZoomSpeed(float zoomSpeed) {m_zoomSpeed = zoomSpeed; }
         float getZoomSpeed() const noexcept { return m_zoomSpeed; }
 
-        void addYaw(float yaw);
-        void addPitch(float pitch);
-        void addRoll(float pitch);
+    private:
+        void calculateView();
+        void moveAroundTarget(float yaw, float pitch);
 
     private:
-        glm::mat4 m_transform{1.0f};
-        glm::vec3 m_lastSetPosition;
-        float m_moveSpeed{0.04f};
-        float m_rotationSpeed{0.04f};
-        float m_zoomSpeed{0.05f};
+        glm::vec3 m_lastSetPosition{0.0f};
+        float m_moveSpeed{0.01f};
+        float m_rotationSpeed{0.005f};
+        float m_zoomSpeed{0.02f};
         float m_previousMouseX{0.0f};
         float m_previousMouseY{0.0f};
         bool m_pan{false};
         bool m_rotate{false};
         Camera& m_camera;
+
+        float m_yaw{0};
+        float m_pitch{0};
+        mutable glm::mat4 m_view{1.0f};
+        glm::vec3 m_up{0.0f, 1.0f, 0.0f};
+        glm::vec3 m_right{0.0f, 0.0f, 0.0f};
+        glm::vec3 m_position{0.0f};
+        glm::vec3 m_focusTarget{0.0f};
     };
 
 } // namespace comet

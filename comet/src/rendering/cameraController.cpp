@@ -1,19 +1,40 @@
+#define GLM_FORCE_SWIZZLE
+
 #include <comet/cameraController.h>
 #include <comet/log.h>
-#include <glm/matrix.hpp>
-#include <glm/vec3.hpp>
-#include <glm/gtc/matrix_access.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 
 namespace comet
 {
-    
         #define BIND_METHOD(m) std::bind(&m, this, std::placeholders::_1)
 
         glm::mat4 CameraController::getView() const
         {
-            return glm::inverse(m_transform);
+            return m_view;
+        }
+
+        void CameraController::calculateView()
+        {
+            auto up = glm::vec3(0.0f, 1.0f, 0.0f);
+            auto front = glm::normalize(m_focusTarget - m_position);
+            auto right = glm::normalize(glm::cross(front, up));
+
+            // If the angle between right vector and previous one (previous frame)
+            // is greater than 90 degrees, then it means that the angle between up and
+            // front vector is greater than 180 degrees and we need to invert the right vector
+            if (m_right != glm::vec3(0.0f) && glm::dot(m_right, right) < 0)
+            {
+                right *= -1.0f;
+            }
+            m_up = glm::cross(right, front);
+            m_right = right;
+
+            m_view[0] = glm::vec4(right.x, m_up.x, -front.x, 0.0f);
+            m_view[1] = glm::vec4(right.y, m_up.y, -front.y, 0.0f);
+            m_view[2] = glm::vec4(right.z, m_up.z, -front.z, 0.0f);
+
+            m_view[3][0] = -glm::dot(right, m_position);
+            m_view[3][1] = -glm::dot(m_up, m_position);
+            m_view[3][2] =  glm::dot(front, m_position);
         }
 
         const glm::mat4& CameraController::getProjection() const
@@ -23,43 +44,48 @@ namespace comet
 
         const glm::vec3& CameraController::getPosition() const
         {
-            return (glm::vec3&)(m_transform[3]);
+            return m_position;
         }
 
         void CameraController::setPosition(const glm::vec3& pos)
         {
             m_lastSetPosition = pos;
-            m_transform[3] = glm::vec4(pos.x, pos.y, pos.z, 1.0f);
+            m_position = pos;
+            moveAroundTarget(0.0f, 0.0f);
+            calculateView();
         }
 
         void CameraController::reset()
         {
             m_camera.setZoom(1.0f);
-            m_transform = glm::translate(glm::mat4(1.0f), m_lastSetPosition);
+            setPosition(m_lastSetPosition);
+            calculateView();
         }
 
-        void CameraController::move(const glm::vec3& translation)
+        void CameraController::move(const glm::vec4& localTranslation)
         {
-            m_transform = glm::translate(m_transform, translation);
+            auto cameraTransform = glm::inverse(m_view);
+            glm::vec4 worldTranslation = cameraTransform * localTranslation;
+            m_focusTarget += worldTranslation.xyz();
+            m_position += worldTranslation.xyz();
+            calculateView();
         }
 
-        void CameraController::addYaw(float yaw)
+        void CameraController::moveAroundTarget(float yaw, float pitch)
         {
-            m_transform = glm::rotate(m_transform, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
-        }
+            m_yaw += yaw;
+            m_pitch += pitch;
 
-        void CameraController::addPitch(float pitch)
-        {
-            m_transform = glm::rotate(m_transform, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-        }
+            glm::vec3 fromTarget = m_position - m_focusTarget;
+            float hDistanceFromTarget = glm::length(fromTarget) * cos(m_pitch);
+            float vDistanceFromTarget = glm::length(fromTarget) * sin(m_pitch);
+            float xOffset = hDistanceFromTarget * sin(m_yaw);
+            float zOffset = hDistanceFromTarget * cos(m_yaw);
 
-        void CameraController::addRoll(float roll)
-        {
-            m_transform = glm::rotate(m_transform, roll, glm::vec3(0.0f, 0.0f, 1.0f));
-        }
-
-        void CameraController::onUpdate(double deltaTime)
-        {
+            m_position.x = m_focusTarget.x - xOffset;
+            m_position.y = m_focusTarget.y + vDistanceFromTarget;
+            m_position.z = m_focusTarget.z - zOffset;
+            calculateView();
         }
 
         void CameraController::onEvent(Event& e)
@@ -77,6 +103,8 @@ namespace comet
         bool CameraController::onWindowResized(WindowResizedEvent& e)
         {
             m_camera.setAspectRatio((float)e.getWidth() / (float)e.getHeight());
+
+            return true;
         }
 
         bool CameraController::onKeyPressed(KeyPressedEvent& e)
@@ -96,6 +124,7 @@ namespace comet
                 {
                     m_previousMouseX = (float)x;
                     m_previousMouseY = (float)y;
+                    return true;
                 }
 
                 auto deltaX = m_previousMouseX - x;
@@ -103,22 +132,28 @@ namespace comet
 
                 if (m_rotate)
                 {
-                    addYaw(glm::radians(10.0f) * m_rotationSpeed * deltaX);
-                    addPitch(glm::radians(10.0f) * m_rotationSpeed * deltaY);
+                    moveAroundTarget(m_rotationSpeed * deltaX, -m_rotationSpeed * deltaY);
                 }
-                else
+                
+                if (m_pan)
                 {
-                    move(glm::vec3(m_moveSpeed * deltaX, -m_moveSpeed * deltaY, 0.0f));
+                    auto correctedMoveSpeed = m_moveSpeed * m_camera.getZoom();
+                    // CM_LOG_DEBUG("zoom: {}, moveSpeed: {}", m_camera.getZoom(), moveSpeed);
+                    move({correctedMoveSpeed * deltaX, -correctedMoveSpeed * deltaY, 0.0f, 0.0f});
                 }
 
                 m_previousMouseX = (float)x;
                 m_previousMouseY = (float)y;
             }
+
+            return true;
         }
 
         bool CameraController::onVerticalMouseWheelScrolled(VerticalMouseWheelScrolledEvent& e)
         {
             m_camera.increaseZoom(-e.getDelta() * m_zoomSpeed);
+
+            return true;
         }
 
         bool CameraController::onMouseButtonPressed(MouseButtonPressedEvent& e)
@@ -126,11 +161,14 @@ namespace comet
             if (e.getButton() == Input::MouseButton::Middle && Input::isKeyPressed(Input::Key::LShift))
             {
                 m_pan = true;
+                m_rotate = false;
             }
             else if (e.getButton() == Input::MouseButton::Middle)
             {
                 m_rotate = true;
             }
+
+            return true;
         }
 
         bool CameraController::onMouseButtonRelease(MouseButtonReleasedEvent& e)
@@ -141,6 +179,8 @@ namespace comet
                 m_pan = false;
                 m_previousMouseX = 0.0f;
             }
+
+            return true;
         }
 
 } // namespace comet

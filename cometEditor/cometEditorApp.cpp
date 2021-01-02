@@ -3,6 +3,8 @@
 
 #include <imgui/imgui.h>
 
+#include <glm/glm.hpp>
+
 namespace comet
 {
 
@@ -20,7 +22,7 @@ namespace comet
     void CometEditorApp::onStart()
     {
         m_camera.setPerspective(glm::radians(45.0f), 16.0f/9.0f, 0.1f, 400.0f);
-        m_cameraController.setPosition(glm::vec3{0.0f, 5.0f, 17.0f});
+        m_cameraController.setPosition(glm::vec3{0.0f, 5.0f, 20.0f});
         getActiveScene().setCameraController(&m_cameraController);
 
         m_frameBuffer = Framebuffer::create({1280, 720});
@@ -37,22 +39,30 @@ namespace comet
         material2->setSpecular({1.0f, 0.0f, 0.0f});
         material2->setShininess(1.5f);
 
-        auto meshHandler = ResourceManager::getInstance().loadStaticMesh("torus.obj");
+        auto materialGround = MaterialRegistry::getInstance().createMaterialInstance("grey");
+        materialGround->setDiffuse({0.092f, 0.092f, 0.188f});
+        materialGround->setSpecular({0.431f, 0.431f, 0.478f});
+        materialGround->setShininess(5.5f);
+
+        auto meshHandler = ResourceManager::getInstance().loadStaticMesh("cube.obj");
         auto meshHandlerScooter = ResourceManager::getInstance().loadStaticMesh("scooterBlender.obj");
 
         auto e1 = getActiveScene().createEntity();
-        e1.getComponent<NameComponent>().name = "Torus1";
-        e1.getComponent<TransformComponent>().translation = glm::vec3(1.0f, 0.0f, -2.0f);
+        e1.getComponent<NameComponent>().name = "Ground";
+        e1.getComponent<TransformComponent>().translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        e1.getComponent<TransformComponent>().scale = glm::vec3(20.0f, 0.02f, 15.0f);
         e1.addComponent<MeshComponent>(meshHandler.resourceId);
+        e1.addComponent<MaterialComponent>(materialGround->getInstanceId());
         
         auto e2 = getActiveScene().createEntity();
-        e2.getComponent<NameComponent>().name = "Scooter Remi";
-        e2.getComponent<TransformComponent>().translation = glm::vec3(-0.4f, 0.5f, -0.3f);
+        e2.getComponent<NameComponent>().name = "Scooter";
+        e2.getComponent<TransformComponent>().translation = glm::vec3(0.0f, 0.57f, 0.0f);
         e2.getComponent<TransformComponent>().scale = glm::vec3(0.15f);
-        e2.getComponent<TransformComponent>().rotation = glm::vec3(.028f, -1.9f, 0.0f);
+        e2.getComponent<TransformComponent>().rotation = glm::vec3(glm::radians(-2.73f), glm::radians(125.0f), 0.0f);
         e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId);
+        e2.addComponent<MaterialComponent>(material2->getInstanceId());
 
-        m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.3f));
+        m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.1f));
         m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
         m_directionalLight->setSpecular({0.9f, 0.9f, 0.9f});
         getActiveScene().addLight(m_directionalLight.get());
