@@ -7,6 +7,8 @@
 
 namespace comet
 {
+
+    class Scene;
     
     class Entity
     {

@@ -3,10 +3,9 @@
 #include <comet/window.h>
 #include <comet/event.h>
 #include <comet/scene.h>
-#include <comet/renderer.h>
-#include <memory>
-
 #include <comet/timer.h>
+
+#include <memory>
 
 namespace comet
 {
@@ -36,10 +35,13 @@ namespace comet
         Application(const WindowSpec& spec = WindowSpec());
         virtual ~Application();
 
-        Scene& getActiveScene() noexcept { return m_activeScene; }
+        Scene* getActiveScene() noexcept { return m_activeScene; }
+
+        template<typename T>
+        void setActiveScene(T* scene) noexcept { m_nextActiveScene = scene; }
 
         // Event Callbacks
-        virtual void onEvent(Event& e) {}   // Generic event handler
+        virtual bool onEvent(Event& e);   // Generic event handler
         virtual bool onWindowResized(WindowResizedEvent& e);
         virtual bool onWindowLostFocus(WindowLostFocusEvent& e);
         virtual bool onWindowGainedFocus(WindowGainedFocusEvent& e);
@@ -54,32 +56,32 @@ namespace comet
         virtual bool onMouseButtonPressed(MouseButtonPressedEvent& e);
         virtual bool onMouseButtonRelease(MouseButtonReleasedEvent& e);
 
-        virtual void onPreRenderScene() {}
-        virtual void onPostRenderScene() {}
-
-        // Imgui Callback
-        virtual void onImGuiInit() {}
-        virtual void onImGuiDraw() {}
+        virtual void onStart() {}
+        virtual void onStop() {}
 
     private:
         void init(const WindowSpec& spec = WindowSpec());
 
-        virtual void onStart();
-        virtual void onUpdate(double deltaTime);
-        virtual void onFixedUpdate(float fixedDeltaTime);
-
-        void onImGuiDebugDraw();
+        void drawImGuiDebug();
 
     private:
         bool m_isRunning{false};
         bool m_isInitialized{false};
+
         Window* m_window{nullptr};
-        Scene m_activeScene;
+
+        Scene* m_activeScene{nullptr};
+        Scene* m_nextActiveScene{nullptr};
+        Scene* m_previousScene{nullptr};
+
         unsigned int m_fpsCap{0};
-        // Fixed update time in ms (used to onFixedUpdate function call)
-        float m_fixedUpdateTime{20.0f};
         std::unique_ptr<ImguiWrapper> m_imguiWrapper;
 
+        // Fixed update time in ms (used to onFixedUpdate function call)
+        // TODO: Make this fixed update time an application config param
+        float m_fixedUpdateTime{20.0f};
+
+        // Timers
         Timer T_gameloop{"GameLoop - Total", true};
         Timer T_fixed_udpate{"GameLoop - FixedUpdate", true};
         Timer T_update{"GameLoop - Update", true};
@@ -88,4 +90,3 @@ namespace comet
     };
 
 } // namespace comet
-

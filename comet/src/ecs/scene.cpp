@@ -1,5 +1,6 @@
 #include <comet/scene.h>
 #include <comet/entity.h>
+#include <comet/nativeScript.h>
 
 namespace comet
 {
@@ -20,18 +21,62 @@ namespace comet
         m_sceneStatistics.entitiesCount--;
     }
 
-    void Scene::prepare()
+    void Scene::start()
+    {
+        onStart();
+        m_registry.view<NativeScriptComponent>().each([](auto entityId, auto& scriptComponent)
+        {
+            scriptComponent.instance = scriptComponent.instantiateScript();
+            scriptComponent.instance->onCreate();
+        });
+        reload();
+    }
+
+    void Scene::reload()
     {
         m_renderer.setScene(this);
         m_renderer.allocateBuffersAndSetupLayouts();
         m_renderer.loadData();
     }
 
+    void Scene::stop()
+    {
+        onStop();
+        m_registry.view<NativeScriptComponent>().each([](auto entityId, auto& scriptComponent)
+        {
+            if (scriptComponent.instance)
+            {
+                scriptComponent.instance->onDestroy();
+            }
+            scriptComponent.destroyScript(&scriptComponent);
+        });
+    }
+
+    void Scene::onUpdate(double deltaTime)
+    {
+        m_registry.view<NativeScriptComponent>().each([deltaTime, this](auto entityId, auto& scriptComponent)
+        {
+            if (scriptComponent.instance)
+            {
+                Entity entity{entityId, this};
+                scriptComponent.instance->onUpdate(entity, deltaTime);
+            }
+        });
+    }
+
     void Scene::render()
     {
         m_renderer.reloadInstanceData();
-        auto viewMatrix = m_cameraController->getView();
-        auto& projectionMatrix = m_cameraController->getProjection();
+        glm::mat4 viewMatrix{1.0f};
+        glm::mat4 projectionMatrix{1.0f};
+
+        // Checking for CameraController presence
+        // Default scene does not have a CameraController for instance
+        if (m_cameraController)
+        {
+            viewMatrix = m_cameraController->getView();
+            projectionMatrix = m_cameraController->getProjection();
+        }
 
         m_renderer.render(viewMatrix, projectionMatrix);
     }

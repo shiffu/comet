@@ -54,10 +54,6 @@ namespace comet
         CM_CORE_LOG_DEBUG("Finished initializing the application");
     }
 
-    void Application::onStart() {}
-    void Application::onUpdate(double deltaTime) {}
-    void Application::onFixedUpdate(float fixedDeltaTime) {}
-
     void Application::onEventDispatch(Event& e)
     {
         EventDispatcher dispatcher(e);
@@ -80,21 +76,22 @@ namespace comet
         onEvent(e);
     }
 
-    bool Application::onWindowResized(WindowResizedEvent& e) {}
-    bool Application::onWindowLostFocus(WindowLostFocusEvent& e) {}
-    bool Application::onWindowGainedFocus(WindowGainedFocusEvent& e) {}
-    bool Application::onKeyPressed(KeyPressedEvent& e) {}
-    bool Application::onKeyReleased(KeyReleasedEvent& e) {}
-    bool Application::onTextEntered(KeyTextEnteredEvent& e) {}
-    bool Application::onMouseMoved(MouseMovedEvent& e) {}
-    bool Application::onMouseEnteredWindow(MouseEnteredWindowEvent& e) {}
-    bool Application::onMouseLeftWindow(MouseLeftWindowEvent& e) {}
-    bool Application::onVerticalMouseWheelScrolled(VerticalMouseWheelScrolledEvent& e) {}
-    bool Application::onHorizontalMouseWheelScrolled(HorizontalMouseWheelScrolledEvent& e) {}
-    bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) {}
-    bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) {}
+    bool Application::onEvent(Event& e) { return m_activeScene->onEvent(e); }
+    bool Application::onWindowResized(WindowResizedEvent& e) { return m_activeScene->onWindowResized(e); }
+    bool Application::onWindowLostFocus(WindowLostFocusEvent& e) { return m_activeScene->onWindowLostFocus(e); }
+    bool Application::onWindowGainedFocus(WindowGainedFocusEvent& e) { return m_activeScene->onWindowGainedFocus(e); }
+    bool Application::onKeyPressed(KeyPressedEvent& e) { return m_activeScene->onKeyPressed(e); }
+    bool Application::onKeyReleased(KeyReleasedEvent& e) { return m_activeScene->onKeyReleased(e); }
+    bool Application::onTextEntered(KeyTextEnteredEvent& e) { return m_activeScene->onTextEntered(e); }
+    bool Application::onMouseMoved(MouseMovedEvent& e) { return m_activeScene->onMouseMoved(e); }
+    bool Application::onMouseEnteredWindow(MouseEnteredWindowEvent& e) { return m_activeScene->onMouseEnteredWindow(e); }
+    bool Application::onMouseLeftWindow(MouseLeftWindowEvent& e) { return m_activeScene->onMouseLeftWindow(e); }
+    bool Application::onVerticalMouseWheelScrolled(VerticalMouseWheelScrolledEvent& e) { return m_activeScene->onVerticalMouseWheelScrolled(e); }
+    bool Application::onHorizontalMouseWheelScrolled(HorizontalMouseWheelScrolledEvent& e) { return m_activeScene->onHorizontalMouseWheelScrolled(e); }
+    bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) { return m_activeScene->onMouseButtonPressed(e); }
+    bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) { return m_activeScene->onMouseButtonRelease(e); }
 
-    void Application::onImGuiDebugDraw()
+    void Application::drawImGuiDebug()
     {
         ImGui::Begin("Comet Debug");
         ImGui::Text("Scene statistics debug information");
@@ -102,7 +99,7 @@ namespace comet
         auto FPS = ImGui::GetIO().Framerate;
         ImGui::Text("Frame time %.3f ms (%.1f FPS)", 1000.0f / FPS, FPS);
         
-        auto& stats = m_activeScene.getStatistics();
+        auto& stats = m_activeScene->getStatistics();
         ImGui::Text("Lights: %d", stats.lightsCount);
         ImGui::Text("Entities: %d", stats.entitiesCount);
         ImGui::Text("Vertices: %d / Indices: %d", stats.verticesCount, stats.indicesCount);
@@ -115,7 +112,6 @@ namespace comet
     {
         if (m_imguiWrapper)
         {
-            onImGuiInit();
             m_imguiWrapper->initPlatform(m_window);
         }
 
@@ -130,12 +126,10 @@ namespace comet
 
         duration<double, std::nano> lag(0);
         duration<double, std::milli> fixedUpdateTime(m_fixedUpdateTime);
+        duration<double, std::nano> elapsedTime;
+        duration<float, std::milli> fpsCapTime(0.0f);
         auto previousTime = steady_clock::now();
         auto currentTime = previousTime;
-        duration<double, std::nano> timeSinceLastFPSDisplay;
-        duration<double, std::nano> elapsedTime;
-        unsigned int frameCounter = 0;
-        duration<float, std::milli> fpsCapTime(0.0f);
         double deltaTime(0.0f);
 
         if (m_fpsCap)
@@ -144,86 +138,103 @@ namespace comet
             CM_CORE_LOG_DEBUG("FPS Cap Time set to: {}ms", fpsCapTime.count());
         }
 
-        while(!m_window->isCloseRequested())
+        if (m_nextActiveScene == nullptr)
         {
-            T_gameloop.resume();
-            currentTime = steady_clock::now();
-            elapsedTime = currentTime - previousTime;
-            previousTime = currentTime;
-            lag += elapsedTime;
-
-            // poll window events
-            m_window->pollEvent();
-
-            T_fixed_udpate.resume();
-            // Update as lag permits
-            while(lag >= fixedUpdateTime)
+            CM_LOG_FATAL("No Scene defined!");
+        }
+        else
+        {
+            // Game Loop
+            while(!m_window->isCloseRequested())
             {
-                // CM_CORE_LOG_DEBUG("calling onFixedUpdate function. lag: {}", lag.count());
-                onFixedUpdate(fixedUpdateTime.count());
-                lag -= fixedUpdateTime;
-            }
-            T_fixed_udpate.pause();
-
-            T_update.resume();
-            deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
-            onUpdate(deltaTime);
-            T_update.pause();
-
-            T_draw_imgui.resume();
-            if (m_imguiWrapper)
-            {
-                m_imguiWrapper->newFrame();
-                onImGuiDraw();
-                onImGuiDebugDraw();
-            }
-            T_draw_imgui.pause();
-
-            // Compute and display FPS (every 2s)
-            // frameCounter++;
-            // timeSinceLastFPSDisplay += elapsedTime;
-            // if (timeSinceLastFPSDisplay > seconds(2))
-            // {
-            //     float fps = frameCounter / (duration_cast<seconds>(timeSinceLastFPSDisplay).count());
-            //     frameCounter = 0;
-            //     timeSinceLastFPSDisplay = milliseconds::zero();
-            //     CM_CORE_LOG_DEBUG("FPS: {}", fps);
-            // }
-
-            T_render.resume();
-            m_window->clearBuffers();
-            onPreRenderScene();
-            m_activeScene.render();
-            onPostRenderScene();
-            T_render.pause();
-
-            T_draw_imgui.resume();
-            if (m_imguiWrapper)
-            {
-                m_imguiWrapper->render();
-            }
-            T_draw_imgui.pause();
-
-            m_window->swapBuffers();
-
-            T_gameloop.pause();
-
-            // Is FPS Cap needed?
-            if (m_fpsCap)
-            {
-                auto t1 = steady_clock::now();
-                auto waitTime = fpsCapTime - duration_cast<milliseconds>(t1 - currentTime);
-                if (waitTime.count() > 1.0f)
+                if (m_nextActiveScene)
                 {
-                    std::this_thread::sleep_for(waitTime);
+                    if (m_activeScene)
+                    {
+                        m_activeScene->stop();
+                        m_previousScene = m_activeScene;
+                    }
+
+                    m_activeScene = m_nextActiveScene;
+                    m_nextActiveScene = nullptr;
+                    m_activeScene->start();
                 }
-            }
-            else
-            {
-                std::this_thread::sleep_for(microseconds(5));
+
+                T_gameloop.resume();
+                currentTime = steady_clock::now();
+                elapsedTime = currentTime - previousTime;
+                previousTime = currentTime;
+                lag += elapsedTime;
+
+                // Poll window events
+                m_window->pollEvent();
+
+                // Fixed Updates
+                T_fixed_udpate.resume();
+                // Update as lag permits
+                while(lag >= fixedUpdateTime)
+                {
+                    m_activeScene->onFixedUpdate(fixedUpdateTime.count());
+                    lag -= fixedUpdateTime;
+                }
+                T_fixed_udpate.pause();
+
+                // Updates
+                T_update.resume();
+                deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
+                m_activeScene->onUpdate(deltaTime);
+                T_update.pause();
+
+                T_draw_imgui.resume();
+                if (m_imguiWrapper)
+                {
+                    m_imguiWrapper->newFrame();
+                    m_activeScene->onImGuiDraw();
+                    drawImGuiDebug();
+                }
+                T_draw_imgui.pause();
+
+                // Rendering
+                T_render.resume();
+                m_window->clearBuffers();
+                m_activeScene->onBeginRender();
+                m_activeScene->render();
+                m_activeScene->onEndRender();
+                T_render.pause();
+
+                T_draw_imgui.resume();
+                if (m_imguiWrapper)
+                {
+                    m_imguiWrapper->render();
+                }
+                T_draw_imgui.pause();
+
+                m_window->swapBuffers();
+
+                T_gameloop.pause();
+
+                // Is FPS Cap needed?
+                if (m_fpsCap)
+                {
+                    auto t1 = steady_clock::now();
+                    auto waitTime = fpsCapTime - duration_cast<milliseconds>(t1 - currentTime);
+                    if (waitTime.count() > 1.0f)
+                    {
+                        std::this_thread::sleep_for(waitTime);
+                    }
+                }
+                else
+                {
+                    std::this_thread::sleep_for(microseconds(5));
+                }
             }
         }
         
+        if (m_activeScene)
+        {
+            m_activeScene->stop();
+        }
+
         if (m_imguiWrapper)
         {
             m_imguiWrapper->shutdown();

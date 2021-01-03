@@ -52,7 +52,7 @@ namespace comet
                         {
                             auto meshHandler = ResourceManager::getInstance().loadStaticMesh(predefineMesh.second);
                             selectedEntity.addComponent<MeshComponent>(meshHandler.resourceId);
-                            activeScene.prepare();
+                            activeScene.reload();
                         }
                     }
                     ImGui::EndMenu();
@@ -78,7 +78,7 @@ namespace comet
                             if (ImGui::MenuItem(materialInstance->getName().c_str()))
                             {
                                 selectedEntity.addComponent<MaterialComponent>(materialInstance->getInstanceId());
-                                activeScene.prepare();
+                                activeScene.reload();
                             }
                         }
                         ImGui::EndMenu();
@@ -95,7 +95,7 @@ namespace comet
                         newMaterialInstance->setShininess(1.1f);
 
                         selectedEntity.addComponent<MaterialComponent>(newMaterialInstance->getInstanceId());
-                        activeScene.prepare();
+                        activeScene.reload();
                     }
 
                     ImGui::EndMenu();
@@ -232,7 +232,7 @@ namespace comet
         if (clicked)
         {
             entity.removeComponent<T>();
-            entity.getScene()->prepare();
+            entity.getScene()->reload();
             ImGui::PopID();
             return;
         }

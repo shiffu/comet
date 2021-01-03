@@ -22,3 +22,4 @@
 #include <comet/scene.h>
 #include <comet/entity.h>
 #include <comet/components.h>
+#include <comet/nativeScript.h>

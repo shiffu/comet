@@ -7,6 +7,8 @@ add_executable(cometEditor
     panels/propertiesPanel.cpp
     cometEditorApp.h
     cometEditorApp.cpp
+    cometEditorScene.h
+    cometEditorScene.cpp
     main.cpp
 )
 

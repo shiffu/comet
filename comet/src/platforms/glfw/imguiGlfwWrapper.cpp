@@ -18,6 +18,7 @@ namespace comet
         // Flags
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     }
     
     void ImguiGlfwWrapper::initPlatform(const Window* window)

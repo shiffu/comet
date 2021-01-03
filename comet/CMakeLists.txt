@@ -59,6 +59,7 @@ target_sources(comet
         include/comet/entity.h
         include/comet/scene.h
         include/comet/components.h
+        include/comet/nativeScript.h
 
     PRIVATE
         src/core/log.cpp

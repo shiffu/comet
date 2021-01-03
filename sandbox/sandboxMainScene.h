@@ -5,10 +5,26 @@
 class SandboxMainScene : public comet::Scene
 {
 public:
-    virtual void onStart()  override;
-    virtual void onShutdown()  override;
-    virtual void onUpdate(double deltaTime)  override;
-    virtual void onFixedUpdate(float fixedDeltaTime)  override;
+    SandboxMainScene() = default;
+    ~SandboxMainScene() = default;
 
-private:
+    virtual void onBeginRender() override;
+    virtual void onEndRender() override;
+    
+    virtual bool onEvent(comet::Event& e) override;
+    virtual bool onKeyPressed(comet::KeyPressedEvent& e) override;
+
+    virtual void onStart() override;
+
+    virtual void onImGuiDraw() override;
+
+    private:
+        comet::Camera m_camera;
+        comet::CameraController m_cameraController{m_camera};
+        double m_angle{0.0};
+        glm::vec3 m_offset{0.0f};
+        bool m_pauseAnimation{false};
+        std::unique_ptr<comet::DirectionalLight> m_directionalLight{};
+        std::vector<std::unique_ptr<comet::PointLight>> m_pointLights{};
+        std::vector<std::unique_ptr<comet::SpotLight>> m_spotLights{};
 };

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <comet/vertex.h>
+
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace comet
@@ -38,7 +39,7 @@ namespace comet
         NameComponent(const char* name) : name(name) {};
         NameComponent(const std::string& name) : name(name) {};
 
-        std::string name{"Unamed"};
+        std::string name{"Unnamed"};
     };
     
     struct TagComponent
@@ -46,9 +47,14 @@ namespace comet
         TagComponent() = default;
     };
     
-    struct PlayerTagComponent
+    struct PlayerTagComponent : public TagComponent
     {
         PlayerTagComponent() = default;
+    };
+    
+    struct EnemyTagComponent : public TagComponent
+    {
+        EnemyTagComponent() = default;
     };
     
     struct MeshComponent
@@ -66,6 +72,33 @@ namespace comet
             : materialInstanceId(materialInstanceId) {};
 
         uint32_t materialInstanceId{0};
+    };
+
+    class NativeScript;
+    
+    struct NativeScriptComponent
+    {
+        NativeScript* instance{nullptr};
+
+        NativeScriptComponent() = default;
+
+        NativeScript* (*instantiateScript)();
+        void (*destroyScript)(NativeScriptComponent*);
+
+        template<typename T>
+        void bind()
+        {
+            instantiateScript = []() { return static_cast<NativeScript*>(new T()); };
+            destroyScript = [](NativeScriptComponent* comp)
+            {
+                if (comp->instance)
+                {
+                    delete comp->instance;
+                    comp->instance = nullptr;
+                }
+            };
+        }
+        
     };
 
 } // namespace comet

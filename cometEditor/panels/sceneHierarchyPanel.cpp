@@ -71,7 +71,7 @@ namespace comet
                     if (activeScene)
                     {
                         activeScene->destroyEntity(entity);
-                        activeScene->prepare();
+                        activeScene->reload();
                     }
                 }
                 ImGui::PopID();
