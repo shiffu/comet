@@ -32,6 +32,8 @@ namespace comet
         }
     };
     
+    class NativeScriptComponent;
+
     class Scene
     {
         friend class Entity;
@@ -58,6 +60,8 @@ namespace comet
         void stop();
         void reload();
         void render();
+
+        void instantiateNativeScriptComponent(NativeScriptComponent& scriptComponent);
 
         virtual void onStart() {}
         virtual void onStop() {}

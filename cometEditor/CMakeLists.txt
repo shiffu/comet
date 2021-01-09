@@ -19,4 +19,8 @@ target_include_directories(cometEditor
 
 target_compile_features(cometEditor PRIVATE cxx_std_17)
 
-target_link_libraries(cometEditor PRIVATE comet)
+target_link_libraries(cometEditor
+    PRIVATE
+        comet
+        ${CMAKE_DL_LIBS}
+)

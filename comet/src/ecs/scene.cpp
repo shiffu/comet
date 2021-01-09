@@ -1,5 +1,6 @@
 #include <comet/scene.h>
 #include <comet/entity.h>
+#include <comet/components.h>
 #include <comet/nativeScript.h>
 
 namespace comet
@@ -24,12 +25,20 @@ namespace comet
     void Scene::start()
     {
         onStart();
-        m_registry.view<NativeScriptComponent>().each([](auto entityId, auto& scriptComponent)
+        m_registry.view<NativeScriptComponent>().each([this](auto entityId, auto& scriptComponent)
+        {
+            instantiateNativeScriptComponent(scriptComponent);
+        });
+        reload();
+    }
+
+    void Scene::instantiateNativeScriptComponent(NativeScriptComponent& scriptComponent)
+    {
+        if (scriptComponent.instantiateScript)
         {
             scriptComponent.instance = scriptComponent.instantiateScript();
             scriptComponent.instance->onCreate();
-        });
-        reload();
+        }
     }
 
     void Scene::reload()
@@ -48,7 +57,13 @@ namespace comet
             {
                 scriptComponent.instance->onDestroy();
             }
-            scriptComponent.destroyScript(&scriptComponent);
+
+            if (scriptComponent.destroyScript)
+            {
+                scriptComponent.destroyScript(&scriptComponent);
+                scriptComponent.destroyScript = nullptr;
+                scriptComponent.instance = nullptr;
+            }
         });
     }
 

@@ -4,6 +4,7 @@
 #include <comet/directionalLight.h>
 #include <comet/resourceManager.h>
 #include <comet/materialRegistry.h>
+#include <comet/components.h>
 #include <comet/nativeScript.h>
 
 #include <imgui/imgui.h>
@@ -55,7 +56,7 @@ namespace comet
         auto e1 = createEntity();
         e1.getComponent<NameComponent>().name = "Ground";
         e1.getComponent<TransformComponent>().translation = glm::vec3(0.0f, 0.0f, 0.0f);
-        e1.getComponent<TransformComponent>().scale = glm::vec3(20.0f, 0.02f, 15.0f);
+        e1.getComponent<TransformComponent>().scale = glm::vec3(20.0f, 0.001f, 20.0f);
         e1.addComponent<MeshComponent>(meshHandler.resourceId);
         e1.addComponent<MaterialComponent>(materialGround->getInstanceId());
         
@@ -95,7 +96,8 @@ namespace comet
         e2.getComponent<TransformComponent>().rotation = glm::vec3(glm::radians(-2.73f), glm::radians(125.0f), 0.0f);
         e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId);
         e2.addComponent<MaterialComponent>(material2->getInstanceId());
-        e2.addComponent<NativeScriptComponent>().bind<TestScript>();
+        // e2.addComponent<NativeScriptComponent>().bind<TestScript>();
+        e2.addComponent<NativeScriptComponent>().runtimeBind("../testScriptsLib/libtestScriptsLib.so", "RotateScript");
 
         m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.1f));
         m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});

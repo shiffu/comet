@@ -9,7 +9,7 @@ option(COMET_BUILD_WITH_SFML "Build SFML Library" OFF)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 
-add_library(comet STATIC)
+add_library(comet SHARED)
 
 if(COMET_BUILD_WITH_GLFW)
     target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
@@ -60,6 +60,7 @@ target_sources(comet
         include/comet/scene.h
         include/comet/components.h
         include/comet/nativeScript.h
+        include/comet/propertiesExposer.h
 
     PRIVATE
         src/core/log.cpp
@@ -117,6 +118,8 @@ target_sources(comet
         src/rendering/textureRegistry.cpp
 
         src/ecs/scene.cpp
+
+        src/scripting/nativeScript.cpp
         
         ## Vendors ##
         # glad
@@ -169,6 +172,7 @@ endif()
 
 # Dependencies
 #   spdlog
+set(SPDLOG_BUILD_SHARED ON)
 add_subdirectory(src/vendors/spdlog)
 
 #   GLFW

@@ -2,7 +2,6 @@
 
 #include <entt/entt.hpp>
 #include <comet/scene.h>
-#include <comet/components.h>
 #include <comet/assert.h>
 
 namespace comet

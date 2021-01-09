@@ -1,9 +1,13 @@
 #include "propertiesPanel.h"
+
+#include <comet/components.h>
 #include <comet/resourceManager.h>
 #include <comet/materialRegistry.h>
 #include <comet/staticMesh.h>
+#include <comet/propertiesExposer.h>
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 #include <string>
 #include <sstream>
@@ -12,7 +16,7 @@
 
 namespace comet
 {
-    static ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterV;
+    static ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV;
     static ImGuiTreeNodeFlags headerFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen;
 
     void PropertiesPanel::onDraw(Scene& activeScene, Entity& selectedEntity)
@@ -101,6 +105,20 @@ namespace comet
                     ImGui::EndMenu();
                 }
             }
+
+            // NativeScript Component
+            if (!selectedEntity.hasComponent<NativeScriptComponent>())
+            {
+                if (ImGui::BeginMenu("NativeScript"))
+                {
+                    if (ImGui::MenuItem("New"))
+                    {
+                        selectedEntity.addComponent<NativeScriptComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+            }
+
             ImGui::EndPopup();
         }
 
@@ -115,6 +133,9 @@ namespace comet
 
         if (selectedEntity.hasComponent<MaterialComponent>())
             drawMaterialComponent(selectedEntity);
+
+        if (selectedEntity.hasComponent<NativeScriptComponent>())
+            drawNativeScriptComponent(selectedEntity);
 
         ImGui::End();
     }
@@ -323,4 +344,127 @@ namespace comet
             ImGui::EndTable();
         });
     }
+
+    void PropertiesPanel::drawNativeScriptComponent(Entity& entity)
+    {
+        drawRemovableComponent<NativeScriptComponent>("NativeScript", entity, [](Entity& entity)
+        {
+            auto& scriptComponent = entity.getComponent<NativeScriptComponent>();
+            bool nativeScriptLibPathUpdated{false};
+            bool selectedScriptUpdated{false};
+
+            if (ImGui::BeginTable("##tableNativeScript", 2, tableFlags))
+            {
+                static constexpr float firstColWidth = 120.0f;
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+
+                // Script Lib filepath
+                constexpr size_t size = 256;
+                static char buffer[size];
+                auto& scriptLibFilepath = scriptComponent.scriptLibFilepath;
+                memset(buffer, 0, size);
+                strncpy(buffer, scriptLibFilepath.c_str(), size);
+
+                ImGui::TableNextColumn();
+                ImGui::Text("Script Lib filepath");
+                ImGui::TableNextColumn();
+                nativeScriptLibPathUpdated = ImGui::InputText("##LibFilepath", buffer, size);
+                scriptLibFilepath = buffer;
+
+                // Getting the available exported scripts from the Scrip Lib
+                auto isGetScriptsFuncBound = scriptComponent.runtimeBindGetScripts(scriptComponent.scriptLibFilepath.c_str());
+                std::vector<const char*> scriptsName{"<Select Script>"};
+                if (isGetScriptsFuncBound)
+                {
+                    scriptsName = scriptComponent.getScripts();
+                }
+
+                static int scriptIndex = 0; 
+                const char* currentSelectedScript = scriptsName[scriptIndex];
+                if (ImGui::BeginCombo("##scriptCombo", currentSelectedScript))
+                {
+                    for (int i = 0; i < scriptsName.size(); i++)
+                    {
+                        const bool isSelected = (scriptIndex == i);
+                        if (ImGui::Selectable(scriptsName[i], isSelected) && scriptIndex != i)
+                        {
+                            selectedScriptUpdated = true;
+                            scriptIndex = i;
+                            scriptComponent.selectedScriptName = scriptsName[i];
+                        }
+
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (isSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // Displaying the available and exported properties of the script
+                if (scriptComponent.instance)
+                {
+                    ImGui::PushID(scriptComponent.selectedScriptName.c_str());
+                    auto propertiesExposer = scriptComponent.instance->getPropertiesExposer();
+                    if (propertiesExposer)
+                    {
+                        ImGui::TableNextRow();
+                        for(auto& propertyName : propertiesExposer->getPropertiesName())
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::Text("%s", propertyName.c_str());
+                            propertiesExposer->render(propertyName);
+                        }
+                    }
+                    ImGui::PopID();
+                }
+            }
+            ImGui::EndTable();
+
+            // Load Button management (disabled/enabled)
+            ImGui::Separator();
+            static bool isLoadButtonDisabled = true;
+            static bool disableLoadButton = true;
+
+            if (nativeScriptLibPathUpdated || selectedScriptUpdated)
+            {
+                isLoadButtonDisabled = disableLoadButton = false;
+            }
+
+            if (isLoadButtonDisabled)
+            {
+                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+            }
+
+            bool isScriptBound = false;
+            auto availableWidth = ImGui::GetContentRegionAvail().x;
+            ImGui::Indent(availableWidth * 0.2f);
+            if ( ImGui::Button("Load", ImVec2(availableWidth * 0.6f, 0.0f)) )
+            {
+                // If we already have a script bound, we need to destroy it first
+                if (scriptComponent.instance)
+                {
+                    scriptComponent.instance->onDestroy();
+                    scriptComponent.destroyScript(&scriptComponent);
+                    scriptComponent.instance = nullptr;
+                }
+
+                isScriptBound = scriptComponent.runtimeBind(scriptComponent.scriptLibFilepath.c_str(), scriptComponent.selectedScriptName.c_str());
+                if (isScriptBound)
+                {
+                    entity.getScene()->instantiateNativeScriptComponent(scriptComponent);
+                    disableLoadButton = true;
+                }
+            }
+            ImGui::Unindent();
+
+            if (isLoadButtonDisabled)
+            {
+                ImGui::PopItemFlag();
+                ImGui::PopStyleVar();
+            }
+
+            isLoadButtonDisabled = disableLoadButton;
+        });
+    }    
 }

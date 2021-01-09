@@ -23,3 +23,4 @@
 #include <comet/entity.h>
 #include <comet/components.h>
 #include <comet/nativeScript.h>
+#include <comet/propertiesExposer.h>

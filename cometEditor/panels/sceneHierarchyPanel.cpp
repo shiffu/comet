@@ -1,5 +1,7 @@
 #include "sceneHierarchyPanel.h"
 
+#include <comet/components.h>
+
 #include <imgui/imgui.h>
 
 namespace comet
