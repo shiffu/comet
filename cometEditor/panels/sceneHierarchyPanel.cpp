@@ -27,11 +27,13 @@ namespace comet
         ImGui::Separator();
         ImGui::PopStyleVar(2);
 
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0.0f, 1.0f));
         auto& registry = activeScene.getRegistry();
         registry.each([&] (auto entityId)
         {
             drawEntity({entityId, &activeScene});
         });
+        ImGui::PopStyleVar();
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
         {
@@ -44,16 +46,21 @@ namespace comet
     void SceneHierarchyPanel::drawEntity(Entity entity)
     {
         ImGuiTreeNodeFlags flags = treeNodesFlags;
-        flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
+        bool isSelected = (m_selectedEntity == entity);
+        flags |= isSelected ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
 
         if (ImGui::BeginTable("##tableDrawEntity", 2, tableFlags))
         {
             ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch | ImGuiTableFlags_Resizable, 4.0f);
             ImGui::TableNextColumn();
-            if (ImGui::TreeNodeEx((void*)(uint64_t)entity.getId(), flags, "%s (id: %d)", entity.getComponent<NameComponent>().name.c_str(), (uint32_t)entity.getId()))
+
+            if (isSelected)
             {
-                ImGui::TreePop();
+                ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.30f, 0.50f, 0.70f, 1.00f));
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.50f, 0.70f, 1.00f));
             }
+
+            auto expand = ImGui::TreeNodeEx((void*)(uint64_t)entity.getId(), flags, "%s (id: %d)", entity.getComponent<NameComponent>().name.c_str(), (uint32_t)entity.getId());
 
             if (ImGui::IsItemClicked())
             {
@@ -63,6 +70,12 @@ namespace comet
             ImGui::TableNextColumn();
             if (ImGui::Button("..."))
                 ImGui::OpenPopup("entityOptionsPopup");
+
+            if (expand)
+                ImGui::TreePop();
+
+            if (isSelected)
+                ImGui::PopStyleColor(2);
 
             if (ImGui::BeginPopup("entityOptionsPopup"))
             {
