@@ -37,6 +37,7 @@ namespace comet
             {
                 m_endTime = TimerClock::now();
                 m_accumulatedDuration +=  m_endTime - m_startTime;
+                m_intervalsCount++;
                 m_paused = true;
             }
         }
@@ -64,7 +65,9 @@ namespace comet
             }
 
             std::stringstream ss;
-            ss << duration.count() * 0.000001f << "ms" << " - TIMER: " << m_name;
+            auto durationInMs = duration.count() * 0.000001f;
+            float avg = durationInMs / (float)m_intervalsCount;
+            ss << durationInMs << "ms (" << avg << "ms/" << m_intervalsCount << ") - TIMER: " << m_name;
             CM_CORE_LOG_DEBUG(ss.str());
         }
 
@@ -72,6 +75,7 @@ namespace comet
         TimerTimePoint m_startTime;
         TimerTimePoint m_endTime;
         TimerDuration m_accumulatedDuration{0};
+        size_t m_intervalsCount{0};
         const char* m_name;
         bool m_paused{false};
     };
