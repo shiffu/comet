@@ -12,6 +12,8 @@ add_executable(cometEditor
     main.cpp
 )
 
+target_precompile_headers(cometEditor REUSE_FROM comet)
+
 target_include_directories(cometEditor
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}

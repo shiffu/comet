@@ -4,24 +4,25 @@ cmake_minimum_required(VERSION 3.17)
 option(COMET_BUILD_WITH_GLFW "Build GLFW Library" ON)
 option(COMET_BUILD_WITH_SFML "Build SFML Library" OFF)
 
-
 # For Debugging
-set(CMAKE_VERBOSE_MAKEFILE OFF)
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_library(comet SHARED)
 
 if(COMET_BUILD_WITH_GLFW)
-    target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
-    message(STATUS "Option BUILD_GLFW was set to ON")
+target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
+message(STATUS "Option BUILD_GLFW was set to ON")
 elseif(COMET_BUILD_WITH_SFML)
-    target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_SFML)
-    message(STATUS "Option BUILD_SFML was set to ON")
+target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_SFML)
+message(STATUS "Option BUILD_SFML was set to ON")
 else()
-    message(FATAL_ERROR "Either COMET_BUILD_WITH_GLFW or COMET_BUILD_WITH_SFML option should be set to ON")
+message(FATAL_ERROR "Either COMET_BUILD_WITH_GLFW or COMET_BUILD_WITH_SFML option should be set to ON")
 endif()
 
+
 target_compile_features(comet PRIVATE cxx_std_17)
+target_precompile_headers(comet PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/core/cometpch.h>")
+
 
 target_sources(comet
     INTERFACE
@@ -247,6 +248,7 @@ if (COMET_BUILD_WITH_SFML)
             sfml-window
     )
 endif()
+
 
 include(CMakePrintHelpers)
 cmake_print_properties(
