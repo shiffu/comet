@@ -16,7 +16,7 @@ namespace comet
     class CometEditorScene : public Scene
     {
     public:
-        CometEditorScene() = default;
+        CometEditorScene(const char* name) : Scene(name) {}
         virtual ~CometEditorScene() = default;
 
         virtual void onBeginRender() override;

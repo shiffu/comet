@@ -40,10 +40,10 @@ namespace comet
         friend class Renderer;
 
     public:
-        Scene() = default;
+        Scene(const char* name) : m_name(name) {}
         virtual ~Scene() = default;
 
-        Entity createEntity();
+        Entity createEntity(bool createDefaultComponents = true);
         void destroyEntity(Entity& entity);
 
         void setCameraController(CameraController* cameraController) { m_cameraController = cameraController; }
@@ -55,6 +55,11 @@ namespace comet
 
         SceneStats& getStatistics() { return m_sceneStatistics; }
         const SceneStats& getStatistics() const { return m_sceneStatistics; }
+
+        void setName(const std::string& name) { m_name = name; }
+        const std::string& getName() const { return m_name; }
+
+        void clear();
 
         void start();
         void stop();
@@ -90,6 +95,7 @@ namespace comet
         virtual void onImGuiDraw() {}
 
     private:
+        std::string m_name;
         entt::registry m_registry;
         Renderer m_renderer;
         CameraController* m_cameraController{nullptr};

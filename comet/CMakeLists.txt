@@ -72,6 +72,8 @@ target_sources(comet
         src/core/objLoader.cpp
         src/core/stringUtils.h
         src/core/stringUtils.cpp
+        src/core/sceneSerializer.h
+        src/core/sceneSerializer.cpp
 
         src/platforms/opengl/openglVertexBuffer.h
         src/platforms/opengl/openglVertexBuffer.cpp
@@ -176,6 +178,12 @@ endif()
 set(SPDLOG_BUILD_SHARED ON)
 add_subdirectory(src/vendors/spdlog)
 
+#   Rapid Yaml (ryml)
+set(RYML_BUILD_TESTS OFF)
+set(RYML_BUILD_BENCHMARKS OFF)
+add_subdirectory(src/vendors/ryml)
+set_target_properties(ryml PROPERTIES POSITION_INDEPENDENT_CODE True)
+
 #   GLFW
 if (COMET_BUILD_WITH_GLFW)
     set(GLFW_BUILD_EXAMPLES OFF)
@@ -209,7 +217,8 @@ target_include_directories(comet
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/src/vendors/glad/include
         ${CMAKE_CURRENT_LIST_DIR}/src/vendors/spdlog/include
-        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/stb 
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/stb
+        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/ryml/src
 )
 
 if (COMET_BUILD_WITH_GLFW)
@@ -232,6 +241,7 @@ target_link_libraries(comet
     PRIVATE
         stdc++fs
         OpenGL::GL
+        ryml
         ${CMAKE_DL_LIBS}
 )
 

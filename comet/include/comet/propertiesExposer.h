@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <variant>
 
 namespace comet
 {
@@ -25,11 +26,13 @@ namespace comet
         SetterFuncType<ScriptType, T>       setterFunc{nullptr};
     };
 
-    enum class NativeScriptPropertyTypeTag
+    enum NativeScriptPropertyTypeTag
     {
         FLOAT = 0,
         VEC3
     };
+ 
+    using PropertyValueType = std::variant<float, glm::vec3>;
     
     struct NativeScriptPropertyDesc
     {
@@ -37,11 +40,20 @@ namespace comet
         NativeScriptPropertyTypeTag type;
         uint32_t index;
     };
-    
+
+    struct PropertyValueContainer
+    {
+        NativeScriptPropertyTypeTag typeTag;
+        PropertyValueType value;
+    };
+
     struct PropertiesExposerInterface
     {
         virtual std::vector<std::string> getPropertiesName() const = 0;
         virtual void render(const std::string& propertyName) = 0;
+
+        virtual PropertyValueContainer getPropertyValue(const std::string& propertyName) = 0;
+        virtual void setPropertyValue(const std::string& propertyName, PropertyValueContainer valueContainer) = 0;
     };
 
     template<typename S>
@@ -59,12 +71,88 @@ namespace comet
             return names;
         }
 
+        PropertyValueContainer getPropertyValue(const std::string& propertyName)
+        {
+            auto propertyDesc = m_properties.find(propertyName);
+            if (propertyDesc != m_properties.end())
+            {
+                auto accessorsIndex = propertyDesc->second.index;
+
+                switch (propertyDesc->second.type)
+                {
+                    case NativeScriptPropertyTypeTag::FLOAT:
+                    {
+                        auto accessors = m_floatAccessors[accessorsIndex];
+                        auto constGetter = accessors.constGetterFunc;
+
+                        if (constGetter)
+                        {
+                            PropertyValueContainer valueContainer{NativeScriptPropertyTypeTag::FLOAT};
+                            valueContainer.value = (nativeScript.*constGetter)();
+                            return valueContainer;
+                        }
+                    }
+
+                    case NativeScriptPropertyTypeTag::VEC3:
+                    {
+                        auto accessors = m_vec3Accessors[accessorsIndex];
+                        auto constGetter = accessors.constGetterFunc;
+
+                        if (constGetter)
+                        {
+                            PropertyValueContainer valueContainer{NativeScriptPropertyTypeTag::VEC3};
+                            valueContainer.value = (nativeScript.*constGetter)();
+                            return valueContainer;
+                        }
+                    }
+                }
+            }
+        }
+
+        void setPropertyValue(const std::string& propertyName, PropertyValueContainer valueContainer)
+        {
+            auto propertyDesc = m_properties.find(propertyName);
+            if (propertyDesc != m_properties.end())
+            {
+                auto accessorsIndex = propertyDesc->second.index;
+
+                switch (propertyDesc->second.type)
+                {
+                    case NativeScriptPropertyTypeTag::FLOAT:
+                    {
+                        auto accessors = m_floatAccessors[accessorsIndex];
+                        auto setter = accessors.setterFunc;
+
+                        if (setter)
+                        {
+                            auto value = std::get<NativeScriptPropertyTypeTag::FLOAT>(valueContainer.value);
+                            (nativeScript.*setter)(value);
+                        }
+                        break;
+                    }
+
+                    case NativeScriptPropertyTypeTag::VEC3:
+                    {
+                        auto accessors = m_vec3Accessors[accessorsIndex];
+                        auto setter = accessors.setterFunc;
+
+                        if (setter)
+                        {
+                            auto value = std::get<NativeScriptPropertyTypeTag::VEC3>(valueContainer.value);
+                            (nativeScript.*setter)(value);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         virtual void render(const std::string& propertyName) override
         {
             auto propertyDesc = m_properties.find(propertyName);
             if (propertyDesc != m_properties.end())
             {
-                auto getterIndex = propertyDesc->second.index;
+                auto accessorsIndex = propertyDesc->second.index;
 
                 ImGui::PushID(propertyName.c_str());
 
@@ -72,7 +160,7 @@ namespace comet
                 {
                     case NativeScriptPropertyTypeTag::FLOAT:
                     {
-                        auto accessors = m_floatAccessors[getterIndex];
+                        auto accessors = m_floatAccessors[accessorsIndex];
                         auto getter = accessors.getterFunc;
                         auto constGetter = accessors.constGetterFunc;
 
@@ -107,7 +195,7 @@ namespace comet
 
                     case NativeScriptPropertyTypeTag::VEC3:
                     {
-                        auto accessors = m_vec3Accessors[getterIndex];
+                        auto accessors = m_vec3Accessors[accessorsIndex];
                         auto getter = accessors.getterFunc;
                         auto constGetter = accessors.constGetterFunc;
 

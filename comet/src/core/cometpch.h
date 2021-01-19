@@ -1,6 +1,7 @@
 #pragma once
 
 #include <comet/log.h>
+#include <comet/timer.h>
 #include <comet/assert.h>
 
 // C++ Types

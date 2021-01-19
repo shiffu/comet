@@ -6,11 +6,14 @@
 namespace comet
 {
     
-    Entity Scene::createEntity()
+    Entity Scene::createEntity(bool createDefaultComponents /*= true*/)
     {
         Entity entity{m_registry.create(), this};
-        entity.addComponent<TransformComponent>();
-        entity.addComponent<NameComponent>();
+        if (createDefaultComponents)
+        {
+            entity.addComponent<TransformComponent>();
+            entity.addComponent<NameComponent>();
+        }
 
         m_sceneStatistics.entitiesCount++;
         return entity;
@@ -20,6 +23,12 @@ namespace comet
     {
         m_registry.destroy(entity.getId());
         m_sceneStatistics.entitiesCount--;
+    }
+
+    void Scene::clear()
+    {
+        m_registry.clear();
+        reload();
     }
 
     void Scene::start()

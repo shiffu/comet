@@ -16,7 +16,7 @@ namespace comet
         virtual void onStart() override;
 
     private:
-        CometEditorScene m_editorScene;
+        CometEditorScene m_editorScene{"CometEditorScene"};
     };
 
 }

@@ -26,7 +26,7 @@ public:
     {
         CM_LOG_DEBUG("RotateScript::onCreate()");
         setPropertiesExposer(&propExposer);
-        propExposer.add("Speed", {&RotateScript::getSpeed});
+        propExposer.add("Speed", {nullptr, &RotateScript::getSpeed, &RotateScript::setSpeed});
     }
 
     virtual void onDestroy() override
@@ -40,8 +40,8 @@ public:
         transformComponent.rotation += m_rotation * (float)(m_speed * deltaTime);
     }
 
-    float& getSpeed() { return m_speed; }
-    void setSpeed(float speed) { m_speed = speed; }
+    const float& getSpeed() const { return m_speed; }
+    void setSpeed(const float& speed) { m_speed = speed; }
 
 private:
     float m_speed{0.001f};
@@ -67,7 +67,7 @@ public:
         CM_LOG_DEBUG("TranslateScript::onCreate()");
         setPropertiesExposer(&propExposer);
         propExposer.add("Speed", {nullptr, &TranslateScript::getSpeed, &TranslateScript::setSpeed});
-        propExposer.add("Translation", {&TranslateScript::getTranslation});
+        propExposer.add("Translation", {nullptr, &TranslateScript::getTranslation, &TranslateScript::setTranslation});
     }
 
     virtual void onDestroy() override
@@ -85,7 +85,8 @@ public:
     const float& getSpeed() const { return m_speed; }
     void setSpeed(const float& speed) { m_speed = speed; }
 
-    glm::vec3& getTranslation() { return m_translation; }
+    const glm::vec3& getTranslation() const { return m_translation; }
+    void setTranslation(const glm::vec3& translation) { m_translation = translation; }
 
 private:
     float m_delta{0.0f};

@@ -75,7 +75,7 @@ namespace comet
         TimerTimePoint m_startTime;
         TimerTimePoint m_endTime;
         TimerDuration m_accumulatedDuration{0};
-        size_t m_intervalsCount{0};
+        size_t m_intervalsCount{1};
         const char* m_name;
         bool m_paused{false};
     };

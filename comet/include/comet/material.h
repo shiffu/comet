@@ -28,7 +28,8 @@ namespace comet
 
         Shader* getShader();
 
-        void setAlbedoTexture(const char* filename);
+        void setAlbedoTexture(const std::string& filename);
+        const std::string& getAlbedoTextureFilename() const { return m_albedoTextureFilename; }
         int32_t getAlbedoTextureIndex() const { return m_albedoTextureIndex; }
 
         void setDiffuse(const glm::vec3& diffuse) { m_diffuse = diffuse; }
@@ -63,7 +64,7 @@ namespace comet
         glm::vec3 m_diffuse;
         glm::vec3 m_specular;
         float m_shininess{1.0f};
-        std::string m_albedoTexturePath;
+        std::string m_albedoTextureFilename;
         int32_t m_albedoTextureIndex{-1};
 
     };

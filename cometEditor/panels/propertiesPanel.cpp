@@ -373,7 +373,7 @@ namespace comet
 
                 // Getting the available exported scripts from the Scrip Lib
                 auto isGetScriptsFuncBound = scriptComponent.runtimeBindGetScripts(scriptComponent.scriptLibFilepath.c_str());
-                std::vector<const char*> scriptsName{"<Select Script>"};
+                std::vector<const char*> scriptsName{"<No Script>"};
                 if (isGetScriptsFuncBound)
                 {
                     scriptsName = scriptComponent.getScripts();
@@ -388,14 +388,16 @@ namespace comet
                         const bool isSelected = (scriptIndex == i);
                         if (ImGui::Selectable(scriptsName[i], isSelected) && scriptIndex != i)
                         {
-                            selectedScriptUpdated = true;
                             scriptIndex = i;
+                            selectedScriptUpdated = true;
                             scriptComponent.selectedScriptName = scriptsName[i];
                         }
 
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (isSelected)
+                        {
                             ImGui::SetItemDefaultFocus();
+                        }
                     }
                     ImGui::EndCombo();
                 }

@@ -6,6 +6,7 @@
 #include <comet/materialRegistry.h>
 #include <comet/components.h>
 #include <comet/nativeScript.h>
+#include <core/sceneSerializer.h>
 
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>
@@ -61,32 +62,35 @@ namespace comet
         e1.addComponent<MaterialComponent>(materialGround->getInstanceId());
         
 
-        class TestScript : public NativeScript
-        {
-        public:
-            TestScript() = default;
-            virtual ~TestScript() = default;
+        //
+        // To test static binding
+        //
+        // class TestScript : public NativeScript
+        // {
+        // public:
+        //     TestScript() = default;
+        //     virtual ~TestScript() = default;
 
-            virtual void onCreate() override
-            {
-                CM_LOG_DEBUG("TestScript::onCreate()");
-            }
+        //     virtual void onCreate() override
+        //     {
+        //         CM_LOG_DEBUG("TestScript::onCreate()");
+        //     }
 
-            virtual void onUpdate(Entity& entity, double deltaTime) override
-            {
-                auto& transformComponent = getComponent<TransformComponent>(entity);
-                yRotation += 0.001f * deltaTime;
-                transformComponent.rotation.y = yRotation;
-            }
+        //     virtual void onUpdate(Entity& entity, double deltaTime) override
+        //     {
+        //         auto& transformComponent = getComponent<TransformComponent>(entity);
+        //         yRotation += 0.001f * deltaTime;
+        //         transformComponent.rotation.y = yRotation;
+        //     }
 
-            virtual void onDestroy() override
-            {
-                CM_LOG_DEBUG("TestScript::onDestroy()");
-            }
+        //     virtual void onDestroy() override
+        //     {
+        //         CM_LOG_DEBUG("TestScript::onDestroy()");
+        //     }
 
-        private:
-            float yRotation{0.0f};
-        };
+        // private:
+        //     float yRotation{0.0f};
+        // };
 
 
         auto e2 = createEntity();
@@ -97,7 +101,6 @@ namespace comet
         e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId);
         e2.addComponent<MaterialComponent>(material2->getInstanceId());
         // e2.addComponent<NativeScriptComponent>().bind<TestScript>();
-        e2.addComponent<NativeScriptComponent>().runtimeBind("../testScriptsLib/libtestScriptsLib.so", "RotateScript");
 
         m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.1f));
         m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
@@ -186,8 +189,16 @@ namespace comet
             {
                 ImGui::MenuItem("New", nullptr);
                 ImGui::Separator();
-                ImGui::MenuItem("Open...", nullptr);
-                ImGui::MenuItem("Save", nullptr);
+                if (ImGui::MenuItem("Open...", nullptr))
+                {
+                    SceneSerializer::deserialize(*this, "EditorScene.scn");
+                }
+                
+                if (ImGui::MenuItem("Save", nullptr))
+                {
+                    SceneSerializer::serialize(*this);
+                }
+
                 ImGui::MenuItem("Save As...", nullptr);
                 ImGui::Separator();
                 ImGui::MenuItem("Show Demo", "", &showDemoWindow);

@@ -5,7 +5,7 @@
 class SandboxMainScene : public comet::Scene
 {
 public:
-    SandboxMainScene() = default;
+    SandboxMainScene(const char* name) : comet::Scene(name) {}
     ~SandboxMainScene() = default;
 
     virtual void onBeginRender() override;

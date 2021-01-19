@@ -17,5 +17,5 @@ public:
     virtual void onStart() override;
 
 private:
-    SandboxMainScene m_mainScene;
+    SandboxMainScene m_mainScene{"SandboxMainScene"};
 };

@@ -27,10 +27,14 @@ namespace comet
         return albedoTexture;
     }
 
-    void Material::setAlbedoTexture(const char* filename)
+    void Material::setAlbedoTexture(const std::string& filename)
     {
-        auto textureArray = getAlbedoTextureArray();
-        m_albedoTextureIndex = textureArray->addTexture2D(filename);
+        if (!filename.empty())
+        {
+            m_albedoTextureFilename = filename;
+            auto textureArray = getAlbedoTextureArray();
+            m_albedoTextureIndex = textureArray->addTexture2D(filename.c_str());
+        }
     }
 
     // Vertex and Instance Buffers Layout

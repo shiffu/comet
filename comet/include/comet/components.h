@@ -48,6 +48,8 @@ namespace comet
     struct TagComponent
     {
         TagComponent() = default;
+        // entt needs non empty aggregate
+        char dummy;
     };
     
     struct PlayerTagComponent : public TagComponent
@@ -92,6 +94,7 @@ namespace comet
         InstantiateFuncType instantiateScript{nullptr};
         DestroyFuncType destroyScript{nullptr};
         GetScriptsFuncType getScripts{nullptr};
+        void* m_dllHandle{nullptr};
 
         // Functions Members
         NativeScriptComponent(const NativeScriptComponent&) = delete;
@@ -100,7 +103,7 @@ namespace comet
         NativeScriptComponent(NativeScriptComponent&& other)
             : instance(std::move(other.instance)),
             scriptLibFilepath(std::move(other.scriptLibFilepath)),
-            selectedScriptName(std::move(selectedScriptName)),
+            selectedScriptName(std::move(other.selectedScriptName)),
             scriptsName(std::move(other.scriptsName)),
             instantiateScript(std::move(other.instantiateScript)),
             destroyScript(std::move(other.destroyScript)),
@@ -253,9 +256,6 @@ namespace comet
             selectedScriptName = scriptClassName;
             return true;
         }
-    
-    private:
-        void* m_dllHandle{nullptr};
     };
 
 } // namespace comet
