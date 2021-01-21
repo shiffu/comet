@@ -14,13 +14,13 @@
 namespace comet
 {
     
-    void CometEditorScene::onBeginRender()
+    void CometEditorScene::onRender()
     {
         m_frameBuffer->bind();
-    }
 
-    void CometEditorScene::onEndRender()
-    {
+        m_renderer.reloadInstanceData();
+        m_renderer.render(m_cameraController.getView(), m_cameraController.getProjection());
+        
         m_frameBuffer->unbind();
     }
 
@@ -30,7 +30,6 @@ namespace comet
 
         m_camera.setPerspective(glm::radians(45.0f), 16.0f/9.0f, 0.1f, 400.0f);
         m_cameraController.setPosition(glm::vec3{0.0f, 5.0f, 20.0f});
-        setCameraController(&m_cameraController);
 
         m_frameBuffer = Framebuffer::create({1280, 720});
         m_frameBuffer->invalidate();

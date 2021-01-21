@@ -8,13 +8,11 @@ public:
     SandboxMainScene(const char* name) : comet::Scene(name) {}
     ~SandboxMainScene() = default;
 
-    virtual void onBeginRender() override;
-    virtual void onEndRender() override;
-    
     virtual bool onEvent(comet::Event& e) override;
     virtual bool onKeyPressed(comet::KeyPressedEvent& e) override;
 
     virtual void onStart() override;
+    virtual void onRender() override;
 
     private:
         comet::Camera m_camera;

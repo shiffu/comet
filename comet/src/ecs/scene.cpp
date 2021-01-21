@@ -88,21 +88,4 @@ namespace comet
         });
     }
 
-    void Scene::render()
-    {
-        m_renderer.reloadInstanceData();
-        glm::mat4 viewMatrix{1.0f};
-        glm::mat4 projectionMatrix{1.0f};
-
-        // Checking for CameraController presence
-        // Default scene does not have a CameraController for instance
-        if (m_cameraController)
-        {
-            viewMatrix = m_cameraController->getView();
-            projectionMatrix = m_cameraController->getProjection();
-        }
-
-        m_renderer.render(viewMatrix, projectionMatrix);
-    }
-
 } // namespace comet

@@ -159,9 +159,7 @@ namespace comet
                 // Scene Rendering Callback
                 T_render.resume();
                 m_window->clearBuffers();
-                m_activeScene->onBeginRender();
-                m_activeScene->render();
-                m_activeScene->onEndRender();
+                m_activeScene->onRender();
                 T_render.pause();
 
                 // Application Render Callback

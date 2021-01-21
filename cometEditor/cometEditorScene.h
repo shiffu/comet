@@ -1,6 +1,9 @@
 #pragma once
 
 #include <comet/scene.h>
+#include <comet/cameraController.h>
+#include <comet/directionalLight.h>
+#include <comet/framebuffer.h>
 
 #include <panels/sceneHierarchyPanel.h>
 #include <panels/propertiesPanel.h>
@@ -10,31 +13,25 @@
 namespace comet
 {
 
-    class Framebuffer;
-    class DirectionalLight;
-
     class CometEditorScene : public Scene
     {
     public:
         CometEditorScene(const char* name) : Scene(name) {}
         virtual ~CometEditorScene() = default;
 
-        virtual void onBeginRender() override;
-        virtual void onEndRender() override;
-        
+        virtual void onRender() override;
         virtual bool onEvent(Event& e) override;
-
         virtual void onStart() override;
 
-        virtual void onImGuiDraw() override;
+        void onImGuiDraw();
 
     private:
         void doImGuiInit();
         void drawImGuiDebug();
 
     private:
-        comet::Camera m_camera;
-        comet::CameraController m_cameraController{m_camera};
+        Camera m_camera;
+        CameraController m_cameraController{m_camera};
         std::unique_ptr<Framebuffer> m_frameBuffer;
         std::unique_ptr<DirectionalLight> m_directionalLight{};
         SceneHierarchyPanel m_sceneHierarchyPanel;

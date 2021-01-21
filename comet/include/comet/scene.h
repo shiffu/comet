@@ -1,6 +1,6 @@
 #pragma once
 
-#include <comet/cameraController.h>
+#include <comet/event.h>
 #include <comet/renderer.h>
 
 #include <entt/entt.hpp>
@@ -46,12 +46,7 @@ namespace comet
         Entity createEntity(bool createDefaultComponents = true);
         void destroyEntity(Entity& entity);
 
-        void setCameraController(CameraController* cameraController) { m_cameraController = cameraController; }
-        CameraController* getCameraController() { return m_cameraController; }
-
         entt::registry& getRegistry() { return m_registry; }
-
-        void addLight(Light* light) { m_renderer.addLight(light); m_sceneStatistics.lightsCount++; }
 
         SceneStats& getStatistics() { return m_sceneStatistics; }
         const SceneStats& getStatistics() const { return m_sceneStatistics; }
@@ -59,12 +54,12 @@ namespace comet
         void setName(const std::string& name) { m_name = name; }
         const std::string& getName() const { return m_name; }
 
-        void clear();
+        void addLight(Light* light) { m_renderer.addLight(light); m_sceneStatistics.lightsCount++; }
 
+        void clear();
         void start();
         void stop();
         void reload();
-        void render();
 
         void instantiateNativeScriptComponent(NativeScriptComponent& scriptComponent);
 
@@ -72,8 +67,7 @@ namespace comet
         virtual void onStop() {}
         virtual void onUpdate(double deltaTime);
         virtual void onFixedUpdate(double fixedDeltaTime) {}
-        virtual void onBeginRender() {}
-        virtual void onEndRender() {}
+        virtual void onRender() {}
 
         // Event Callbacks
         virtual bool onEvent(Event& e) { return true; } // Generic event handler
@@ -91,15 +85,13 @@ namespace comet
         virtual bool onMouseButtonPressed(MouseButtonPressedEvent& e) {return true; }
         virtual bool onMouseButtonRelease(MouseButtonReleasedEvent& e) {return true; }
 
-        // Imgui Callback
-        virtual void onImGuiDraw() {}
+    protected:
+        SceneStats m_sceneStatistics;
+        Renderer m_renderer;
 
     private:
         std::string m_name;
         entt::registry m_registry;
-        Renderer m_renderer;
-        CameraController* m_cameraController{nullptr};
-        SceneStats m_sceneStatistics;
     };
     
 } // namespace comet

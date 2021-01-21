@@ -21,12 +21,6 @@ public:
     }
 };
 
-
-
-void SandboxMainScene::onBeginRender() {}
-
-void SandboxMainScene::onEndRender() {}
-
 bool SandboxMainScene::onEvent(comet::Event& e)
 {
     m_cameraController.onEvent(e);
@@ -44,7 +38,6 @@ void SandboxMainScene::onStart()
 {
     m_camera.setPerspective(glm::radians(45.0f), 16.0f/9.0f, 0.1f, 400.0f);
     m_cameraController.setPosition(glm::vec3{0.0f, 5.0f, 17.0f});
-    setCameraController(&m_cameraController);
 
     Vertex data[] = {
         {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
@@ -131,4 +124,10 @@ void SandboxMainScene::onStart()
     m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(-3.6f, 1.19f, 0.7f)));
     m_spotLights.back()->setDiffuse({1.0f, 1.0f, 0.0f});
     addLight(m_spotLights.back().get());
+}
+
+void SandboxMainScene::onRender()
+{
+    m_renderer.reloadInstanceData();
+    m_renderer.render(m_cameraController.getView(), m_cameraController.getProjection());
 }
