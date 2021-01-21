@@ -151,19 +151,19 @@ namespace comet
                 T_update.resume();
                 deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
                 m_activeScene->onUpdate(deltaTime);
-                T_update.pause();
 
                 // Application onUpdate Callback
                 onUpdate();
+                T_update.pause();
 
                 // Scene Rendering Callback
                 T_render.resume();
                 m_window->clearBuffers();
                 m_activeScene->onRender();
-                T_render.pause();
 
                 // Application Render Callback
                 onRender();
+                T_render.pause();
 
                 m_window->swapBuffers();
 

@@ -1,9 +1,11 @@
 #pragma once
 
-#include <comet/comet.h>
-
 #include "cometEditorScene.h"
+
+#include <comet/comet.h>
 #include <core/imguiWrapper.h>
+#include <panels/sceneHierarchyPanel.h>
+#include <panels/propertiesPanel.h>
 
 namespace comet
 {
@@ -20,8 +22,15 @@ namespace comet
         virtual void onRender() override;
         
     private:
+        void doImGuiInit();
+        void drawImGui();
+        void drawImGuiDebug();
+
+    private:
         CometEditorScene m_editorScene{"CometEditorScene"};
         std::unique_ptr<ImguiWrapper> m_imguiWrapper;
+        SceneHierarchyPanel m_sceneHierarchyPanel;
+        PropertiesPanel m_propertiesPanel;
     };
 
 }
