@@ -6,6 +6,8 @@
 namespace comet
 {
 
+    class PropertiesExposerInterface;
+
     class PropertiesPanel
     {
     public:
@@ -20,6 +22,7 @@ namespace comet
         void drawMeshComponent(Entity& entity);
         void drawMaterialComponent(Entity& entity);
         void drawNativeScriptComponent(Entity& entity);
+        static void drawNativeScriptProperties(PropertiesExposerInterface* propertiesExposer, const std::string& propertyName);
 
         void drawVec3(const char* label, glm::vec3& vec, float firstColWidth, float resetValue = 0.0f);
 

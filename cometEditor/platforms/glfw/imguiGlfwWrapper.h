@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rendering/imguiWrapper.h>
+#include <core/imguiWrapper.h>
 
 namespace comet
 {

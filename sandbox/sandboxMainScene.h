@@ -16,8 +16,6 @@ public:
 
     virtual void onStart() override;
 
-    virtual void onImGuiDraw() override;
-
     private:
         comet::Camera m_camera;
         comet::CameraController m_cameraController{m_camera};

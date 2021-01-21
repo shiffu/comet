@@ -2,7 +2,6 @@
 
 #include <comet/comet.h>
 
-#include <imgui/imgui.h>
 #include <glm/glm.hpp>
 
 
@@ -24,13 +23,9 @@ public:
 
 
 
-void SandboxMainScene::onBeginRender()
-{
-}
+void SandboxMainScene::onBeginRender() {}
 
-void SandboxMainScene::onEndRender()
-{
-}
+void SandboxMainScene::onEndRender() {}
 
 bool SandboxMainScene::onEvent(comet::Event& e)
 {
@@ -136,98 +131,4 @@ void SandboxMainScene::onStart()
     m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(-3.6f, 1.19f, 0.7f)));
     m_spotLights.back()->setDiffuse({1.0f, 1.0f, 0.0f});
     addLight(m_spotLights.back().get());
-}
-
-
-void ligtColorEdit(const char* label, comet::Light* light)
-{
-    {
-        // Ambient
-        std::stringstream ss;
-        auto ambientColor = light->getAmbient();
-        float ambientData[] = {ambientColor.x, ambientColor.y, ambientColor.z};
-        ss << label << " Light Ambient Color";
-        ImGui::ColorEdit3(ss.str().c_str(), ambientData);
-        light->setAmbient({ambientData[0], ambientData[1], ambientData[2]});
-    }
-
-    {
-        // Diffuse
-        std::stringstream ss;
-        auto diffuseColor = light->getDiffuse();
-        float diffuseData[] = {diffuseColor.x, diffuseColor.y, diffuseColor.z};
-        ss << label << " Light Diffuse Color";
-        ImGui::ColorEdit3(ss.str().c_str(), diffuseData);
-        light->setDiffuse({diffuseData[0], diffuseData[1], diffuseData[2]});
-    }
-    
-    {
-        // Specular
-        std::stringstream ss;
-        auto specularColor = light->getSpecular();
-        float specularData[] = {specularColor.x, specularColor.y, specularColor.z};
-        ss << label << " Light Specular Color";
-        ImGui::ColorEdit3(ss.str().c_str(), specularData);
-        light->setSpecular({specularData[0], specularData[1], specularData[2]});
-    }
-}
-
-void SandboxMainScene::onImGuiDraw()
-{
-    ImGui::Begin("SandBox Debug");
-    
-    // Directional Light
-    {
-        ImGui::Separator();
-        ImGui::Text("Directional Light Attributes");
-        auto directionalLightPos = m_directionalLight->getDirection();
-        float pos[] = {directionalLightPos.x, directionalLightPos.y, directionalLightPos.z};
-        ImGui::SliderFloat3("Dir Light Direction", pos, -1.0f, 1.0f);
-        m_directionalLight->setDirection({pos[0], pos[1], pos[2]});
-    }
-    
-    ligtColorEdit("Dir", m_directionalLight.get());
-
-    // Point Light(s)
-    static int pointLightSelected{0};
-    ImGui::Separator();
-    ImGui::Text("Point Light Attributes");
-    if (ImGui::RadioButton("Select Pt Light 0", pointLightSelected == 0)) { pointLightSelected = 0; } ImGui::SameLine();
-    if (ImGui::RadioButton("Select Pt Light 1", pointLightSelected == 1)) { pointLightSelected = 1; }
-
-    auto currentPointLight = m_pointLights[pointLightSelected].get();
-    {
-        auto lightPos = currentPointLight->getPosition();
-        float pos[] = {lightPos.x, lightPos.y, lightPos.z};
-        ImGui::SliderFloat3("Point Light Position", pos, -20.0f, 20.0f);
-        currentPointLight->setPosition({pos[0], pos[1], pos[2]});
-    }
-
-    ligtColorEdit("Point", currentPointLight);
-
-    // Spot Light(s)
-    static int spotLightSelected{0};
-    ImGui::Separator();
-    ImGui::Text("Spot Light Attributes");
-    if (ImGui::RadioButton("Select Spot Light 0", spotLightSelected == 0)) { spotLightSelected = 0; } ImGui::SameLine();
-    if (ImGui::RadioButton("Select Spot Light 1", spotLightSelected == 1)) { spotLightSelected = 1; }
-
-    auto currentSpotLight = m_spotLights[spotLightSelected].get();
-    {
-        auto lightPos = currentSpotLight->getPosition();
-        float pos[] = {lightPos.x, lightPos.y, lightPos.z};
-        ImGui::SliderFloat3("Spot Light Position", pos, -20.0f, 20.0f);
-        currentSpotLight->setPosition({pos[0], pos[1], pos[2]});
-    }
-    
-    {
-        auto lightDir = currentSpotLight->getDirection();
-        float dir[] = {lightDir.x, lightDir.y, lightDir.z};
-        ImGui::SliderFloat3("Spot Light Direction", dir, -1.0f, 1.0f);
-        currentSpotLight->setDirection({dir[0], dir[1], dir[2]});
-    }
-    
-    ligtColorEdit("Spot", currentSpotLight);
-
-    ImGui::End();
 }

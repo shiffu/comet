@@ -345,6 +345,62 @@ namespace comet
         });
     }
 
+    void PropertiesPanel::drawNativeScriptProperties(PropertiesExposerInterface* propertiesExposer, const std::string& propertyName)
+    {
+        auto valueWrapper = propertiesExposer->getPropertyValue(propertyName);
+        if (valueWrapper)
+        {
+            ImGui::PushID(propertyName.c_str());
+            switch (valueWrapper->typeTag)
+            {
+                case NativeScriptPropertyTypeTag::FLOAT:
+                {
+                    auto value = std::get<NativeScriptPropertyTypeTag::FLOAT>(valueWrapper->value);
+
+                    // Read / Write Property
+                    if (propertiesExposer->hasSetter(propertyName))
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##setterFloat", &value, 0.001f, -5.0f, 5.0f, "%.5f");
+                        valueWrapper->value = value;
+                        propertiesExposer->setPropertyValue(propertyName, *valueWrapper);
+                    }
+                    // Read only Property
+                    else
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%.5f", value);                                
+                    }
+                    break;
+                }
+
+                case NativeScriptPropertyTypeTag::VEC3:
+                {
+                    auto value = std::get<NativeScriptPropertyTypeTag::VEC3>(valueWrapper->value);
+
+                    // Read / Write Property
+                    if (propertiesExposer->hasSetter(propertyName))
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat3("##setterVec3", &value[0], 0.001f, -5.0f, 5.0f, "%.5f");
+                        valueWrapper->value = value;
+                        propertiesExposer->setPropertyValue(propertyName, *valueWrapper);
+                    }
+                    // Read only Property
+                    else
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%.5f", value.x); ImGui::SameLine();
+                        ImGui::Text("%.5f", value.y); ImGui::SameLine();
+                        ImGui::Text("%.5f", value.z);
+                    }
+                    break;
+                }
+            }
+            ImGui::PopID();
+        }
+    }
+
     void PropertiesPanel::drawNativeScriptComponent(Entity& entity)
     {
         drawRemovableComponent<NativeScriptComponent>("NativeScript", entity, [](Entity& entity)
@@ -414,7 +470,7 @@ namespace comet
                         {
                             ImGui::TableNextColumn();
                             ImGui::Text("%s", propertyName.c_str());
-                            propertiesExposer->render(propertyName);
+                            drawNativeScriptProperties(propertiesExposer, propertyName);
                         }
                     }
                     ImGui::PopID();

@@ -10,8 +10,6 @@
 namespace comet
 {
 
-    class ImguiWrapper;
-
     class Application
     {
     public:
@@ -26,7 +24,7 @@ namespace comet
         void onEventDispatch(Event& e);
         virtual void run();
         
-        Window& getWindow() const { return *m_window; }
+        Window* getWindow() const { return m_window; }
 
         // Configuration
         void setFPSCap(unsigned int fpsCap);
@@ -58,11 +56,11 @@ namespace comet
 
         virtual void onStart() {}
         virtual void onStop() {}
+        virtual void onUpdate() {}
+        virtual void onRender() {}
 
     private:
         void init(const WindowSpec& spec = WindowSpec());
-
-        void drawImGuiDebug();
 
     private:
         bool m_isRunning{false};
@@ -75,7 +73,7 @@ namespace comet
         Scene* m_previousScene{nullptr};
 
         unsigned int m_fpsCap{0};
-        std::unique_ptr<ImguiWrapper> m_imguiWrapper;
+        
 
         // Fixed update time in ms (used to onFixedUpdate function call)
         // TODO: Make this fixed update time an application config param
@@ -86,7 +84,6 @@ namespace comet
         Timer T_fixed_udpate{"GameLoop - FixedUpdate", true};
         Timer T_update{"GameLoop - Update", true};
         Timer T_render{"GameLoop - Render", true};
-        Timer T_draw_imgui{"GameLoop - Draw ImGui", true};
     };
 
 } // namespace comet

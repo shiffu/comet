@@ -30,6 +30,7 @@ namespace comet
 
     private:
         void doImGuiInit();
+        void drawImGuiDebug();
 
     private:
         comet::Camera m_camera;

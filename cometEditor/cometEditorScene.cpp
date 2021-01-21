@@ -36,23 +36,12 @@ namespace comet
         m_frameBuffer->invalidate();
 
         // TEST SCENE
-        auto material = MaterialRegistry::getInstance().createMaterialInstance("blue");
-        material->setDiffuse({0.0f, 0.0f, 0.7f});
-        material->setSpecular({0.0f, 0.0f, 1.0f});
-        material->setShininess(20);
-
-        auto material2 = MaterialRegistry::getInstance().createMaterialInstance("red");
-        material2->setDiffuse({0.7f, 0.0f, 0.0f});
-        material2->setSpecular({1.0f, 0.0f, 0.0f});
-        material2->setShininess(1.5f);
-
         auto materialGround = MaterialRegistry::getInstance().createMaterialInstance("grey");
         materialGround->setDiffuse({0.092f, 0.092f, 0.188f});
         materialGround->setSpecular({0.431f, 0.431f, 0.478f});
         materialGround->setShininess(5.5f);
 
         auto meshHandler = ResourceManager::getInstance().loadStaticMesh("cube.obj");
-        auto meshHandlerScooter = ResourceManager::getInstance().loadStaticMesh("scooterBlender.obj");
 
         auto e1 = createEntity();
         e1.getComponent<NameComponent>().name = "Ground";
@@ -60,47 +49,6 @@ namespace comet
         e1.getComponent<TransformComponent>().scale = glm::vec3(20.0f, 0.001f, 20.0f);
         e1.addComponent<MeshComponent>(meshHandler.resourceId);
         e1.addComponent<MaterialComponent>(materialGround->getInstanceId());
-        
-
-        //
-        // To test static binding
-        //
-        // class TestScript : public NativeScript
-        // {
-        // public:
-        //     TestScript() = default;
-        //     virtual ~TestScript() = default;
-
-        //     virtual void onCreate() override
-        //     {
-        //         CM_LOG_DEBUG("TestScript::onCreate()");
-        //     }
-
-        //     virtual void onUpdate(Entity& entity, double deltaTime) override
-        //     {
-        //         auto& transformComponent = getComponent<TransformComponent>(entity);
-        //         yRotation += 0.001f * deltaTime;
-        //         transformComponent.rotation.y = yRotation;
-        //     }
-
-        //     virtual void onDestroy() override
-        //     {
-        //         CM_LOG_DEBUG("TestScript::onDestroy()");
-        //     }
-
-        // private:
-        //     float yRotation{0.0f};
-        // };
-
-
-        auto e2 = createEntity();
-        e2.getComponent<NameComponent>().name = "Scooter";
-        e2.getComponent<TransformComponent>().translation = glm::vec3(0.0f, 0.57f, 0.0f);
-        e2.getComponent<TransformComponent>().scale = glm::vec3(0.15f);
-        e2.getComponent<TransformComponent>().rotation = glm::vec3(glm::radians(-2.73f), glm::radians(125.0f), 0.0f);
-        e2.addComponent<MeshComponent>(meshHandlerScooter.resourceId);
-        e2.addComponent<MaterialComponent>(material2->getInstanceId());
-        // e2.addComponent<NativeScriptComponent>().bind<TestScript>();
 
         m_directionalLight = std::make_unique<DirectionalLight>(glm::vec3(1.0f, -0.70f, -0.1f));
         m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
@@ -161,6 +109,22 @@ namespace comet
         io.Fonts->AddFontFromFileTTF(boldFontPath.c_str(), 17.0f);
     }
 
+    void CometEditorScene::drawImGuiDebug()
+    {
+        ImGui::Begin("Debug");
+        
+        auto FPS = ImGui::GetIO().Framerate;
+        ImGui::Text("Frame time %.3f ms (%.1f FPS)", 1000.0f / FPS, FPS);
+        
+        auto& stats = getStatistics();
+        ImGui::Text("Lights: %d", stats.lightsCount);
+        ImGui::Text("Entities: %d", stats.entitiesCount);
+        ImGui::Text("Vertices: %d / Indices: %d", stats.verticesCount, stats.indicesCount);
+        ImGui::Text("Draw calls: %d / Draw commands: %d", stats.drawCalls, stats.drawCommandsCount);
+
+        ImGui::End();
+    }
+
     void CometEditorScene::onImGuiDraw()
     {
         static ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -189,6 +153,7 @@ namespace comet
             {
                 ImGui::MenuItem("New", nullptr);
                 ImGui::Separator();
+                
                 if (ImGui::MenuItem("Open...", nullptr))
                 {
                     SceneSerializer::deserialize(*this, "EditorScene.scn");
@@ -201,6 +166,7 @@ namespace comet
 
                 ImGui::MenuItem("Save As...", nullptr);
                 ImGui::Separator();
+
                 ImGui::MenuItem("Show Demo", "", &showDemoWindow);
                 ImGui::EndMenu();
             }
@@ -209,6 +175,9 @@ namespace comet
 
         if (showDemoWindow)
             ImGui::ShowDemoWindow();
+
+        // Debug Window
+        drawImGuiDebug();
 
         // Viewport Panel
         ImGui::Begin("Viewport");

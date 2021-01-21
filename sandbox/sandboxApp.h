@@ -4,9 +4,6 @@
 
 #include <comet/comet.h>
 
-#include <memory>
-#include <glm/vec3.hpp>
-
 class SandboxApp : public comet::Application
 {
 public:

@@ -2,9 +2,6 @@
 #include <comet/log.h>
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
-#include <rendering/imguiWrapper.h>
-
-#include <imgui/imgui.h>
 
 #include <functional>
 #include <chrono>
@@ -42,13 +39,6 @@ namespace comet
 
         // set Event callback
         m_window->addEventCallback(BIND_METHOD(Application::onEventDispatch));
-
-        // set Imgui Wrapper
-        m_imguiWrapper = ImguiWrapper::create();
-        if (m_imguiWrapper)
-        {
-            m_imguiWrapper->init();
-        }
 
         m_isInitialized = true;
         CM_CORE_LOG_DEBUG("Finished initializing the application");
@@ -91,30 +81,8 @@ namespace comet
     bool Application::onMouseButtonPressed(MouseButtonPressedEvent& e) { return m_activeScene->onMouseButtonPressed(e); }
     bool Application::onMouseButtonRelease(MouseButtonReleasedEvent& e) { return m_activeScene->onMouseButtonRelease(e); }
 
-    void Application::drawImGuiDebug()
-    {
-        ImGui::Begin("Comet Debug");
-        ImGui::Text("Scene statistics debug information");
-        
-        auto FPS = ImGui::GetIO().Framerate;
-        ImGui::Text("Frame time %.3f ms (%.1f FPS)", 1000.0f / FPS, FPS);
-        
-        auto& stats = m_activeScene->getStatistics();
-        ImGui::Text("Lights: %d", stats.lightsCount);
-        ImGui::Text("Entities: %d", stats.entitiesCount);
-        ImGui::Text("Vertices: %d / Indices: %d", stats.verticesCount, stats.indicesCount);
-        ImGui::Text("Draw calls: %d / Draw commands: %d", stats.drawCalls, stats.drawCommandsCount);
-
-        ImGui::End();
-    }
-
     void Application::run()
     {
-        if (m_imguiWrapper)
-        {
-            m_imguiWrapper->initPlatform(m_window);
-        }
-
         CM_CORE_LOG_INFO("Start running the application");
         m_isRunning = true;
 
@@ -169,7 +137,7 @@ namespace comet
                 // Poll window events
                 m_window->pollEvent();
 
-                // Fixed Updates
+                // Scene Fixed Update Callback
                 T_fixed_udpate.resume();
                 // Update as lag permits
                 while(lag >= fixedUpdateTime)
@@ -179,22 +147,16 @@ namespace comet
                 }
                 T_fixed_udpate.pause();
 
-                // Updates
+                // Scene Update Callback
                 T_update.resume();
                 deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
                 m_activeScene->onUpdate(deltaTime);
                 T_update.pause();
 
-                T_draw_imgui.resume();
-                if (m_imguiWrapper)
-                {
-                    m_imguiWrapper->newFrame();
-                    m_activeScene->onImGuiDraw();
-                    drawImGuiDebug();
-                }
-                T_draw_imgui.pause();
+                // Application onUpdate Callback
+                onUpdate();
 
-                // Rendering
+                // Scene Rendering Callback
                 T_render.resume();
                 m_window->clearBuffers();
                 m_activeScene->onBeginRender();
@@ -202,12 +164,8 @@ namespace comet
                 m_activeScene->onEndRender();
                 T_render.pause();
 
-                T_draw_imgui.resume();
-                if (m_imguiWrapper)
-                {
-                    m_imguiWrapper->render();
-                }
-                T_draw_imgui.pause();
+                // Application Render Callback
+                onRender();
 
                 m_window->swapBuffers();
 
@@ -235,12 +193,9 @@ namespace comet
             m_activeScene->stop();
         }
 
-        if (m_imguiWrapper)
-        {
-            m_imguiWrapper->shutdown();
-            m_imguiWrapper = nullptr;
-        }
-        
+        // Application onStop Callback
+        onStop();
+
         m_window->close();
         CM_CORE_LOG_DEBUG("Exit main loop");
     }

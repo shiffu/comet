@@ -3,6 +3,7 @@
 #include <comet/comet.h>
 
 #include "cometEditorScene.h"
+#include <core/imguiWrapper.h>
 
 namespace comet
 {
@@ -14,9 +15,13 @@ namespace comet
         virtual ~CometEditorApp();
 
         virtual void onStart() override;
-
+        virtual void onStop() override;
+        virtual void onUpdate() override;
+        virtual void onRender() override;
+        
     private:
         CometEditorScene m_editorScene{"CometEditorScene"};
+        std::unique_ptr<ImguiWrapper> m_imguiWrapper;
     };
 
 }

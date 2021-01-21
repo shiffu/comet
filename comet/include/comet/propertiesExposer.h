@@ -1,11 +1,10 @@
 #pragma once
 
-#include <imgui/imgui.h>
-
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <variant>
+#include <optional>
 
 namespace comet
 {
@@ -50,10 +49,10 @@ namespace comet
     struct PropertiesExposerInterface
     {
         virtual std::vector<std::string> getPropertiesName() const = 0;
-        virtual void render(const std::string& propertyName) = 0;
 
-        virtual PropertyValueContainer getPropertyValue(const std::string& propertyName) = 0;
+        virtual std::optional<PropertyValueContainer> getPropertyValue(const std::string& propertyName) = 0;
         virtual void setPropertyValue(const std::string& propertyName, PropertyValueContainer valueContainer) = 0;
+        virtual bool hasSetter(const std::string& propertyName) = 0;
     };
 
     template<typename S>
@@ -71,7 +70,7 @@ namespace comet
             return names;
         }
 
-        PropertyValueContainer getPropertyValue(const std::string& propertyName)
+        std::optional<PropertyValueContainer> getPropertyValue(const std::string& propertyName)
         {
             auto propertyDesc = m_properties.find(propertyName);
             if (propertyDesc != m_properties.end())
@@ -107,8 +106,49 @@ namespace comet
                     }
                 }
             }
+
+            CM_CORE_LOG_ERROR("Property name '{}' does not exist in script", propertyName);
+            return {};
         }
 
+        bool hasSetter(const std::string& propertyName)
+        {
+            auto propertyDesc = m_properties.find(propertyName);
+            if (propertyDesc != m_properties.end())
+            {
+                auto accessorsIndex = propertyDesc->second.index;
+
+                switch (propertyDesc->second.type)
+                {
+                    case NativeScriptPropertyTypeTag::FLOAT:
+                    {
+                        auto accessors = m_floatAccessors[accessorsIndex];
+                        auto setter = accessors.setterFunc;
+
+                        if (setter)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+
+                    case NativeScriptPropertyTypeTag::VEC3:
+                    {
+                        auto accessors = m_vec3Accessors[accessorsIndex];
+                        auto setter = accessors.setterFunc;
+
+                        if (setter)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            return false;
+        }
+        
         void setPropertyValue(const std::string& propertyName, PropertyValueContainer valueContainer)
         {
             auto propertyDesc = m_properties.find(propertyName);
@@ -144,93 +184,6 @@ namespace comet
                         break;
                     }
                 }
-            }
-        }
-
-        virtual void render(const std::string& propertyName) override
-        {
-            auto propertyDesc = m_properties.find(propertyName);
-            if (propertyDesc != m_properties.end())
-            {
-                auto accessorsIndex = propertyDesc->second.index;
-
-                ImGui::PushID(propertyName.c_str());
-
-                switch (propertyDesc->second.type)
-                {
-                    case NativeScriptPropertyTypeTag::FLOAT:
-                    {
-                        auto accessors = m_floatAccessors[accessorsIndex];
-                        auto getter = accessors.getterFunc;
-                        auto constGetter = accessors.constGetterFunc;
-
-                        if (getter)
-                        {
-                            auto& value = (nativeScript.*getter)();
-                            ImGui::TableNextColumn();
-                            ImGui::DragFloat("##getterFloat", &value, 0.0f, 0.0f, 0.0f, "%.5f");
-                        }
-                        else if (constGetter)
-                        {
-                            auto setter = accessors.setterFunc;
-
-                            // Read / Write Property
-                            if (setter)
-                            {
-                                auto value = (nativeScript.*constGetter)();
-                                ImGui::TableNextColumn();
-                                ImGui::DragFloat("##setterFloat", &value, 0.001f, -5.0f, 5.0f, "%.5f");
-                                (nativeScript.*setter)(value);
-                            }
-                            // Read only Property
-                            else
-                            {
-                                auto& value = (nativeScript.*getter)();
-                                ImGui::TableNextColumn();
-                                ImGui::Text("%.5f", value);                                
-                            }
-                        }
-                        break;
-                    }
-
-                    case NativeScriptPropertyTypeTag::VEC3:
-                    {
-                        auto accessors = m_vec3Accessors[accessorsIndex];
-                        auto getter = accessors.getterFunc;
-                        auto constGetter = accessors.constGetterFunc;
-
-                        if (getter)
-                        {
-                            auto& value = (nativeScript.*getter)();
-                            ImGui::TableNextColumn();
-                            ImGui::DragFloat3("##getterVec3", &value[0], 0.001f, -5.0f, 5.0f, "%.5f");
-                        }
-                        else if (constGetter)
-                        {
-                            auto setter = accessors.setterFunc;
-
-                            // Read / Write Property
-                            if (setter)
-                            {
-                                auto value = (nativeScript.*constGetter)();
-                                ImGui::TableNextColumn();
-                                ImGui::DragFloat3("##setterVec3", &value[0], 0.001f, -5.0f, 5.0f, "%.5f");
-                                (nativeScript.*setter)(value);
-                            }
-                            // Read only Property
-                            else
-                            {
-                                auto& value = (nativeScript.*getter)();
-                                ImGui::TableNextColumn();
-                                ImGui::Text("%.5f", value.x); ImGui::SameLine();
-                                ImGui::Text("%.5f", value.y); ImGui::SameLine();
-                                ImGui::Text("%.5f", value.z);
-                            }
-                        }
-                        break;
-                    }
-                }
-                ImGui::PopID();
             }
         }
 

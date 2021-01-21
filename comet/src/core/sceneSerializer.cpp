@@ -138,21 +138,20 @@ namespace comet
                             propertyNode.append_child() << ryml::key("name") << propertyName;
 
                             auto valueContainer = propertiesExposer->getPropertyValue(propertyName);
-                            switch (valueContainer.typeTag)
+                            if (valueContainer)
                             {
-                            case NativeScriptPropertyTypeTag::FLOAT:
-                                propertyNode.append_child() << ryml::key("type") << NativeScriptPropertyTypeTag::FLOAT;
-                                propertyNode.append_child() << ryml::key("value") << std::get<NativeScriptPropertyTypeTag::FLOAT>(valueContainer.value);
-                                break;
-                            
-                            case NativeScriptPropertyTypeTag::VEC3:
-                                propertyNode.append_child() << ryml::key("type") << NativeScriptPropertyTypeTag::VEC3;
-                                propertyNode.append_child() << ryml::key("value") << std::get<NativeScriptPropertyTypeTag::VEC3>(valueContainer.value);
-                                break;
-                            
-                            default:
-                                CM_LOG_ERROR("Unmanaged property type {}", valueContainer.typeTag);
-                                break;
+                                switch (valueContainer->typeTag)
+                                {
+                                case NativeScriptPropertyTypeTag::FLOAT:
+                                    propertyNode.append_child() << ryml::key("type") << NativeScriptPropertyTypeTag::FLOAT;
+                                    propertyNode.append_child() << ryml::key("value") << std::get<NativeScriptPropertyTypeTag::FLOAT>(valueContainer->value);
+                                    break;
+                                
+                                case NativeScriptPropertyTypeTag::VEC3:
+                                    propertyNode.append_child() << ryml::key("type") << NativeScriptPropertyTypeTag::VEC3;
+                                    propertyNode.append_child() << ryml::key("value") << std::get<NativeScriptPropertyTypeTag::VEC3>(valueContainer->value);
+                                    break;
+                                }
                             }
                         }
                     }

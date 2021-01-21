@@ -10,19 +10,17 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 add_library(comet SHARED)
 
 if(COMET_BUILD_WITH_GLFW)
-target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
+target_compile_definitions(comet PUBLIC COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_GLFW)
 message(STATUS "Option BUILD_GLFW was set to ON")
 elseif(COMET_BUILD_WITH_SFML)
-target_compile_definitions(comet PRIVATE COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_SFML)
+target_compile_definitions(comet PUBLIC COMET_WINDOW_IMPL=COMET_WINDOW_IMPL_SFML)
 message(STATUS "Option BUILD_SFML was set to ON")
 else()
 message(FATAL_ERROR "Either COMET_BUILD_WITH_GLFW or COMET_BUILD_WITH_SFML option should be set to ON")
 endif()
 
-
 target_compile_features(comet PRIVATE cxx_std_17)
 target_precompile_headers(comet PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/core/cometpch.h>")
-
 
 target_sources(comet
     INTERFACE
@@ -115,8 +113,6 @@ target_sources(comet
         src/rendering/pointLight.cpp
         src/rendering/spotLight.cpp
         src/rendering/staticMesh.cpp
-        src/rendering/imguiWrapper.h
-        src/rendering/imguiWrapper.cpp
         src/rendering/texture.cpp
         src/rendering/textureRegistry.cpp
 
@@ -128,19 +124,6 @@ target_sources(comet
         # glad
         src/vendors/glad/include/glad/glad.h
         src/vendors/glad/src/glad.c
-
-        # ImGui
-        src/vendors/imgui/imgui/imconfig.h
-        src/vendors/imgui/imgui/imgui.cpp
-        src/vendors/imgui/imgui/imgui.h
-        src/vendors/imgui/imgui/imgui_draw.cpp
-        src/vendors/imgui/imgui/imgui_widgets.cpp
-        src/vendors/imgui/imgui/imgui_demo.cpp
-        src/vendors/imgui/imgui/imgui_tables.cpp
-        src/vendors/imgui/imgui/imgui_impl_opengl3.cpp
-        src/vendors/imgui/imgui/imgui_impl_opengl3.h
-        src/vendors/imgui/imgui/imgui_impl_glfw.cpp
-        src/vendors/imgui/imgui/imgui_impl_glfw.h
 
         # stb
         src/vendors/stb/stb/stb_image.h
@@ -157,9 +140,7 @@ target_sources(comet
             src/platforms/glfw/glfwWindowWrapper.cpp
             src/platforms/glfw/glfwInput.cpp
             src/platforms/glfw/glfwInput.h
-            src/platforms/glfw/imguiGlfwWrapper.h
-            src/platforms/glfw/imguiGlfwWrapper.cpp
-    )
+)
 endif()
 
  # Only when BUILD_SFML = ON
@@ -170,7 +151,7 @@ endif()
             src/platforms/sfml/SFMLWindow.cpp
             src/platforms/sfml/SFMLInput.h
             src/platforms/sfml/SFMLInput.cpp
-    )
+)
 endif()
 
 # Dependencies
@@ -210,7 +191,6 @@ target_include_directories(comet
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/src/vendors/glm
-        ${CMAKE_CURRENT_LIST_DIR}/src/vendors/imgui
         ${CMAKE_CURRENT_LIST_DIR}/src/vendors/entt
         # TODO: Move this to private / build a more robust include structure
         ${CMAKE_CURRENT_LIST_DIR}/src
