@@ -2,6 +2,8 @@
 
 #include <comet/event.h>
 #include <comet/renderer.h>
+#include <comet/light.h>
+#include <comet/framebuffer.h>
 
 #include <entt/entt.hpp>
 
@@ -40,7 +42,7 @@ namespace comet
         friend class Renderer;
 
     public:
-        Scene(const char* name) : m_name(name) {}
+        Scene(const char* name, bool runtime = true) : m_name(name), m_runtime(runtime) {}
         virtual ~Scene() = default;
 
         Entity createEntity(bool createDefaultComponents = true);
@@ -54,7 +56,11 @@ namespace comet
         void setName(const std::string& name) { m_name = name; }
         const std::string& getName() const { return m_name; }
 
-        void addLight(Light* light) { m_renderer.addLight(light); m_sceneStatistics.lightsCount++; }
+        Framebuffer& getFramebuffer() { return *m_frameBuffer.get(); }
+        const Framebuffer& getFramebuffer() const { return *m_frameBuffer.get(); }
+
+        void addLight(std::unique_ptr<Light>&& light);
+        const std::vector<std::unique_ptr<Light>>& getLights() { return m_lights; }
 
         void clear();
         void start();
@@ -88,10 +94,13 @@ namespace comet
     protected:
         SceneStats m_sceneStatistics;
         Renderer m_renderer;
+        entt::registry m_registry;
+        std::unique_ptr<Framebuffer> m_frameBuffer;
 
     private:
         std::string m_name;
-        entt::registry m_registry;
+        bool m_runtime;
+        std::vector<std::unique_ptr<Light>> m_lights{};
     };
     
 } // namespace comet

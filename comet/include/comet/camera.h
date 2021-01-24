@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/mat4x4.hpp>
+#include <glm/glm.hpp>
 
 namespace comet
 {
@@ -8,8 +9,17 @@ namespace comet
     class Camera
     {
     public:
-        Camera() = default;
+        enum ProjectionType
+        {
+            PERSPECTIVE = 0,
+            ORTHOGRAPHIC
+        };
 
+        Camera(ProjectionType type = ProjectionType::PERSPECTIVE)
+            : m_projectionType(type) {};
+
+        ProjectionType getProjectionType() const { return m_projectionType; }
+        void setProjectionType(ProjectionType type) { m_projectionType = type; }
         const glm::mat4& getProjection() const { return m_projection; }
         void setProjection(const glm::mat4& projection) { m_projection = m_projection; }
 
@@ -43,8 +53,9 @@ namespace comet
 
     private:
         glm::mat4 m_projection{1.0f};
+        ProjectionType m_projectionType;
         float m_zoom{1.0f};
-        float m_fov{0.0f};
+        float m_fov{glm::radians(60.0f)};
         float m_aspectRatio{1.0f};
         float m_near{0.1f};
         float m_far{500.0f};

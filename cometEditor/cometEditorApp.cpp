@@ -2,8 +2,7 @@
 
 #include <core/imguiWrapper.h>
 #include <core/sceneSerializer.h>
-
-#include <imgui/imgui.h>
+#include <core/imguiUtils.h>
 
 #include <memory>
 
@@ -31,10 +30,10 @@ namespace comet
         }
 
         setActiveScene(&m_editorScene);
-        doImGuiInit();
+        initImGuiTheme();
     }
 
-    void CometEditorApp::doImGuiInit()
+    void CometEditorApp::initImGuiTheme()
     {
         // Flags
         ImGuiIO& io = ImGui::GetIO();
@@ -82,7 +81,27 @@ namespace comet
         io.Fonts->AddFontFromFileTTF(boldFontPath.c_str(), 17.0f);
     }
 
-    void CometEditorApp::drawImGui()
+    
+    void CometEditorApp::drawFramebuffer(Scene& scene)
+    {
+        auto viewportPanelSize = ImGui::GetContentRegionAvail();
+        auto& framebuffer = scene.getFramebuffer();
+        auto framebufferSpec = framebuffer.getSpec();
+        
+        if (viewportPanelSize.x != framebufferSpec.width || viewportPanelSize.y != framebufferSpec.height)
+        {
+            framebufferSpec.width = viewportPanelSize.x;
+            framebufferSpec.height = viewportPanelSize.y;
+            framebuffer.setSpec(framebufferSpec);
+        }
+        framebuffer.invalidate();
+        
+        auto texId = framebuffer.getColorAttachmentId();
+        ImGui::Image((void*)(uint64_t)texId, ImVec2((float)viewportPanelSize.x, (float)viewportPanelSize.y),
+                    ImVec2(0, 1), ImVec2(1, 0));
+    }
+
+    void CometEditorApp::drawEditor()
     {
         static ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -134,26 +153,49 @@ namespace comet
             ImGui::ShowDemoWindow();
 
         // Debug Window
-        drawImGuiDebug();
+        drawEditorDebug();
 
         // Viewport Panel
         ImGui::Begin("Viewport");
         ImGui::PopStyleVar(3);
-        auto viewportPanelSize = ImGui::GetContentRegionAvail();
-        auto& framebuffer = m_editorScene.getFramebuffer();
-        auto framebufferSpec = framebuffer.getSpec();
-        
-        if (viewportPanelSize.x != framebufferSpec.width || viewportPanelSize.y != framebufferSpec.height)
+        if (!m_isGamePlaying)
         {
-            framebufferSpec.width = viewportPanelSize.x;
-            framebufferSpec.height = viewportPanelSize.y;
-            framebuffer.setSpec(framebufferSpec);
+            drawFramebuffer(m_editorScene);
         }
-        framebuffer.invalidate();
-        
-        auto texId = framebuffer.getBufferId();
-        ImGui::Image((void*)(uint64_t)texId, ImVec2((float)viewportPanelSize.x, (float)viewportPanelSize.y),
-                    ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::End();
+
+        // Game panel
+        ImGui::Begin("Game");
+        if (m_isGamePlaying)
+        {
+            drawFramebuffer(m_gameScene);
+        }
+        ImGui::End();
+
+        // Toolbar
+        ImGui::Begin("Toolbar");
+        bool playClicked;
+        bool stopClicked;
+        {
+            ItemDisabler playButtonDisabler{m_isGamePlaying};
+            playClicked = ImGui::Button("Play"); ImGui::SameLine();
+        }
+        {
+            ItemDisabler stopButtonDisabler{!m_isGamePlaying};
+            stopClicked = ImGui::Button("Stop");
+        }
+
+        if (playClicked && !m_isGamePlaying)
+        {
+            m_isGamePlaying = true;
+            setActiveScene(&m_gameScene);
+        }
+
+        if (stopClicked && m_isGamePlaying)
+        {
+            m_isGamePlaying = false;
+            setActiveScene(&m_editorScene);
+        }
         ImGui::End();
 
         // Scene Hierarchy Panel
@@ -169,7 +211,7 @@ namespace comet
         ImGui::End(); // Main Docking frame
     }
 
-    void CometEditorApp::drawImGuiDebug()
+    void CometEditorApp::drawEditorDebug()
     {
         ImGui::Begin("Debug");
         
@@ -199,7 +241,7 @@ namespace comet
         if (m_imguiWrapper)
         {
             m_imguiWrapper->newFrame();
-            drawImGui();
+            drawEditor();
         }
     }
 

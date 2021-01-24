@@ -12,7 +12,7 @@ using namespace comet;
 class RotateScript : public NativeScript
 {
 public:
-    RotateScript() : propExposer(*this)
+    RotateScript() : m_propExposer(*this)
     {
         CM_CORE_LOG_DEBUG("RotateScript::RotateScript()");
     }
@@ -25,8 +25,8 @@ public:
     virtual void onCreate() override
     {
         CM_LOG_DEBUG("RotateScript::onCreate()");
-        setPropertiesExposer(&propExposer);
-        propExposer.add("Speed", {nullptr, &RotateScript::getSpeed, &RotateScript::setSpeed});
+        setPropertiesExposer(&m_propExposer);
+        m_propExposer.add("Speed", {nullptr, &RotateScript::getSpeed, &RotateScript::setSpeed});
     }
 
     virtual void onDestroy() override
@@ -46,13 +46,13 @@ public:
 private:
     float m_speed{0.001f};
     glm::vec3 m_rotation{0.0f, 1.0f, 0.0f};
-    PropertiesExposer<RotateScript> propExposer;
+    PropertiesExposer<RotateScript> m_propExposer;
 };
 
 class TranslateScript : public NativeScript
 {
 public:
-    TranslateScript() : propExposer(*this)
+    TranslateScript() : m_propExposer(*this)
     {
         CM_CORE_LOG_DEBUG("TranslateScript::TranslateScript()");
     }
@@ -65,9 +65,9 @@ public:
     virtual void onCreate() override
     {
         CM_LOG_DEBUG("TranslateScript::onCreate()");
-        setPropertiesExposer(&propExposer);
-        propExposer.add("Speed", {nullptr, &TranslateScript::getSpeed, &TranslateScript::setSpeed});
-        propExposer.add("Translation", {nullptr, &TranslateScript::getTranslation, &TranslateScript::setTranslation});
+        setPropertiesExposer(&m_propExposer);
+        m_propExposer.add("Speed", {nullptr, &TranslateScript::getSpeed, &TranslateScript::setSpeed});
+        m_propExposer.add("Translation", {nullptr, &TranslateScript::getTranslation, &TranslateScript::setTranslation});
     }
 
     virtual void onDestroy() override
@@ -92,7 +92,7 @@ private:
     float m_delta{0.0f};
     float m_speed{0.005f};
     glm::vec3 m_translation{0.04f, 0.0f, 0.0f};
-    PropertiesExposer<TranslateScript> propExposer;
+    PropertiesExposer<TranslateScript> m_propExposer;
 };
 
 

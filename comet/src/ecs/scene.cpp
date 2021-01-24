@@ -31,6 +31,12 @@ namespace comet
         reload();
     }
 
+    void Scene::addLight(std::unique_ptr<Light>&& light)
+    {
+        m_lights.push_back(std::move(light));
+        m_sceneStatistics.lightsCount++;
+    }
+
     void Scene::start()
     {
         onStart();
@@ -43,7 +49,7 @@ namespace comet
 
     void Scene::instantiateNativeScriptComponent(NativeScriptComponent& scriptComponent)
     {
-        if (scriptComponent.instantiateScript)
+        if (scriptComponent.instantiateScript && scriptComponent.instance == nullptr)
         {
             scriptComponent.instance = scriptComponent.instantiateScript();
             scriptComponent.instance->onCreate();
@@ -65,27 +71,29 @@ namespace comet
             if (scriptComponent.instance)
             {
                 scriptComponent.instance->onDestroy();
+                scriptComponent.instance = nullptr;
             }
 
             if (scriptComponent.destroyScript)
             {
                 scriptComponent.destroyScript(&scriptComponent);
-                scriptComponent.destroyScript = nullptr;
-                scriptComponent.instance = nullptr;
             }
         });
     }
 
     void Scene::onUpdate(double deltaTime)
     {
-        m_registry.view<NativeScriptComponent>().each([deltaTime, this](auto entityId, auto& scriptComponent)
+        if (m_runtime)
         {
-            if (scriptComponent.instance)
+            m_registry.view<NativeScriptComponent>().each([deltaTime, this](auto entityId, auto& scriptComponent)
             {
-                Entity entity{entityId, this};
-                scriptComponent.instance->onUpdate(entity, deltaTime);
-            }
-        });
+                if (scriptComponent.instance)
+                {
+                    Entity entity{entityId, this};
+                    scriptComponent.instance->onUpdate(entity, deltaTime);
+                }
+            });
+        }
     }
 
 } // namespace comet

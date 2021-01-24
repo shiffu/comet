@@ -110,6 +110,36 @@ namespace comet
                 node.append_child() << ryml::key("albedoTextureFilename") << material->getAlbedoTextureFilename();
             }
 
+            // CameraComponent (Optional)
+            if (entity.hasComponent<CameraComponent>())
+            {
+                auto& component = entity.getComponent<CameraComponent>();
+                auto node = entityNode["CameraComponent"];
+                node |= ryml::MAP;
+                node.append_child() << ryml::key("isPrimary") << component.isPrimary;
+
+                auto& camera = component.camera;
+                auto projectionType = camera.getProjectionType();
+                node.append_child() << ryml::key("projectionType") << (uint32_t)projectionType;
+
+                if (projectionType == Camera::ProjectionType::PERSPECTIVE)
+                {
+                    node.append_child() << ryml::key("fov") << camera.getFOV();
+                }
+
+                auto zoom = camera.getZoom();
+                node.append_child() << ryml::key("zoom") << zoom;
+
+                auto ar = camera.getAspectRatio();
+                node.append_child() << ryml::key("aspectRatio") << ar;
+
+                auto near = camera.getNear();
+                node.append_child() << ryml::key("near") << near;
+
+                auto far = camera.getFar();
+                node.append_child() << ryml::key("far") << far;
+            }
+
             // NativeScriptComponent (Optional)
             if (entity.hasComponent<NativeScriptComponent>())
             {
@@ -184,6 +214,12 @@ namespace comet
             auto sceneData = ss.str();
 
             auto sceneTree = ryml::parse(c4::to_substr(sceneData));
+            if (sceneTree.size() <= 1)
+            {
+                CM_LOG_ERROR("Invalid scene, no data");
+                return false;
+            }
+
             auto sceneRoot = sceneTree["CometScene"];
 
             if (!sceneRoot.valid() || sceneRoot.is_seed() || !sceneRoot.is_map())
@@ -243,7 +279,6 @@ namespace comet
                     // EnemyTagComponent (Optional)
                     if (entityNode["EnemyTagComponent"] != nullptr)
                     {
-                        // auto compNode = entityNode["EnemyTagComponent"];
                         entity.addComponent<EnemyTagComponent>();
                     }
 
@@ -287,6 +322,45 @@ namespace comet
                         
                         auto& component = entity.addComponent<MaterialComponent>();
                         component.materialInstanceId = material->getInstanceId();
+                    }
+
+                    // CameraComponent (Optional)
+                    if (entityNode["CameraComponent"] != nullptr)
+                    {
+                        auto compNode = entityNode["CameraComponent"];
+                        bool isPrimary;
+                        compNode["isPrimary"] >> isPrimary;
+
+                        uint32_t projectionType;
+                        compNode["projectionType"] >> projectionType;
+                        Camera camera((Camera::ProjectionType)projectionType);
+
+                        if (projectionType == Camera::ProjectionType::PERSPECTIVE)
+                        {
+                            float fov;
+                            compNode["fov"] >> fov;
+                            camera.setFOV(fov);
+                        }
+
+                        float zoom;
+                        compNode["zoom"] >> zoom;
+                        camera.setZoom(zoom);
+
+                        float ar;
+                        compNode["aspectRatio"] >> ar;
+                        camera.setAspectRatio(ar);
+
+                        float near;
+                        compNode["near"] >> near;
+                        camera.setNear(near);
+
+                        float far;
+                        compNode["far"] >> far;
+                        camera.setFar(far);
+
+                        auto& component = entity.addComponent<CameraComponent>();
+                        component.isPrimary = isPrimary;
+                        component.camera = camera;
                     }
 
                     // NativeScriptComponent (Optional)

@@ -12,9 +12,12 @@ target_sources(cometEditor
         cometEditorApp.cpp
         cometEditorScene.h
         cometEditorScene.cpp
+        cometGameScene.h
+        cometGameScene.cpp
         main.cpp
 
         # ImGui
+        core/imguiUtils.h
         core/imguiWrapper.h
         core/imguiWrapper.cpp
 

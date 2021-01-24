@@ -28,6 +28,7 @@ namespace comet
         void setSpec(const FramebufferSpec& spec) { m_spec = spec; }
 
         virtual uint32_t getBufferId() const = 0 ;
+        virtual uint32_t getColorAttachmentId() const = 0 ;
         virtual void invalidate() = 0;
         virtual void bind() const = 0;
         virtual void unbind() const = 0;

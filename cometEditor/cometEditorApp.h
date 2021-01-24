@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cometEditorScene.h"
+#include "cometGameScene.h"
 
 #include <comet/comet.h>
 #include <core/imguiWrapper.h>
@@ -22,12 +23,15 @@ namespace comet
         virtual void onRender() override;
         
     private:
-        void doImGuiInit();
-        void drawImGui();
-        void drawImGuiDebug();
+        void initImGuiTheme();
+        void drawEditor();
+        void drawEditorDebug();
+        void drawFramebuffer(Scene& scene);
 
     private:
         CometEditorScene m_editorScene{"CometEditorScene"};
+        CometGameScene m_gameScene{"CometGameScene"};
+        bool m_isGamePlaying{false};
         std::unique_ptr<ImguiWrapper> m_imguiWrapper;
         SceneHierarchyPanel m_sceneHierarchyPanel;
         PropertiesPanel m_propertiesPanel;

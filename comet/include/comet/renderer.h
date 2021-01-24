@@ -19,9 +19,6 @@ namespace comet
         Renderer();
         ~Renderer();
 
-        void addLight(Light* light);
-        const std::vector<Light*>& getLights() { return m_lights; }
-
         void allocateBuffersAndSetupLayouts();
         void loadData();
         void reloadInstanceData();
@@ -36,7 +33,6 @@ namespace comet
     private:
         std::unordered_map<uint32_t, ShaderDrawContext*> m_shaderDrawContexts;
         Material* m_defaultMaterial{nullptr};
-        std::vector<Light*> m_lights{};
         Scene* m_scene{nullptr};
         bool m_isReady{false};
 

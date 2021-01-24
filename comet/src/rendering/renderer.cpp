@@ -105,11 +105,6 @@ namespace comet
         m_shaderDrawContexts.clear();
     }
 
-    void Renderer::addLight(Light* light)
-    {
-        m_lights.push_back(light);
-    }
-
     void Renderer::setScene(Scene* scene)
     {
         m_isReady = false;
@@ -400,7 +395,7 @@ namespace comet
             currentShader->setUniform(currentShader->getViewMatrixName(), view);
             currentShader->setUniform(currentShader->getProjectionMatrixName(), projection);
 
-            for (auto light : getLights())
+            for (auto& light : m_scene->getLights())
             {
                 light->loadUniforms(currentShader);
             }

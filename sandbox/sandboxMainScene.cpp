@@ -102,28 +102,20 @@ void SandboxMainScene::onStart()
 
     // Create the lights
     // Directional Light
-    m_directionalLight = std::make_unique<comet::DirectionalLight>(glm::vec3(1.0f, -0.55f, -0.3f));
-    m_directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
-    m_directionalLight->setSpecular({0.9f, 0.9f, 0.9f});
-    addLight(m_directionalLight.get());
+    auto directionalLight = std::make_unique<comet::DirectionalLight>(glm::vec3(1.0f, -0.55f, -0.3f));
+    directionalLight->setDiffuse({0.8f, 0.8f, 0.8f});
+    directionalLight->setSpecular({0.9f, 0.9f, 0.9f});
+    addLight(std::move(directionalLight));
 
     // Point Lights
-    m_pointLights.emplace_back(std::make_unique<comet::PointLight>(glm::vec3(0.37f, 0.19f, 2.9f)));
-    m_pointLights.back()->setDiffuse({0.0f, 0.0f, 1.0f});
-    addLight(m_pointLights.back().get());
-
-    m_pointLights.emplace_back(std::make_unique<comet::PointLight>(glm::vec3(-3.6f, 0.19f, 0.7f)));
-    m_pointLights.back()->setDiffuse({1.0f, 0.0f, 0.0f});
-    addLight(m_pointLights.back().get());
+    auto pointLight = std::make_unique<comet::PointLight>(glm::vec3(0.37f, 0.19f, 2.9f));
+    pointLight->setDiffuse({0.0f, 0.0f, 1.0f});
+    addLight(std::move(pointLight));
 
     // Spot Lights
-    m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(0.0f, 2.0f, 0.0f)));
-    m_spotLights.back()->setDiffuse({1.0f, 0.0f, 1.0f});
-    addLight(m_spotLights.back().get());
-
-    m_spotLights.emplace_back(std::make_unique<comet::SpotLight>(glm::vec3(-3.6f, 1.19f, 0.7f)));
-    m_spotLights.back()->setDiffuse({1.0f, 1.0f, 0.0f});
-    addLight(m_spotLights.back().get());
+    auto spotLight = std::make_unique<comet::SpotLight>(glm::vec3(0.0f, 2.0f, 0.0f));
+    spotLight->setDiffuse({1.0f, 0.0f, 1.0f});
+    addLight(std::move(spotLight));
 }
 
 void SandboxMainScene::onRender()

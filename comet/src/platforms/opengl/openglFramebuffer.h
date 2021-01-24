@@ -13,6 +13,7 @@ namespace comet
         OpenglFramebuffer& operator=(OpenglFramebuffer&& other) noexcept;
 
         virtual uint32_t getBufferId() const override { return m_bufferId; }
+        virtual uint32_t getColorAttachmentId() const override { return m_colorAttachment; }
         virtual void invalidate() override;
         virtual void bind() const override;
         virtual void unbind() const override;

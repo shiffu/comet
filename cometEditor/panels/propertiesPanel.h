@@ -21,6 +21,7 @@ namespace comet
         void drawTransformComponent(Entity& entity);
         void drawMeshComponent(Entity& entity);
         void drawMaterialComponent(Entity& entity);
+        void drawCameraComponent(Entity& entity);
         void drawNativeScriptComponent(Entity& entity);
         static void drawNativeScriptProperties(PropertiesExposerInterface* propertiesExposer, const std::string& propertyName);
 

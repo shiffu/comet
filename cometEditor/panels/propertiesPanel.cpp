@@ -5,9 +5,9 @@
 #include <comet/materialRegistry.h>
 #include <comet/staticMesh.h>
 #include <comet/propertiesExposer.h>
+#include <comet/camera.h>
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
+#include <core/imguiUtils.h>
 
 #include <string>
 #include <sstream>
@@ -106,6 +106,15 @@ namespace comet
                 }
             }
 
+            // Camera Component
+            if (!selectedEntity.hasComponent<CameraComponent>())
+            {
+                if (ImGui::MenuItem("Camera"))
+                {
+                    selectedEntity.addComponent<CameraComponent>();
+                }
+            }            
+
             // NativeScript Component
             if (!selectedEntity.hasComponent<NativeScriptComponent>())
             {
@@ -133,6 +142,9 @@ namespace comet
 
         if (selectedEntity.hasComponent<MaterialComponent>())
             drawMaterialComponent(selectedEntity);
+
+        if (selectedEntity.hasComponent<CameraComponent>())
+            drawCameraComponent(selectedEntity);
 
         if (selectedEntity.hasComponent<NativeScriptComponent>())
             drawNativeScriptComponent(selectedEntity);
@@ -345,6 +357,78 @@ namespace comet
         });
     }
 
+    void PropertiesPanel::drawCameraComponent(Entity& entity)
+    {
+        drawRemovableComponent<CameraComponent>("Camera", entity, [](Entity& entity)
+        {
+            if (ImGui::BeginTable("##tableComponent", 2, tableFlags))
+            {
+                static constexpr float firstColWidth = 145.0f;
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, firstColWidth);
+                auto& cameraComponent = entity.getComponent<CameraComponent>();
+                auto& camera = cameraComponent.camera;
+
+                // Primary?
+                // static bool primaryCamera = true;
+                ImGui::TableNextColumn();
+                ImGui::Text("Is Primary");
+                ImGui::TableNextColumn();
+                ImGui::Checkbox("##isPrimary", &cameraComponent.isPrimary);
+
+                // Projection Type
+                static int projectionType = Camera::ProjectionType::PERSPECTIVE;
+                ImGui::TableNextColumn();
+                ImGui::Text("Projection");
+                ImGui::TableNextColumn();
+                ImGui::RadioButton("Perspective", &projectionType, Camera::ProjectionType::PERSPECTIVE); ImGui::SameLine();
+                ImGui::RadioButton("Orthographic", &projectionType, Camera::ProjectionType::ORTHOGRAPHIC); ImGui::SameLine();
+
+                if(projectionType == Camera::ProjectionType::PERSPECTIVE)
+                {
+                    ImGui::TableNextColumn();
+                    ImGui::Text("FOV");
+                    ImGui::TableNextColumn();
+                    auto fov = glm::degrees(camera.getFOV());
+                    ImGui::DragFloat("##fov", &fov, 1.0f, 0.0f, 90.0f);
+                    camera.setFOV(glm::radians(fov));
+                }
+
+                // Zoom
+                ImGui::TableNextColumn();
+                ImGui::Text("Zoom");
+                ImGui::TableNextColumn();
+                auto zoom = camera.getZoom();
+                ImGui::DragFloat("##zoom", &zoom, 0.1f, 0.1f, 100.0f);
+                camera.setZoom(zoom);
+
+                // Aspect Ratio
+                ImGui::TableNextColumn();
+                ImGui::Text("Aspect ratio");
+                ImGui::TableNextColumn();
+                auto aspectRatio = camera.getAspectRatio();
+                ImGui::DragFloat("##aspectRatio", &aspectRatio, 0.1f, 0.0f, 10.0f);
+                camera.setAspectRatio(aspectRatio);
+
+                // Near Plan
+                ImGui::TableNextColumn();
+                ImGui::Text("Near Plan");
+                ImGui::TableNextColumn();
+                auto nearPlan = camera.getNear();
+                ImGui::DragFloat("##nearPlan", &nearPlan, 0.1f, 0.1f, 10.0f);
+                camera.setNear(nearPlan);
+
+                // Far Plan
+                ImGui::TableNextColumn();
+                ImGui::Text("Far Plan");
+                ImGui::TableNextColumn();
+                auto farPlan = camera.getFar();
+                ImGui::DragFloat("##farPlan", &farPlan, 10.0f, 100.0f, 4000.0f);
+                camera.setFar(farPlan);
+            }
+            ImGui::EndTable();
+        });
+    }    
+
     void PropertiesPanel::drawNativeScriptProperties(PropertiesExposerInterface* propertiesExposer, const std::string& propertyName)
     {
         auto valueWrapper = propertiesExposer->getPropertyValue(propertyName);
@@ -488,38 +572,30 @@ namespace comet
                 isLoadButtonDisabled = disableLoadButton = false;
             }
 
-            if (isLoadButtonDisabled)
             {
-                ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-                ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-            }
+                ItemDisabler buttonDisabler{isLoadButtonDisabled};
 
-            bool isScriptBound = false;
-            auto availableWidth = ImGui::GetContentRegionAvail().x;
-            ImGui::Indent(availableWidth * 0.2f);
-            if ( ImGui::Button("Load", ImVec2(availableWidth * 0.6f, 0.0f)) )
-            {
-                // If we already have a script bound, we need to destroy it first
-                if (scriptComponent.instance)
+                bool isScriptBound = false;
+                auto availableWidth = ImGui::GetContentRegionAvail().x;
+                ImGui::Indent(availableWidth * 0.2f);
+                if ( ImGui::Button("Load", ImVec2(availableWidth * 0.6f, 0.0f)) )
                 {
-                    scriptComponent.instance->onDestroy();
-                    scriptComponent.destroyScript(&scriptComponent);
-                    scriptComponent.instance = nullptr;
-                }
+                    // If we already have a script bound, we need to destroy it first
+                    if (scriptComponent.instance)
+                    {
+                        scriptComponent.instance->onDestroy();
+                        scriptComponent.destroyScript(&scriptComponent);
+                        scriptComponent.instance = nullptr;
+                    }
 
-                isScriptBound = scriptComponent.runtimeBind(scriptComponent.scriptLibFilepath.c_str(), scriptComponent.selectedScriptName.c_str());
-                if (isScriptBound)
-                {
-                    entity.getScene()->instantiateNativeScriptComponent(scriptComponent);
-                    disableLoadButton = true;
+                    isScriptBound = scriptComponent.runtimeBind(scriptComponent.scriptLibFilepath.c_str(), scriptComponent.selectedScriptName.c_str());
+                    if (isScriptBound)
+                    {
+                        entity.getScene()->instantiateNativeScriptComponent(scriptComponent);
+                        disableLoadButton = true;
+                    }
                 }
-            }
-            ImGui::Unindent();
-
-            if (isLoadButtonDisabled)
-            {
-                ImGui::PopItemFlag();
-                ImGui::PopStyleVar();
+                ImGui::Unindent();                
             }
 
             isLoadButtonDisabled = disableLoadButton;

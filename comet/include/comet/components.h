@@ -2,6 +2,7 @@
 
 #include <comet/vertex.h>
 #include <comet/nativeScript.h>
+#include <comet/camera.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -77,6 +78,16 @@ namespace comet
             : materialInstanceId(materialInstanceId) {};
 
         uint32_t materialInstanceId{0};
+    };
+    
+    struct CameraComponent
+    {
+        CameraComponent() = default;
+        CameraComponent(const Camera& camera)
+            : camera(camera) {};
+
+        Camera camera;
+        bool isPrimary{true};
     };
 
     struct NativeScriptComponent
