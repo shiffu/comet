@@ -7,7 +7,7 @@ namespace comet
 {
         #define BIND_METHOD(m) std::bind(&m, this, std::placeholders::_1)
 
-        glm::mat4 CameraController::getView() const
+        const glm::mat4& CameraController::getView() const
         {
             return m_view;
         }

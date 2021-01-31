@@ -3,7 +3,7 @@
 #include <comet/event.h>
 #include <comet/renderer.h>
 #include <comet/light.h>
-#include <comet/framebuffer.h>
+#include <comet/renderPass.h>
 
 #include <entt/entt.hpp>
 
@@ -56,16 +56,25 @@ namespace comet
         void setName(const std::string& name) { m_name = name; }
         const std::string& getName() const { return m_name; }
 
-        Framebuffer& getFramebuffer() { return *m_frameBuffer.get(); }
-        const Framebuffer& getFramebuffer() const { return *m_frameBuffer.get(); }
-
         void addLight(std::unique_ptr<Light>&& light);
         const std::vector<std::unique_ptr<Light>>& getLights() { return m_lights; }
+
+        uint32_t addRenderPass(const RenderPassSpec& renderPassSpec, const Renderer& renderer);
+        void removeRenderPass(size_t index);
+        void removeAllRenderPasses();
+
+        virtual glm::mat4 getViewMatrix() = 0;
+        virtual glm::mat4 getProjectionMatrix() = 0;
+
+        std::shared_ptr<RenderPass> getRenderPass(size_t index);
+        std::shared_ptr<RenderPass> getSwapChainTargetRenderPass() const;
+        const std::vector<std::shared_ptr<RenderPass>>& getRenderPasses() { return m_renderPasses; }
 
         void clear();
         void start();
         void stop();
         void reload();
+        void render();
 
         void instantiateNativeScriptComponent(NativeScriptComponent& scriptComponent);
 
@@ -93,14 +102,13 @@ namespace comet
 
     protected:
         SceneStats m_sceneStatistics;
-        Renderer m_renderer;
         entt::registry m_registry;
-        std::unique_ptr<Framebuffer> m_frameBuffer;
 
     private:
         std::string m_name;
         bool m_runtime;
         std::vector<std::unique_ptr<Light>> m_lights{};
+        std::vector<std::shared_ptr<RenderPass>> m_renderPasses{};
     };
     
 } // namespace comet

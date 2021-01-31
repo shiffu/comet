@@ -1,12 +1,11 @@
 #include <comet/framebuffer.h>
-#include <comet/assert.h>
 #include <comet/graphicApiConfig.h>
 #include <platforms/opengl/openglFramebuffer.h>
 
 namespace comet
 {
 
-    std::unique_ptr<Framebuffer> Framebuffer::create(const FramebufferSpec& spec)
+    std::shared_ptr<Framebuffer> Framebuffer::create(const FramebufferSpec& spec)
     {
         switch (GraphicApiConfig::getApiImpl())
         {

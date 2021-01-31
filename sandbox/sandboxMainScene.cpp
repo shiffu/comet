@@ -117,9 +117,3 @@ void SandboxMainScene::onStart()
     spotLight->setDiffuse({1.0f, 0.0f, 1.0f});
     addLight(std::move(spotLight));
 }
-
-void SandboxMainScene::onRender()
-{
-    m_renderer.reloadInstanceData();
-    m_renderer.render(m_cameraController.getView(), m_cameraController.getProjection());
-}

@@ -120,7 +120,6 @@ namespace comet
                     if (m_activeScene)
                     {
                         m_activeScene->stop();
-                        m_previousScene = m_activeScene;
                     }
 
                     m_activeScene = m_nextActiveScene;
@@ -159,7 +158,7 @@ namespace comet
                 // Scene Rendering Callback
                 T_render.resume();
                 m_window->clearBuffers();
-                m_activeScene->onRender();
+                m_activeScene->render();
 
                 // Application Render Callback
                 onRender();

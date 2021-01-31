@@ -1,7 +1,5 @@
 #pragma once
 
-#include <comet/timer.h>
-
 #include <glm/mat4x4.hpp>
 
 #include <unordered_map>
@@ -16,29 +14,27 @@ namespace comet
     class Renderer
     {
     public:
-        Renderer();
+        Renderer(Scene* scene);
         ~Renderer();
-
-        void allocateBuffersAndSetupLayouts();
-        void loadData();
+        
+        void prepare();
         void reloadInstanceData();
-        void render(const glm::mat4& view, const glm::mat4& projection);
-
-        void setScene(Scene* scene);
+        void render();
 
     private:
+        void initFromScene();
+        void allocateBuffersAndSetupLayouts();
+        void loadDataToBuffers();
         void cleanUp();
-        bool isReady() {return m_isReady; }
 
     private:
         std::unordered_map<uint32_t, ShaderDrawContext*> m_shaderDrawContexts;
         Material* m_defaultMaterial{nullptr};
         Scene* m_scene{nullptr};
-        bool m_isReady{false};
 
-        Timer T1{"reloadData - T1", true};
-        Timer T2{"reloadData - T2", true};
-        Timer T3{"reloadData - T3", true};
+        Timer reloadInstanceData_T1{"reloadInstanceData - T1", true};
+        Timer reloadInstanceData_T2{"reloadInstanceData - T2", true};
+        Timer reloadInstanceData_T3{"reloadInstanceData - T3", true};
     };
 
 } // namespace comet

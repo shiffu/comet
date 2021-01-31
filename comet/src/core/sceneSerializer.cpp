@@ -423,8 +423,6 @@ namespace comet
                         }
                     }
                 }
-
-                scene.reload();
             }
         }
 

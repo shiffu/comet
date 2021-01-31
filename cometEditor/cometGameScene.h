@@ -14,12 +14,12 @@ namespace comet
         CometGameScene(const char* name) : Scene(name) {}
         virtual ~CometGameScene() = default;
 
-        virtual void onRender() override;
         virtual bool onEvent(Event& e) override;
         virtual void onStart() override;
         virtual void onStop() override;
 
-    private:
+        virtual glm::mat4 getViewMatrix() override;
+        virtual glm::mat4 getProjectionMatrix() override;
     };
 
 } // namespace comet

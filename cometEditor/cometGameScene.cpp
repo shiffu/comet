@@ -4,6 +4,7 @@
 #include <comet/components.h>
 #include <core/sceneSerializer.h>
 #include <comet/components.h>
+#include <comet/renderPass.h>
 
 #include <glm/glm.hpp>
 
@@ -12,8 +13,14 @@ namespace comet
 
     void CometGameScene::onStart()
     {
-        m_frameBuffer = Framebuffer::create({1280, 720});
-        m_frameBuffer->invalidate();
+        FramebufferSpec spec{1280, 720};
+        spec.attachmentSet = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::DEPTH24_STENCIL8};
+        spec.swapChainTarget = true;
+        auto frameBuffer = Framebuffer::create(spec);
+        frameBuffer->invalidate();
+
+        RenderPassSpec baseRenderPassSpec{ frameBuffer };
+        addRenderPass(baseRenderPassSpec, Renderer(this));
 
         // TODO: Default main scene should be retrieved from the project config
         const char* mainScene = "EditorScene.scn";
@@ -30,35 +37,41 @@ namespace comet
 
     void CometGameScene::onStop() {}
     bool CometGameScene::onEvent(Event& e) {}
-    
-    void CometGameScene::onRender()
+
+    glm::mat4 CometGameScene::getViewMatrix()
     {
-        glm::mat4 cameraProjection;
-        glm::mat4 cameraView;
-        bool primaryCameraFound{false};
+        glm::mat4 cameraView{1.0f};
 
         // Find the primary camera
         m_registry.view<CameraComponent>()
-                  .each([this, &cameraView, &cameraProjection, &primaryCameraFound](auto entityId, auto& scriptComponent)
+                  .each([this, &cameraView](auto entityId, auto& cameraComponent)
         {
-            if (scriptComponent.isPrimary)
+            if (cameraComponent.isPrimary)
             {
                 Entity entity{entityId, this};
-                cameraProjection = scriptComponent.camera.getProjection();
                 cameraView = glm::inverse(entity.getComponent<TransformComponent>().getTransform());
-                primaryCameraFound = true;
             }
         });
 
-        if (primaryCameraFound)
-        {
-            m_frameBuffer->bind();
+        return cameraView;
+    }
 
-            m_renderer.reloadInstanceData();
-            m_renderer.render(cameraView, cameraProjection);
-            
-            m_frameBuffer->unbind();
-        }
+    glm::mat4 CometGameScene::getProjectionMatrix()
+    {
+        glm::mat4 cameraProjection{1.0f};
+
+        // Find the primary camera
+        m_registry.view<CameraComponent>()
+                  .each([this, &cameraProjection](auto entityId, auto& cameraComponent)
+        {
+            if (cameraComponent.isPrimary)
+            {
+                Entity entity{entityId, this};
+                cameraProjection = cameraComponent.camera.getProjection();
+            }
+        });
+
+        return cameraProjection;
     }
 
 } // namespace comet

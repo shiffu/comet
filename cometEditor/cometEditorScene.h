@@ -4,8 +4,6 @@
 #include <comet/cameraController.h>
 #include <comet/directionalLight.h>
 
-#include <memory>
-
 namespace comet
 {
 
@@ -15,9 +13,11 @@ namespace comet
         CometEditorScene(const char* name) : Scene(name, false) {}
         virtual ~CometEditorScene() = default;
 
-        virtual void onRender() override;
         virtual bool onEvent(Event& e) override;
         virtual void onStart() override;
+
+        virtual glm::mat4 getViewMatrix() override { return m_cameraController.getView(); }
+        virtual glm::mat4 getProjectionMatrix() override { return m_camera.getProjection(); }
 
     private:
         Camera m_camera;

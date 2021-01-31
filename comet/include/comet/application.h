@@ -70,10 +70,8 @@ namespace comet
 
         Scene* m_activeScene{nullptr};
         Scene* m_nextActiveScene{nullptr};
-        Scene* m_previousScene{nullptr};
 
         unsigned int m_fpsCap{0};
-        
 
         // Fixed update time in ms (used to onFixedUpdate function call)
         // TODO: Make this fixed update time an application config param

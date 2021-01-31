@@ -40,6 +40,7 @@ target_sources(comet
         include/comet/event.h
         include/comet/input.h
         include/comet/framebuffer.h
+        include/comet/renderPass.h
         include/comet/shader.h
         include/comet/shaderRegistry.h
         include/comet/camera.h
@@ -99,6 +100,7 @@ target_sources(comet
         src/rendering/commandBuffer.h
         src/rendering/commandBuffer.cpp
         src/rendering/framebuffer.cpp
+        src/rendering/renderPass.cpp
         src/rendering/vertexBufferLayout.h
         src/rendering/vertexBufferLayout.cpp
         src/rendering/vertexArray.h

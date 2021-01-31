@@ -12,7 +12,9 @@ public:
     virtual bool onKeyPressed(comet::KeyPressedEvent& e) override;
 
     virtual void onStart() override;
-    virtual void onRender() override;
+
+    virtual glm::mat4 getViewMatrix() override { return m_cameraController.getView(); }
+    virtual glm::mat4 getProjectionMatrix() override { return m_camera.getProjection(); }
 
     private:
         comet::Camera m_camera;

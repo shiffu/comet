@@ -3,6 +3,8 @@
 #include <comet/components.h>
 #include <comet/nativeScript.h>
 
+#include <algorithm>
+
 namespace comet
 {
     
@@ -37,9 +39,51 @@ namespace comet
         m_sceneStatistics.lightsCount++;
     }
 
+    uint32_t Scene::addRenderPass(const RenderPassSpec& renderPassSpec, const Renderer& renderer)
+    {
+        m_renderPasses.push_back(RenderPass::create(renderPassSpec, renderer));
+        
+        return m_renderPasses.size() - 1;
+    }
+
+    void Scene::removeRenderPass(size_t index)
+    {
+        ASSERT(index < m_renderPasses.size(), "out of bound index");
+        m_renderPasses.erase(m_renderPasses.begin() + index);
+    }
+
+    void Scene::removeAllRenderPasses()
+    {
+        CM_CORE_LOG_DEBUG("Scene::removeAllRenderPasses()");
+        m_renderPasses.erase(m_renderPasses.begin(), m_renderPasses.end());
+    }
+
+    std::shared_ptr<RenderPass> Scene::getRenderPass(size_t index)
+    {
+        ASSERT(index < m_renderPasses.size(), "out of bound index");
+        return m_renderPasses[index];
+    }
+
+    std::shared_ptr<RenderPass> Scene::getSwapChainTargetRenderPass() const
+    {
+        auto swapChainTargerRenderPassIt = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), [](auto& renderPass)
+        {
+            return renderPass->getSpec().target->getSpec().swapChainTarget;
+        });
+
+        ASSERT(swapChainTargerRenderPassIt != m_renderPasses.end(), "No SwapChain Target found!");
+        return *swapChainTargerRenderPassIt;
+    }
+
     void Scene::start()
     {
+        CM_CORE_LOG_DEBUG("Start Scene: {}", m_name);
         onStart();
+        for (auto renderPass : m_renderPasses)
+        {
+            renderPass->prepare();
+        }
+
         m_registry.view<NativeScriptComponent>().each([this](auto entityId, auto& scriptComponent)
         {
             instantiateNativeScriptComponent(scriptComponent);
@@ -58,14 +102,17 @@ namespace comet
 
     void Scene::reload()
     {
-        m_renderer.setScene(this);
-        m_renderer.allocateBuffersAndSetupLayouts();
-        m_renderer.loadData();
+        for (auto renderPass : m_renderPasses)
+        {
+            renderPass->prepare();
+        }
     }
 
     void Scene::stop()
     {
+        CM_CORE_LOG_DEBUG("Stop Scene: {}", m_name);
         onStop();
+        removeAllRenderPasses();
         m_registry.view<NativeScriptComponent>().each([](auto entityId, auto& scriptComponent)
         {
             if (scriptComponent.instance)
@@ -93,6 +140,14 @@ namespace comet
                     scriptComponent.instance->onUpdate(entity, deltaTime);
                 }
             });
+        }
+    }
+
+    void Scene::render()
+    {
+        for (auto renderPass : m_renderPasses)
+        {
+            renderPass->run();
         }
     }
 

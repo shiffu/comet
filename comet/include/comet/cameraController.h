@@ -15,7 +15,7 @@ namespace comet
 
         void reset();
 
-        glm::mat4 getView() const;
+        const glm::mat4& getView() const;
         const glm::mat4& getProjection() const;
 
         void onEvent(Event& e);
@@ -59,7 +59,7 @@ namespace comet
 
         float m_yaw{0};
         float m_pitch{0};
-        mutable glm::mat4 m_view{1.0f};
+        glm::mat4 m_view{1.0f};
         glm::vec3 m_up{0.0f, 1.0f, 0.0f};
         glm::vec3 m_right{0.0f, 0.0f, 0.0f};
         glm::vec3 m_position{0.0f};

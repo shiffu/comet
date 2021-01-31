@@ -12,16 +12,22 @@ namespace comet
         OpenglFramebuffer(OpenglFramebuffer&& other);
         OpenglFramebuffer& operator=(OpenglFramebuffer&& other) noexcept;
 
-        virtual uint32_t getBufferId() const override { return m_bufferId; }
-        virtual uint32_t getColorAttachmentId() const override { return m_colorAttachment; }
+        virtual uint32_t getColorAttachmentId(size_t index = 0) const override
+        {
+            ASSERT(index < m_colorAttachmentIds.size(), "Invalid index");
+            return m_colorAttachmentIds[index];
+        }
+
         virtual void invalidate() override;
         virtual void bind() const override;
         virtual void unbind() const override;
     
     private:
         uint32_t m_bufferId{0};
-        uint32_t m_colorAttachment{0};
-        uint32_t m_depthAttachment{0};
+        std::vector<FramebufferTextureSpec> m_colorAttachmentSpecs;
+        FramebufferTextureSpec m_depthAttachmentSpec{FramebufferTextureFormat::NONE};
+        std::vector<uint32_t> m_colorAttachmentIds;
+        uint32_t m_depthAttachmentId{0};
     };
     
 } // namespace comet

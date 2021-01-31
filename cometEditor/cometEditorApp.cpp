@@ -4,8 +4,6 @@
 #include <core/sceneSerializer.h>
 #include <core/imguiUtils.h>
 
-#include <memory>
-
 namespace comet
 {
 
@@ -85,18 +83,19 @@ namespace comet
     void CometEditorApp::drawFramebuffer(Scene& scene)
     {
         auto viewportPanelSize = ImGui::GetContentRegionAvail();
-        auto& framebuffer = scene.getFramebuffer();
-        auto framebufferSpec = framebuffer.getSpec();
+        auto renderPass = scene.getSwapChainTargetRenderPass();
+        auto framebuffer = renderPass->getTarget();
+        auto framebufferSpec = framebuffer->getSpec();
         
         if (viewportPanelSize.x != framebufferSpec.width || viewportPanelSize.y != framebufferSpec.height)
         {
             framebufferSpec.width = viewportPanelSize.x;
             framebufferSpec.height = viewportPanelSize.y;
-            framebuffer.setSpec(framebufferSpec);
+            framebuffer->setSpec(framebufferSpec);
         }
-        framebuffer.invalidate();
+        framebuffer->invalidate();
         
-        auto texId = framebuffer.getColorAttachmentId();
+        auto texId = framebuffer->getColorAttachmentId();
         ImGui::Image((void*)(uint64_t)texId, ImVec2((float)viewportPanelSize.x, (float)viewportPanelSize.y),
                     ImVec2(0, 1), ImVec2(1, 0));
     }
@@ -132,7 +131,9 @@ namespace comet
                 
                 if (ImGui::MenuItem("Open...", nullptr))
                 {
+                    m_editorScene.stop();
                     SceneSerializer::deserialize(m_editorScene, "EditorScene.scn");
+                    m_editorScene.start();
                 }
                 
                 if (ImGui::MenuItem("Save", nullptr))

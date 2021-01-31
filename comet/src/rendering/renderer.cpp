@@ -16,8 +16,6 @@
 #include <glm/mat4x4.hpp>
 #include <unordered_set>
 
-#include <comet/log.h>
-
 namespace comet
 {
     struct MultiDrawKey
@@ -76,7 +74,8 @@ namespace comet
         std::unordered_map<MultiDrawKey, MultiDrawIndirectContext*, hash_fn> multiDrawIndirectContexts;
     };
 
-    Renderer::Renderer()
+    Renderer::Renderer(Scene* scene)
+        : m_scene(scene)
     {
         m_defaultMaterial = MaterialRegistry::getInstance().createMaterialInstance("__cometDefaultMaterial");
         m_defaultMaterial->setDiffuse({0.7f, 0.7f, 0.7f});
@@ -105,83 +104,91 @@ namespace comet
         m_shaderDrawContexts.clear();
     }
 
-    void Renderer::setScene(Scene* scene)
+    void Renderer::prepare()
     {
-        m_isReady = false;
+        initFromScene();
+        allocateBuffersAndSetupLayouts();
+        loadDataToBuffers();
+    }
+
+    void Renderer::initFromScene()
+    {
         cleanUp();
-        m_scene = scene;
-        auto& registry = m_scene->m_registry;
-
-        // TODO: From the doc: consider creating the group when no components have been assigned yet.
-        // If the registry is empty, preparation is extremely fast.
-        registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
+        if (m_scene)
         {
-            uint32_t materialInstanceId;
-            Material* material = nullptr;
+            auto& registry = m_scene->m_registry;
 
-            bool hasMaterial = registry.has<MaterialComponent>(entity);
-            if (hasMaterial)
+            // TODO: From the doc: consider creating the group when no components have been assigned yet.
+            // If the registry is empty, preparation is extremely fast.
+            registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
             {
-                auto materialComponent = registry.get<MaterialComponent>(entity);
-                materialInstanceId = materialComponent.materialInstanceId;
-                material = MaterialRegistry::getInstance().getMaterialInstance(materialInstanceId);
-            }
+                uint32_t materialInstanceId;
+                Material* material = nullptr;
 
-            if (material == nullptr)
-            {
-                material = m_defaultMaterial;
-                materialInstanceId = material->getInstanceId();
-            }
-
-            // Check if a new Shader Draw context is needed
-            auto shader = material->getShader();
-            auto shaderTypeHash = shader->getTypeHash();
-            if (m_shaderDrawContexts.find(shaderTypeHash) == m_shaderDrawContexts.end())
-            {
-                m_shaderDrawContexts[shaderTypeHash] = new ShaderDrawContext();
-                m_shaderDrawContexts[shaderTypeHash]->shader = shader;
-            }
-
-            // Check if a new Material Indirect Draw context is needed
-            auto staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
-            auto staticMesh = staticMeshHandler.resource;
-            auto hasIndices = staticMesh->hasIndices();
-            auto key = MultiDrawKey{hasIndices};
-            auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
-            if (drawContextMap.find(key) == drawContextMap.end())
-            {
-                auto context = new MultiDrawIndirectContext(material);
-                context->ibo = IndexBuffer::create(GL_STATIC_DRAW);
-                context->vbo = VertexBuffer::create(GL_STATIC_DRAW);
-                context->instanceBuffer = VertexBuffer::create(GL_DYNAMIC_DRAW);
-                context->commandBuffer = CommandBuffer::create(GL_DYNAMIC_DRAW);
-                context->vao = VertexArray::create();
-
-                drawContextMap[key] = context;
-            }
-
-            auto currentDrawContext = drawContextMap[key];
-            // Check if we are dealing with a new StaticMesh (to update buffers' size)
-            if (currentDrawContext->staticMeshes.find(staticMeshHandler.resourceId) == currentDrawContext->staticMeshes.end())
-            {
-                if (hasIndices)
+                bool hasMaterial = registry.has<MaterialComponent>(entity);
+                if (hasMaterial)
                 {
-                    currentDrawContext->ibo->increaseSize(staticMesh->getIndicesSize());
-                    currentDrawContext->commandBuffer->increaseSize(sizeof(DrawElementsIndirectCommand));
-                }
-                else
-                {
-                    currentDrawContext->commandBuffer->increaseSize(sizeof(DrawArraysIndirectCommand));
+                    auto materialComponent = registry.get<MaterialComponent>(entity);
+                    materialInstanceId = materialComponent.materialInstanceId;
+                    material = MaterialRegistry::getInstance().getMaterialInstance(materialInstanceId);
                 }
 
-                currentDrawContext->vbo->increaseSize(staticMesh->getVerticesSize());
-            }
+                if (material == nullptr)
+                {
+                    material = m_defaultMaterial;
+                    materialInstanceId = material->getInstanceId();
+                }
 
-            currentDrawContext->instanceBuffer->increaseSize(sizeof(MeshInstanceData));
-            auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
-            meshAndInstances.staticMesh = staticMesh;
-            meshAndInstances.instancesData.emplace_back(transform.getTransform(), materialInstanceId);
-        });
+                // Check if a new Shader Draw context is needed
+                auto shader = material->getShader();
+                auto shaderTypeHash = shader->getTypeHash();
+                if (m_shaderDrawContexts.find(shaderTypeHash) == m_shaderDrawContexts.end())
+                {
+                    m_shaderDrawContexts[shaderTypeHash] = new ShaderDrawContext();
+                    m_shaderDrawContexts[shaderTypeHash]->shader = shader;
+                }
+
+                // Check if a new Material Indirect Draw context is needed
+                auto staticMeshHandler = ResourceManager::getInstance().getStaticMesh(mesh.meshTypeId);
+                auto staticMesh = staticMeshHandler.resource;
+                auto hasIndices = staticMesh->hasIndices();
+                auto key = MultiDrawKey{hasIndices};
+                auto& drawContextMap = m_shaderDrawContexts[shaderTypeHash]->multiDrawIndirectContexts;
+                if (drawContextMap.find(key) == drawContextMap.end())
+                {
+                    auto context = new MultiDrawIndirectContext(material);
+                    context->ibo = IndexBuffer::create(GL_STATIC_DRAW);
+                    context->vbo = VertexBuffer::create(GL_STATIC_DRAW);
+                    context->instanceBuffer = VertexBuffer::create(GL_DYNAMIC_DRAW);
+                    context->commandBuffer = CommandBuffer::create(GL_DYNAMIC_DRAW);
+                    context->vao = VertexArray::create();
+
+                    drawContextMap[key] = context;
+                }
+
+                auto currentDrawContext = drawContextMap[key];
+                // Check if we are dealing with a new StaticMesh (to update buffers' size)
+                if (currentDrawContext->staticMeshes.find(staticMeshHandler.resourceId) == currentDrawContext->staticMeshes.end())
+                {
+                    if (hasIndices)
+                    {
+                        currentDrawContext->ibo->increaseSize(staticMesh->getIndicesSize());
+                        currentDrawContext->commandBuffer->increaseSize(sizeof(DrawElementsIndirectCommand));
+                    }
+                    else
+                    {
+                        currentDrawContext->commandBuffer->increaseSize(sizeof(DrawArraysIndirectCommand));
+                    }
+
+                    currentDrawContext->vbo->increaseSize(staticMesh->getVerticesSize());
+                }
+
+                currentDrawContext->instanceBuffer->increaseSize(sizeof(MeshInstanceData));
+                auto& meshAndInstances = currentDrawContext->staticMeshes[staticMeshHandler.resourceId];
+                meshAndInstances.staticMesh = staticMesh;
+                meshAndInstances.instancesData.emplace_back(transform.getTransform(), materialInstanceId);
+            });
+        }
     }
 
     void Renderer::allocateBuffersAndSetupLayouts()
@@ -218,7 +225,7 @@ namespace comet
         }
     }
 
-    void Renderer::loadData()
+    void Renderer::loadDataToBuffers()
     {
         auto& sceneStats = m_scene->getStatistics();
         sceneStats.indicesCount = 0;
@@ -294,14 +301,11 @@ namespace comet
                 pMaterialDrawContext->commandBuffer->unmapMemory();
             }
         }
-        m_isReady = true;
     }
 
     void Renderer::reloadInstanceData()
     {
-        T3.resume();
-        if (!isReady())
-            return;
+        reloadInstanceData_T3.resume();
 
         auto& sceneStats = m_scene->getStatistics();
         sceneStats.entitiesCount = 0;
@@ -312,7 +316,7 @@ namespace comet
         uint32_t currentMaterialTypeId{0};
         std::unordered_set<uint32_t> tmpMeshTypes;
         
-        T1.resume();
+        reloadInstanceData_T1.resume();
         registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
         {
             ResourceHandler<StaticMesh> staticMeshHandler;
@@ -358,9 +362,9 @@ namespace comet
             }
             meshAndInstances.instancesData.emplace_back(transform.getTransform(), materialInstanceId);
         });
-        T1.pause();
+        reloadInstanceData_T1.pause();
 
-        T2.resume();
+        reloadInstanceData_T2.resume();
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
@@ -377,13 +381,15 @@ namespace comet
                 pMaterialDrawContext->instanceBuffer->unmapMemory();
             }
         }
-        T2.pause();
-        T3.pause();
+        reloadInstanceData_T2.pause();
+        reloadInstanceData_T3.pause();
     }
 
-    void Renderer::render(const glm::mat4& view, const glm::mat4& projection)
+    void Renderer::render()
     {
         auto& sceneStats = m_scene->getStatistics();
+        auto view = m_scene->getViewMatrix();
+        auto projection = m_scene->getProjectionMatrix();
         sceneStats.drawCalls = 0;
         auto vpMatrix = projection * view;
 
