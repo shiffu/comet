@@ -19,6 +19,7 @@ namespace comet
         }
 
         virtual void invalidate() override;
+        virtual void clear() const override;
         virtual void bind() const override;
         virtual void unbind() const override;
     

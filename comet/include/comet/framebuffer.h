@@ -63,10 +63,11 @@ namespace comet
         void operator=(const Framebuffer&) = delete;
 
         const FramebufferSpec& getSpec() const { return m_spec; }
-        void setSpec(const FramebufferSpec& spec) { m_spec = spec; }
+        void setSpec(const FramebufferSpec& spec);
 
         virtual uint32_t getColorAttachmentId(size_t index = 0) const = 0 ;
         virtual void invalidate() = 0;
+        virtual void clear() const = 0;
         virtual void bind() const = 0;
         virtual void unbind() const = 0;
     

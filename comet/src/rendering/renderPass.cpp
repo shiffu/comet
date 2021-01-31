@@ -18,6 +18,7 @@ namespace comet
         if (m_spec.target != nullptr)
         {
             m_spec.target->bind();
+            m_spec.target->clear();
 
             m_renderer.reloadInstanceData();
             m_renderer.render();

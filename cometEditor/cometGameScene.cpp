@@ -17,7 +17,6 @@ namespace comet
         spec.attachmentSet = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::DEPTH24_STENCIL8};
         spec.swapChainTarget = true;
         auto frameBuffer = Framebuffer::create(spec);
-        frameBuffer->invalidate();
 
         RenderPassSpec baseRenderPassSpec{ frameBuffer };
         addRenderPass(baseRenderPassSpec, Renderer(this));

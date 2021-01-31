@@ -100,6 +100,14 @@ void SandboxMainScene::onStart()
         }
     }
 
+    comet::FramebufferSpec spec{1280, 720};
+    spec.attachmentSet = {comet::FramebufferTextureFormat::RGBA8, comet::FramebufferTextureFormat::DEPTH24_STENCIL8};
+    spec.swapChainTarget = true;
+    auto frameBuffer = comet::Framebuffer::create(spec);
+
+    comet::RenderPassSpec baseRenderPassSpec{ frameBuffer };
+    addRenderPass(baseRenderPassSpec, comet::Renderer(this));
+
     // Create the lights
     // Directional Light
     auto directionalLight = std::make_unique<comet::DirectionalLight>(glm::vec3(1.0f, -0.55f, -0.3f));

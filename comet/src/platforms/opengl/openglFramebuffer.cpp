@@ -212,8 +212,14 @@ namespace comet
 
         // Unbind
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 
+    void OpenglFramebuffer::clear() const
+    {
         glViewport(0, 0, m_spec.width, m_spec.height);
+        glClearBufferfv(GL_COLOR, 0, (GLfloat*)&m_spec.clearColor[0]);
+        float one{1.0f};
+        glClearBufferfv(GL_DEPTH, 0, &one);
     }
 
     void OpenglFramebuffer::bind() const

@@ -93,7 +93,6 @@ namespace comet
             framebufferSpec.height = viewportPanelSize.y;
             framebuffer->setSpec(framebufferSpec);
         }
-        framebuffer->invalidate();
         
         auto texId = framebuffer->getColorAttachmentId();
         ImGui::Image((void*)(uint64_t)texId, ImVec2((float)viewportPanelSize.x, (float)viewportPanelSize.y),
