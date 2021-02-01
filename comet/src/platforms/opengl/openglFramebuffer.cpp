@@ -75,7 +75,25 @@ namespace comet
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
         
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, getTextureTarget(samples > 1), id, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, getTextureTarget(samples > 1), id, 0);
+    }
+
+    static void attachDepthRenderBuffer(uint32_t id, uint16_t samples, GLenum format, GLenum attachmentType, uint16_t width, uint16_t height)
+    {
+        glGenRenderbuffers(1, &id);
+        glBindRenderbuffer(GL_RENDERBUFFER, id);
+
+        // Multisampled?
+        if (samples > 1)
+        {
+            glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, format, width, height);
+        }
+        else
+        {
+            glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
+        }
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachmentType, GL_RENDERBUFFER, id);
     }
 
     OpenglFramebuffer::OpenglFramebuffer(const FramebufferSpec& spec) : Framebuffer(spec)
@@ -184,14 +202,18 @@ namespace comet
             {
                 CM_CORE_LOG_WARN("Overriding an already bound Framebuffer depth attachment");
             }
-            createTextures(isMultisampled, &m_depthAttachmentId, 1);
-            bindTexture(isMultisampled, m_depthAttachmentId);
+            // createTextures(isMultisampled, &m_depthAttachmentId, 1);
+            // bindTexture(isMultisampled, m_depthAttachmentId);
 
             switch (m_depthAttachmentSpec.format)
             {
             case FramebufferTextureFormat::DEPTH24_STENCIL8:
-                attachDepthTexture(m_depthAttachmentId, m_spec.samples, GL_DEPTH24_STENCIL8,
+                // attachDepthTexture(m_depthAttachmentId, m_spec.samples, GL_DEPTH24_STENCIL8,
+                //                     GL_DEPTH_STENCIL_ATTACHMENT, m_spec.width, m_spec.height);
+
+                attachDepthRenderBuffer(m_depthAttachmentId, m_spec.samples, GL_DEPTH24_STENCIL8,
                                     GL_DEPTH_STENCIL_ATTACHMENT, m_spec.width, m_spec.height);
+
                 break;
             }
         }
