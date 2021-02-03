@@ -1,6 +1,7 @@
 #pragma once
 
 #include <comet/log.h>
+#include <comet/logFormatters.h>
 #include <comet/timer.h>
 #include <comet/application.h>
 #include <comet/resourceManager.h>
