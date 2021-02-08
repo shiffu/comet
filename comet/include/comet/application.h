@@ -3,9 +3,7 @@
 #include <comet/window.h>
 #include <comet/event.h>
 #include <comet/scene.h>
-#include <comet/timer.h>
 
-#include <memory>
 
 namespace comet
 {
@@ -14,7 +12,7 @@ namespace comet
     {
     public:
 
-        // TODO: Find a proper way to make Application a Singleton
+        // TODO(jcp): Find a proper way to make Application a Singleton
         // Here we need the client to actually define this static function (not ideal)
         static Application* getInstance();
 
@@ -74,7 +72,7 @@ namespace comet
         unsigned int m_fpsCap{0};
 
         // Fixed update time in ms (used to onFixedUpdate function call)
-        // TODO: Make this fixed update time an application config param
+        // TODO(jcp): Make this fixed update time an application config param
         float m_fixedUpdateTime{20.0f};
 
         // Timers

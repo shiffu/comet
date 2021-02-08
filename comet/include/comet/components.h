@@ -98,7 +98,7 @@ namespace comet
 
         // Data Members
         NativeScript* instance{nullptr};
-        //TODO: remove this once we have an Asset Manager UI
+        // TODO(jcp): remove this once we have an Asset Manager UI
         std::string scriptLibFilepath = "../testScriptsLib/libtestScriptsLib.so";
         std::string selectedScriptName;
         std::vector<const char*> scriptsName;

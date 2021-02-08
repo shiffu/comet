@@ -160,7 +160,7 @@ namespace comet
         }
 
         // In case we want to reuse this program with different shaders code.
-        // TODO: Think more about this
+        // TODO(jcp): Think more about this
         m_numShaders = 0;
     }
 

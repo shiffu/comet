@@ -227,7 +227,7 @@ namespace comet
 
     bool SFMLInput::isMouseButtonPressedImpl(MouseButton button)
     {
-        //TODO: Map like for the keys? Issue here is if sfml decides to change the enum values.
+        // TODO(jcp): Map like for the keys? Issue here is if sfml decides to change the enum values.
         sf::Mouse::isButtonPressed(sf::Mouse::Button(button));
     }
 

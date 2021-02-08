@@ -39,7 +39,7 @@ namespace comet
         ss << spec.title << " (" << (const unsigned char*)glGetString(GL_VERSION) << ")";
         m_sfWindow->setTitle(ss.str());
 
-        // TODO: Figure out why VSync is slowing down window movement responsiveness on Linux
+        // TODO(jcp): Figure out why VSync is slowing down window movement responsiveness on Linux
         // Somehow this slows down a lot the responsiveness of the window on Linux (when moving the window)
         // m_sfWindow->setVerticalSyncEnabled(true);
 
@@ -179,7 +179,7 @@ namespace comet
                 }
 
                 // we don't process other types of events for now
-                // TODO: implement Joystick events
+                // TODO(jcp): implement Joystick events
                 default:
                     break;
             }

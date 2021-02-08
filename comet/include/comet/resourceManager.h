@@ -52,7 +52,7 @@ namespace comet
         const char* AUDIO_SUBFOLDER = "audio";
 
     private:
-        // TODO: Get the default root value from the expected packaging structure
+        // TODO(jcp): Get the default root value from the expected packaging structure
         std::string m_rootPath{"../../comet/resources"};
         std::unordered_map<uint32_t, std::unique_ptr<StaticMesh>> m_meshMap{};
     };

@@ -302,7 +302,7 @@ namespace comet
 
     void GLFWWindowWrapper::clearBuffers() const
     {
-        // TODO: This code is actually pure OpenGL Code and as such should be in the GraphicsAPI instead
+        // TODO(jcp): This code is actually pure OpenGL Code and as such should be in the GraphicsAPI instead
         glClearColor(
             m_windowSpec.backgroundColor.r,
             m_windowSpec.backgroundColor.g,
