@@ -23,7 +23,7 @@ namespace comet
     
     void ImguiGlfwWrapper::initPlatform(const Window* window)
     {
-        // Setup Platform/Renderer bindings
+        // Setup Platform/SceneRenderer bindings
         ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window->getPlatformWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 430");
     }

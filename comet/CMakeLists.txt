@@ -28,6 +28,7 @@ target_sources(comet
 
     PUBLIC
         include/comet/log.h
+        include/comet/logFormatters.h
         include/comet/assert.h
         include/comet/utils.h
         include/comet/platform.h

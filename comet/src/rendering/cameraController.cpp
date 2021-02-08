@@ -1,5 +1,3 @@
-#define GLM_FORCE_SWIZZLE
-
 #include <comet/cameraController.h>
 #include <comet/log.h>
 
@@ -66,8 +64,9 @@ namespace comet
         {
             auto cameraTransform = glm::inverse(m_view);
             glm::vec4 worldTranslation = cameraTransform * localTranslation;
-            m_focusTarget += worldTranslation.xyz();
-            m_position += worldTranslation.xyz();
+            auto worldTranslation3 = glm::vec3(worldTranslation.x, worldTranslation.y, worldTranslation.z);;
+            m_focusTarget += worldTranslation3;
+            m_position += worldTranslation3;
             calculateView();
         }
 
