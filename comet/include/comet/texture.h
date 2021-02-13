@@ -27,6 +27,7 @@ namespace comet
 		Texture2D(const char* filename = nullptr) {};
 		virtual ~Texture2D() = default;
 
+		static std::unique_ptr<Texture2D> create(uint32_t textureId);
 		static std::unique_ptr<Texture2D> create(const char* filename = nullptr);
 
 		virtual void makeItWhite() = 0;

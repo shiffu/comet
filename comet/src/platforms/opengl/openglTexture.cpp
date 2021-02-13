@@ -12,6 +12,10 @@
 namespace comet
 {
 
+
+    OpenglTexture2D::OpenglTexture2D(uint32_t textureId)
+        : m_textureId(textureId), m_isProxy{true} {}
+
     OpenglTexture2D::OpenglTexture2D(const char* filename /*= nullptr*/)
     {
         if (filename)
@@ -32,7 +36,8 @@ namespace comet
 
  	OpenglTexture2D::~OpenglTexture2D()
     {
-       cleanUp();
+        if (!m_isProxy)
+            cleanUp();
     }
 
 	OpenglTexture2D& OpenglTexture2D::operator=(OpenglTexture2D&& other)

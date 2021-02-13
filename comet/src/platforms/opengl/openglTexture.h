@@ -11,6 +11,8 @@ namespace comet
     class OpenglTexture2D : public Texture2D
 	{
 	public:
+		
+		OpenglTexture2D(uint32_t textureId);
 		OpenglTexture2D(const char* filename = nullptr);
 		virtual ~OpenglTexture2D();
 
@@ -33,6 +35,7 @@ namespace comet
         uint32_t m_width{0};
         uint32_t m_height{0};
 		std::string m_filepath{};
+		bool m_isProxy{false};
 	};
 
     class OpenglTexture2DArray : public Texture2DArray
