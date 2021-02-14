@@ -6,19 +6,20 @@ class SandboxMainScene : public comet::Scene
 {
 public:
     SandboxMainScene(const char* name) : comet::Scene(name) {}
-    ~SandboxMainScene() = default;
+    virtual ~SandboxMainScene() = default;
 
     virtual bool onEvent(comet::Event& e) override;
     virtual bool onKeyPressed(comet::KeyPressedEvent& e) override;
 
+    virtual void onUpdate(double deltaTime) override;
     virtual void onStart() override;
 
-    virtual glm::mat4 getViewMatrix() override { return m_cameraController.getView(); }
+    virtual glm::mat4 getViewMatrix() override;
     virtual glm::mat4 getProjectionMatrix() override { return m_camera.getProjection(); }
 
     private:
+        comet::Entity m_cameraEntity;
         comet::Camera m_camera;
-        comet::CameraController m_cameraController{m_camera};
         double m_angle{0.0};
         glm::vec3 m_offset{0.0f};
         bool m_pauseAnimation{false};

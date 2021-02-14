@@ -37,23 +37,6 @@ namespace comet
         }
     }
 
-    // Vertex and Instance Buffers Layout
-    void Material::updateVboDataLayout(VertexBufferLayout& layout) const
-    {
-        layout.addFloat(3, false, 0); // position
-        layout.addFloat(3, false, 1); // normal
-        layout.addFloat(2, false, 2); // texture coordinate
-    }
-
-    void Material::updateInstanceDataLayout(VertexBufferLayout& layout) const
-    {
-        layout.addFloat(4, false, 10, 1); //
-        layout.addFloat(4, false, 11, 1); //
-        layout.addFloat(4, false, 12, 1); // Instance Model to Word Matrix transform
-        layout.addFloat(4, false, 13, 1); //
-        layout.addUInt(1, false, 14, 1);  // Material ID (or index)
-    }
-
     void Material::loadUniforms()
     {
         getShader();

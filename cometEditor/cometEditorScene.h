@@ -19,6 +19,9 @@ namespace comet
         virtual glm::mat4 getViewMatrix() override { return m_cameraController.getView(); }
         virtual glm::mat4 getProjectionMatrix() override { return m_camera.getProjection(); }
 
+        glm::mat4 getViewMatrixFromScene();
+        glm::mat4 getProjectionMatrixFromScene();
+
     private:
         Camera m_camera;
         CameraController m_cameraController{m_camera};

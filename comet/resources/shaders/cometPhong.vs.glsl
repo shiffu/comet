@@ -13,7 +13,7 @@ layout (location = 10) in mat4 instance_model_matrix;
 layout (location = 14) in uint instance_materialID;
 
 // View & Projection Matrices uniforms
-uniform mat4 vp_matrix;
+uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
 
 struct DirectionalLight
@@ -92,5 +92,5 @@ void main()
     vs_out.to_camera = to_camera;
     vs_out.instance_materialID = instance_materialID;
 
-    gl_Position = vp_matrix * world_position;
+    gl_Position = projection_matrix * view_matrix * world_position;
 }

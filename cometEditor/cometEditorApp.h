@@ -26,7 +26,7 @@ namespace comet
         void initImGuiTheme();
         void drawEditor();
         void drawEditorDebug();
-        void drawFramebuffer(Scene& scene);
+        void drawFramebuffer(Scene& scene, uint8_t renderPassIndex = 0);
 
     private:
         CometEditorScene m_editorScene{"CometEditorScene"};

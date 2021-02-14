@@ -80,17 +80,18 @@ namespace comet
     }
 
     
-    void CometEditorApp::drawFramebuffer(Scene& scene)
+    void CometEditorApp::drawFramebuffer(Scene& scene, uint8_t renderPassIndex /*= 0*/)
     {
         auto viewportPanelSize = ImGui::GetContentRegionAvail();
-        auto renderPass = scene.getSwapChainTargetRenderPass();
+        auto renderPass = scene.getRenderPass(renderPassIndex);
         auto framebuffer = renderPass->getTarget();
         auto framebufferSpec = framebuffer->getSpec();
         
         if (viewportPanelSize.x != framebufferSpec.width || viewportPanelSize.y != framebufferSpec.height)
         {
-            framebufferSpec.width = viewportPanelSize.x;
-            framebufferSpec.height = viewportPanelSize.y;
+            framebufferSpec.width = (uint16_t)viewportPanelSize.x;
+            framebufferSpec.height = (uint16_t)viewportPanelSize.y;
+
             framebuffer->setSpec(framebufferSpec);
         }
         
@@ -169,6 +170,13 @@ namespace comet
         if (m_isGamePlaying)
         {
             drawFramebuffer(m_gameScene);
+        }
+        ImGui::End();
+
+        ImGui::Begin("GamePreview");
+        if (!m_isGamePlaying)
+        {
+            drawFramebuffer(m_editorScene, 1);
         }
         ImGui::End();
 

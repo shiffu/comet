@@ -45,11 +45,6 @@ namespace comet
 
         void loadUniforms();
 
-
-        // TODO: Move those 2 methods away - Vertex and Instance Buffers Layout
-        void updateVboDataLayout(VertexBufferLayout& layout) const;
-        void updateInstanceDataLayout(VertexBufferLayout& layout) const;
-    
     private:
         Texture2DArray* getAlbedoTextureArray();
 

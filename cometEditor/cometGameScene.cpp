@@ -18,8 +18,18 @@ namespace comet
         spec.swapChainTarget = true;
         auto frameBuffer = Framebuffer::create(spec);
 
-        RenderPassSpec baseRenderPassSpec{ frameBuffer };
-        addRenderPass(baseRenderPassSpec, Renderer(this));
+        RenderPassSpec renderPassSpec{ frameBuffer };
+        auto renderer = std::make_unique<SceneRenderer>(this);
+        renderer->registerPreRenderCallback( [] (SceneRenderer& renderer, void* sceneInstance) {
+            CometGameScene* self = (CometGameScene*)sceneInstance;
+            if (self)
+            {
+                renderer.setViewMatrix(self->getViewMatrix());
+                renderer.setProjectionMatrix(self->getProjectionMatrix());
+            }
+
+        }, this);
+        addRenderPass(renderPassSpec, std::move(renderer));
 
         // TODO: Default main scene should be retrieved from the project config
         const char* mainScene = "EditorScene.scn";

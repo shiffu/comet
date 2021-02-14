@@ -21,6 +21,16 @@ namespace comet
         return entity;
     }
 
+    bool Scene::onWindowResized(WindowResizedEvent& e)
+    {
+        for (auto& renderPass : m_renderPasses)
+        {
+            renderPass->invalidate();
+        }
+
+        return true;
+    }
+
     void Scene::destroyEntity(Entity& entity)
     {
         m_registry.destroy(entity.getId());
@@ -39,16 +49,18 @@ namespace comet
         m_sceneStatistics.lightsCount++;
     }
 
-    uint32_t Scene::addRenderPass(const RenderPassSpec& renderPassSpec, const Renderer& renderer)
+    uint32_t Scene::addRenderPass(const RenderPassSpec& renderPassSpec, std::unique_ptr<Renderer>&& renderer)
     {
-        m_renderPasses.push_back(RenderPass::create(renderPassSpec, renderer));
-        
+        m_renderPasses.push_back(RenderPass::create(renderPassSpec, std::move(renderer)));
+        m_renderPasses.back()->invalidate();
+
         return m_renderPasses.size() - 1;
     }
 
     void Scene::removeRenderPass(size_t index)
     {
         ASSERT(index < m_renderPasses.size(), "out of bound index");
+        // TODO(jcp,perf): should we do a swap with the last element instead?
         m_renderPasses.erase(m_renderPasses.begin() + index);
     }
 
@@ -58,13 +70,13 @@ namespace comet
         m_renderPasses.erase(m_renderPasses.begin(), m_renderPasses.end());
     }
 
-    std::shared_ptr<RenderPass> Scene::getRenderPass(size_t index)
+    RenderPass* Scene::getRenderPass(size_t index)
     {
         ASSERT(index < m_renderPasses.size(), "out of bound index");
-        return m_renderPasses[index];
+        return m_renderPasses[index].get();
     }
 
-    std::shared_ptr<RenderPass> Scene::getSwapChainTargetRenderPass() const
+    RenderPass* Scene::getSwapChainTargetRenderPass() const
     {
         auto swapChainTargerRenderPassIt = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), [](auto& renderPass)
         {
@@ -72,18 +84,13 @@ namespace comet
         });
 
         ASSERT(swapChainTargerRenderPassIt != m_renderPasses.end(), "No SwapChain Target found!");
-        return *swapChainTargerRenderPassIt;
+        return swapChainTargerRenderPassIt->get();
     }
 
     void Scene::start()
     {
         CM_CORE_LOG_DEBUG("Start Scene: {}", m_name);
         onStart();
-        for (auto renderPass : m_renderPasses)
-        {
-            renderPass->prepare();
-        }
-
         m_registry.view<NativeScriptComponent>().each([this](auto entityId, auto& scriptComponent)
         {
             instantiateNativeScriptComponent(scriptComponent);
@@ -102,7 +109,7 @@ namespace comet
 
     void Scene::reload()
     {
-        for (auto renderPass : m_renderPasses)
+        for (auto& renderPass : m_renderPasses)
         {
             renderPass->prepare();
         }
@@ -128,7 +135,7 @@ namespace comet
         });
     }
 
-    void Scene::onUpdate(double deltaTime)
+    void Scene::update(double deltaTime)
     {
         if (m_runtime)
         {
@@ -140,12 +147,13 @@ namespace comet
                     scriptComponent.instance->onUpdate(entity, deltaTime);
                 }
             });
+            onUpdate(deltaTime);
         }
     }
 
     void Scene::render()
     {
-        for (auto renderPass : m_renderPasses)
+        for (auto& renderPass : m_renderPasses)
         {
             renderPass->run();
         }

@@ -1,6 +1,7 @@
 #include "openglFramebuffer.h"
 
-#include <comet/assert.h>
+#include <comet/texture.h>
+#include <comet/application.h>
 
 #include <glad/glad.h>
 
@@ -105,11 +106,11 @@ namespace comet
         {
             if (!isDepthFormat(attachment.format))
             {
-                m_colorAttachmentSpecs.emplace_back(attachment.format);
+                m_colorAttachmentSpecs.push_back(attachment);
             }
             else
             {
-                m_depthAttachmentSpec = attachment.format;
+                m_depthAttachmentSpec = attachment;
             }
         }
     }
@@ -158,6 +159,12 @@ namespace comet
         return *this;
     }
 
+    std::unique_ptr<Texture2D> OpenglFramebuffer::getColorAttachmentTexture(size_t index /*= 0*/) const
+    {
+        ASSERT(index < m_colorAttachmentIds.size(), "Invalid index");
+        return Texture2D::create(m_colorAttachmentIds[index]);
+    }
+
     void OpenglFramebuffer::invalidate()
     {
         // Bind
@@ -177,8 +184,8 @@ namespace comet
         // Color attachments
         if (!m_colorAttachmentSpecs.empty())
         {
-            m_colorAttachmentIds.reserve(m_colorAttachmentSpecs.size());
             m_colorAttachmentIds.resize(m_colorAttachmentSpecs.size());
+            m_colorAttachmentIds.reserve(m_colorAttachmentSpecs.size());
             createTextures(isMultisampled, m_colorAttachmentIds.data(), m_colorAttachmentIds.size());
 
             for (size_t i = 0; i < m_colorAttachmentIds.size(); i++)
@@ -202,15 +209,10 @@ namespace comet
             {
                 CM_CORE_LOG_WARN("Overriding an already bound Framebuffer depth attachment");
             }
-            // createTextures(isMultisampled, &m_depthAttachmentId, 1);
-            // bindTexture(isMultisampled, m_depthAttachmentId);
 
             switch (m_depthAttachmentSpec.format)
             {
             case FramebufferTextureFormat::DEPTH24_STENCIL8:
-                // attachDepthTexture(m_depthAttachmentId, m_spec.samples, GL_DEPTH24_STENCIL8,
-                //                     GL_DEPTH_STENCIL_ATTACHMENT, m_spec.width, m_spec.height);
-
                 attachDepthRenderBuffer(m_depthAttachmentId, m_spec.samples, GL_DEPTH24_STENCIL8,
                                     GL_DEPTH_STENCIL_ATTACHMENT, m_spec.width, m_spec.height);
 
@@ -236,10 +238,71 @@ namespace comet
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void OpenglFramebuffer::renderToScreen()
+    {
+        // TODO(jcp): Move all this rendering code to its dedicated 2DRenderer?
+        if (m_shader == nullptr)
+        {
+            m_shader = ShaderRegistry::getInstance().getShader("cometFramebufferSwapchain");
+
+            float data[] = {
+                // Position     Texture Coords.
+                -1.0f, -1.0f,   0.0f, 0.0f,
+                 1.0f, -1.0f,   1.0f, 0.0f,
+                 1.0f,  1.0f,   1.0f, 1.0f,
+                -1.0f,  1.0f,   0.0f, 1.0f
+            };
+
+            m_vbo = VertexBuffer::create(GL_STATIC_DRAW);
+            auto dataSize = sizeof(data);
+            auto dataVectexCount = 4;
+            m_vbo->allocate(dataSize);
+
+            m_vao = VertexArray::create();
+            auto vboLayout = VertexBufferLayout::create();
+            vboLayout->addFloat(2, false, 0); // position
+            vboLayout->addFloat(2, false, 1); // texture coordinate
+            auto layout = vboLayout.get();
+            m_vao->addLayout(*layout, *m_vbo.get(), nullptr);
+
+            m_vbo->mapMemory(GL_WRITE_ONLY);
+            m_vbo->loadDataInMappedMemory((const void*)data, dataSize, dataVectexCount);
+            m_vbo->unmapMemory();
+        }
+
+        if (m_shader && m_spec.swapChainTarget == true)
+        {
+            glDisable(GL_DEPTH_TEST);
+
+            auto window = Application::getInstance()->getWindow();
+            auto width = window->getWidth();
+            auto height = window->getHeight();
+            glViewport(0, 0, width, height);
+            
+            m_shader->bind();
+
+            // TODO(jcp): How to handle multiple attachments? Which texture to use/return?
+            auto attachmentTexture = getColorAttachmentTexture();
+            attachmentTexture->bind();
+
+            m_shader->setUniform("framebufferTexture", 0);
+            m_vao->bind();
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            m_vao->unbind();
+
+            glEnable(GL_DEPTH_TEST);
+        }
+    }
+
     void OpenglFramebuffer::clear() const
     {
         glViewport(0, 0, m_spec.width, m_spec.height);
-        glClearBufferfv(GL_COLOR, 0, (GLfloat*)&m_spec.clearColor[0]);
+        for (auto& attachmentSpec : m_colorAttachmentSpecs)
+        {
+            glClearBufferfv(GL_COLOR, 0, (GLfloat*)&attachmentSpec.clearColor);
+        }
+        
+        // TODO(jcp): Add depth clear value in the FramebufferAttachmentSpec (like the clearColor)
         float one{1.0f};
         glClearBufferfv(GL_DEPTH, 0, &one);
     }

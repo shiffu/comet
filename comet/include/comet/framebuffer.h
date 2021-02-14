@@ -1,5 +1,7 @@
 #pragma once
 
+#include <comet/texture.h>
+
 #include <glm/vec4.hpp>
 
 namespace comet
@@ -21,23 +23,27 @@ namespace comet
         // DEPTH32F,
     };
     
-    struct FramebufferTextureSpec
+    struct FramebufferAttachmentSpec
     {
-        FramebufferTextureSpec() = default;
-        FramebufferTextureSpec(FramebufferTextureFormat format)
+        FramebufferAttachmentSpec() = default;
+        FramebufferAttachmentSpec(FramebufferTextureFormat format)
             : format(format) {}
+        FramebufferAttachmentSpec(FramebufferTextureFormat format, glm::vec4 clearColor)
+            : format(format), clearColor(clearColor) {}
 
         FramebufferTextureFormat format{FramebufferTextureFormat::NONE};
-        // TODO: implement wrap and filtering
+        glm::vec4 clearColor{0.0f, 0.0f, 0.0f, 1.0f};
+
+        // TODO(jcp): implement wrap and filtering
     };
 
-    struct FramebufferAttachments
+    struct FramebufferAttachmentSet
     {
-        FramebufferAttachments() = default;
-        FramebufferAttachments(std::initializer_list<FramebufferTextureSpec> specs)
+        FramebufferAttachmentSet() = default;
+        FramebufferAttachmentSet(std::initializer_list<FramebufferAttachmentSpec> specs)
             : attachments(specs) {}
 
-        std::vector<FramebufferTextureSpec> attachments;
+        std::vector<FramebufferAttachmentSpec> attachments;
     };
 
     struct FramebufferSpec
@@ -45,9 +51,8 @@ namespace comet
         uint16_t width{0};
         uint16_t height{0};
         uint16_t samples{1};
-        glm::vec4 clearColor{0.0f, 0.0f, 0.0f, 1.0f};
         bool swapChainTarget{false};
-        FramebufferAttachments attachmentSet;
+        FramebufferAttachmentSet attachmentSet;
     };
     
     class Framebuffer
@@ -65,8 +70,11 @@ namespace comet
         const FramebufferSpec& getSpec() const { return m_spec; }
         void setSpec(const FramebufferSpec& spec);
 
-        virtual uint32_t getColorAttachmentId(size_t index = 0) const = 0 ;
+        virtual int getColorAttachmentId(size_t index = 0) const = 0;
+        virtual std::unique_ptr<Texture2D> getColorAttachmentTexture(size_t index = 0) const = 0;
+
         virtual void invalidate() = 0;
+        virtual void renderToScreen() = 0;
         virtual void clear() const = 0;
         virtual void bind() const = 0;
         virtual void unbind() const = 0;

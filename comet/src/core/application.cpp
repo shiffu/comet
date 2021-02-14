@@ -1,5 +1,4 @@
 #include <comet/application.h>
-#include <comet/log.h>
 #include <comet/window.h>
 #include <platforms/sfml/SFMLWindow.h>
 
@@ -133,10 +132,10 @@ namespace comet
                 previousTime = currentTime;
                 lag += elapsedTime;
 
-                // Poll window events
+                // INPUTS: Poll window events
                 m_window->pollEvent();
 
-                // Scene Fixed Update Callback
+                // FIXED UPDATES: Scene Fixed Update Callback
                 T_fixed_udpate.resume();
                 // Update as lag permits
                 while(lag >= fixedUpdateTime)
@@ -146,16 +145,16 @@ namespace comet
                 }
                 T_fixed_udpate.pause();
 
-                // Scene Update Callback
+                // UPDATES: Scene Update Callback
                 T_update.resume();
                 deltaTime = duration_cast<duration<double, std::milli>>(elapsedTime).count();
-                m_activeScene->onUpdate(deltaTime);
+                m_activeScene->update(deltaTime);
 
                 // Application onUpdate Callback
                 onUpdate();
                 T_update.pause();
 
-                // Scene Rendering Callback
+                // RENDER: Scene Rendering Callback
                 T_render.resume();
                 m_window->clearBuffers();
                 m_activeScene->render();

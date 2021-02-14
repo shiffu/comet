@@ -12,8 +12,10 @@
 #include <comet/components.h>
 #include <comet/materialRegistry.h>
 #include <comet/resourceManager.h>
+#include <comet/logFormatters.h>
 
 #include <glm/mat4x4.hpp>
+
 #include <unordered_set>
 
 namespace comet
@@ -74,7 +76,7 @@ namespace comet
         std::unordered_map<MultiDrawKey, MultiDrawIndirectContext*, hash_fn> multiDrawIndirectContexts;
     };
 
-    Renderer::Renderer(Scene* scene)
+    SceneRenderer::SceneRenderer(Scene* scene)
         : m_scene(scene)
     {
         m_defaultMaterial = MaterialRegistry::getInstance().createMaterialInstance("__cometDefaultMaterial");
@@ -83,12 +85,31 @@ namespace comet
         m_defaultMaterial->setShininess(1.1f);
     }
 
-    Renderer::~Renderer()
+    SceneRenderer::~SceneRenderer()
     {
         cleanUp();
     }
 
-    void Renderer::cleanUp()
+    // SceneRenderer& SceneRenderer::operator=(const SceneRenderer&& other)
+    // {
+    //     if (&other == this)
+    //     {
+    //         return *this;
+    //     }
+
+    //     m_shaderDrawContexts = std::move(other.m_shaderDrawContexts);
+    //     m_defaultMaterial = std::move(other.m_defaultMaterial);
+    //     m_scene = std::move(other.m_scene);
+    //     m_preRenderFunction = std::move(other.m_preRenderFunction);
+    //     m_userData = std::move(other.m_userData);
+    //     m_view = std::move(other.m_view);
+    //     m_projection = std::move(other.m_projection);
+    //     reloadInstanceData_T1 = std::move(other.reloadInstanceData_T1);
+    //     reloadInstanceData_T2 = std::move(other.reloadInstanceData_T2);
+    //     reloadInstanceData_T3 = std::move(other.reloadInstanceData_T3);
+    // }
+
+    void SceneRenderer::cleanUp()
     {
         for (auto [shaderName, pShaderDrawContext] : m_shaderDrawContexts)
         {
@@ -104,21 +125,21 @@ namespace comet
         m_shaderDrawContexts.clear();
     }
 
-    void Renderer::prepare()
+    void SceneRenderer::prepare()
     {
         initFromScene();
         allocateBuffersAndSetupLayouts();
         loadDataToBuffers();
     }
 
-    void Renderer::initFromScene()
+    void SceneRenderer::initFromScene()
     {
         cleanUp();
         if (m_scene)
         {
             auto& registry = m_scene->m_registry;
 
-            // TODO: From the doc: consider creating the group when no components have been assigned yet.
+            // TODO(jcp): From the doc: consider creating the group when no components have been assigned yet.
             // If the registry is empty, preparation is extremely fast.
             registry.group<TransformComponent, MeshComponent>().each([&](auto entity, auto& transform, auto& mesh)
             {
@@ -191,7 +212,7 @@ namespace comet
         }
     }
 
-    void Renderer::allocateBuffersAndSetupLayouts()
+    void SceneRenderer::allocateBuffersAndSetupLayouts()
     {
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
@@ -205,7 +226,11 @@ namespace comet
                 // Buffers Layouts definition
                 auto vboLayoutPtr = VertexBufferLayout::create();
                 auto& vboLayout = *vboLayoutPtr.get();
-                pMaterialDrawContext->material->updateVboDataLayout(vboLayout);
+
+                // Update VBO Attributes Layout
+                vboLayout.addFloat(3, false, 0); // position
+                vboLayout.addFloat(3, false, 1); // normal
+                vboLayout.addFloat(2, false, 2); // texture coordinate
 
                 if (pMaterialDrawContext->ibo->getSize())
                 {
@@ -219,13 +244,20 @@ namespace comet
 
                 auto instanceDataLayoutPtr = VertexBufferLayout::create();
                 auto& instanceDataLayout = *instanceDataLayoutPtr.get();
-                pMaterialDrawContext->material->updateInstanceDataLayout(instanceDataLayout);
+
+                // Update Instance Buffer Attributes Layout
+                instanceDataLayout.addFloat(4, false, 10, 1); //
+                instanceDataLayout.addFloat(4, false, 11, 1); //
+                instanceDataLayout.addFloat(4, false, 12, 1); // Instance Model to Word Matrix transform
+                instanceDataLayout.addFloat(4, false, 13, 1); //
+                instanceDataLayout.addUInt(1, false, 14, 1);  // Material ID (or index)
+
                 pMaterialDrawContext->vao->addLayout(instanceDataLayout, *pMaterialDrawContext->instanceBuffer.get());
             }
         }
     }
 
-    void Renderer::loadDataToBuffers()
+    void SceneRenderer::loadDataToBuffers()
     {
         auto& sceneStats = m_scene->getStatistics();
         sceneStats.indicesCount = 0;
@@ -303,7 +335,7 @@ namespace comet
         }
     }
 
-    void Renderer::reloadInstanceData()
+    void SceneRenderer::reloadData()
     {
         reloadInstanceData_T3.resume();
 
@@ -369,7 +401,7 @@ namespace comet
         {
             for (auto [key, pMaterialDrawContext] : pShaderDrawContext->multiDrawIndirectContexts)
             {
-                // TODO: This mapMemory can be quite slow for big buffers. Check if splitting in multiple buffers would be faster!
+                // TODO(jcp): This mapMemory can be quite slow for big buffers. Check if splitting in multiple buffers would be faster!
                 pMaterialDrawContext->instanceBuffer->mapMemory(GL_WRITE_ONLY);
                 for (auto& [staticMeshId, meshAndInstancesData] : pMaterialDrawContext->staticMeshes)
                 {
@@ -385,22 +417,24 @@ namespace comet
         reloadInstanceData_T3.pause();
     }
 
-    void Renderer::render()
+    void SceneRenderer::render()
     {
         auto& sceneStats = m_scene->getStatistics();
-        auto view = m_scene->getViewMatrix();
-        auto projection = m_scene->getProjectionMatrix();
         sceneStats.drawCalls = 0;
-        auto vpMatrix = projection * view;
+        
+        if (m_preRenderFunction)
+        {
+            m_preRenderFunction(*this, m_userData);
+        }
 
         for (auto [shaderType, pShaderDrawContext] : m_shaderDrawContexts)
         {
             auto currentShader = pShaderDrawContext->shader;
             currentShader->bind();
-            currentShader->setUniform(currentShader->getViewProjectionMatrixName(), vpMatrix);
-            currentShader->setUniform(currentShader->getViewMatrixName(), view);
-            currentShader->setUniform(currentShader->getProjectionMatrixName(), projection);
+            currentShader->setUniform("view_matrix", m_view);
+            currentShader->setUniform("projection_matrix", m_projection);
 
+            // TODO(jcp): Revise Light management in the SceneRenderer: should be an entity or part of the environment
             for (auto& light : m_scene->getLights())
             {
                 light->loadUniforms(currentShader);

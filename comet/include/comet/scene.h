@@ -39,7 +39,7 @@ namespace comet
     class Scene
     {
         friend class Entity;
-        friend class Renderer;
+        friend class SceneRenderer;
 
     public:
         Scene(const char* name, bool runtime = true) : m_name(name), m_runtime(runtime) {}
@@ -59,19 +59,20 @@ namespace comet
         void addLight(std::unique_ptr<Light>&& light);
         const std::vector<std::unique_ptr<Light>>& getLights() { return m_lights; }
 
-        uint32_t addRenderPass(const RenderPassSpec& renderPassSpec, const Renderer& renderer);
+        uint32_t addRenderPass(const RenderPassSpec& renderPassSpec, std::unique_ptr<Renderer>&& renderer);
         void removeRenderPass(size_t index);
         void removeAllRenderPasses();
 
         virtual glm::mat4 getViewMatrix() = 0;
         virtual glm::mat4 getProjectionMatrix() = 0;
 
-        std::shared_ptr<RenderPass> getRenderPass(size_t index);
-        std::shared_ptr<RenderPass> getSwapChainTargetRenderPass() const;
-        const std::vector<std::shared_ptr<RenderPass>>& getRenderPasses() { return m_renderPasses; }
+        RenderPass* getRenderPass(size_t index);
+        RenderPass* getSwapChainTargetRenderPass() const;
+        const std::vector<std::unique_ptr<RenderPass>>& getRenderPasses() { return m_renderPasses; }
 
         void clear();
         void start();
+        void update(double deltaTime);
         void stop();
         void reload();
         void render();
@@ -80,13 +81,13 @@ namespace comet
 
         virtual void onStart() {}
         virtual void onStop() {}
-        virtual void onUpdate(double deltaTime);
+        virtual void onUpdate(double deltaTime) {}
         virtual void onFixedUpdate(double fixedDeltaTime) {}
         virtual void onRender() {}
 
         // Event Callbacks
         virtual bool onEvent(Event& e) { return true; } // Generic event handler
-        virtual bool onWindowResized(WindowResizedEvent& e) {return true; }
+        virtual bool onWindowResized(WindowResizedEvent& e);
         virtual bool onWindowLostFocus(WindowLostFocusEvent& e) {return true; }
         virtual bool onWindowGainedFocus(WindowGainedFocusEvent& e) {return true; }
         virtual bool onKeyPressed(KeyPressedEvent& e) {return true; }
@@ -107,8 +108,9 @@ namespace comet
     private:
         std::string m_name;
         bool m_runtime;
+        // TODO(jcp): Move lights management to Environment
         std::vector<std::unique_ptr<Light>> m_lights{};
-        std::vector<std::shared_ptr<RenderPass>> m_renderPasses{};
+        std::vector<std::unique_ptr<RenderPass>> m_renderPasses{};
     };
     
 } // namespace comet

@@ -50,15 +50,6 @@ namespace comet
             return Type::NONE;
         }
 
-        void setViewProjectionMatrixName(const std::string& matrixName) { m_viewProjectionMatrixName = matrixName; }
-        const std::string& getViewProjectionMatrixName() const { return m_viewProjectionMatrixName; }
-
-        void setViewMatrixName(const std::string& matrixName) { m_viewMatrixName = matrixName; }
-        const std::string& getViewMatrixName() const { return m_viewMatrixName; }
-
-        void setProjectionMatrixName(const std::string& matrixName) { m_projectionMatrixName = matrixName; }
-        const std::string& getProjectionMatrixName() const { return m_projectionMatrixName; }
-
         // Compile & Link Shader Program
         virtual void compileShaderFile(const std::string& filename, Type shaderType) = 0;
         virtual void compileShaderSrc(const std::string& source, Type shaderType) = 0;
@@ -88,9 +79,6 @@ namespace comet
 
     protected:
         std::string m_name{};
-        std::string m_viewProjectionMatrixName{"vp_matrix"};
-        std::string m_viewMatrixName{"view_matrix"};
-        std::string m_projectionMatrixName{"projection_matrix"};
     };
     
 } // namespace comet
